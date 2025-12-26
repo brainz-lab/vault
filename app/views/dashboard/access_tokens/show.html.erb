@@ -1,0 +1,114 @@
+<% content_for :title, @token.name %>
+
+<% if flash[:token] %>
+  <div class="rounded-md bg-yellow-50 p-4 mb-6">
+    <div class="flex">
+      <div class="flex-shrink-0">⚠️</div>
+      <div class="ml-3 flex-1">
+        <p class="text-sm text-yellow-700 mb-2">
+          <strong>Copy your token now!</strong> You won't be able to see it again.
+        </p>
+        <div class="flex items-center space-x-2">
+          <code class="flex-1 block rounded-md bg-gray-900 text-green-400 p-3 text-sm font-mono break-all">
+            <%= flash[:token] %>
+          </code>
+          <button type="button" class="rounded-md bg-yellow-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-yellow-500" onclick="navigator.clipboard.writeText('<%= flash[:token] %>')">
+            Copy
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<div class="sm:flex sm:items-center sm:justify-between">
+  <div>
+    <div class="flex items-center">
+      <span class="text-2xl mr-3">🔐</span>
+      <h1 class="text-2xl font-semibold text-gray-900"><%= @token.name %></h1>
+    </div>
+    <p class="mt-1 text-sm text-gray-500"><%= @token.description || "No description" %></p>
+  </div>
+  <div class="mt-4 sm:mt-0 flex space-x-3">
+    <% unless @token.revoked? %>
+      <%= button_to "Regenerate", regenerate_dashboard_project_access_token_path(@current_project, @token),
+          method: :post,
+          data: { confirm: "This will invalidate the existing token. Continue?" },
+          class: "inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+      <%= link_to "Edit", edit_dashboard_project_access_token_path(@current_project, @token),
+          class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+    <% end %>
+  </div>
+</div>
+
+<div class="mt-8 grid gap-8 lg:grid-cols-2">
+  <div class="rounded-lg bg-white shadow p-6">
+    <h2 class="text-lg font-medium text-gray-900 mb-4">Token Details</h2>
+    <dl class="space-y-4">
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Token Prefix</dt>
+        <dd class="mt-1 text-sm text-gray-900 font-mono"><%= @token.token_prefix %>...</dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Status</dt>
+        <dd class="mt-1">
+          <% if @token.revoked? %>
+            <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">Revoked</span>
+          <% elsif @token.expired? %>
+            <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">Expired</span>
+          <% else %>
+            <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Active</span>
+          <% end %>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Created</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @token.created_at.strftime("%b %d, %Y at %H:%M") %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Last Used</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @token.last_used_at ? @token.last_used_at.strftime("%b %d, %Y at %H:%M") : "Never" %></dd>
+      </div>
+      <% if @token.expires_at %>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Expires</dt>
+          <dd class="mt-1 text-sm <%= @token.expired? ? 'text-red-600' : 'text-gray-900' %>">
+            <%= @token.expires_at.strftime("%b %d, %Y") %>
+          </dd>
+        </div>
+      <% end %>
+    </dl>
+  </div>
+
+  <div class="space-y-6">
+    <div class="rounded-lg bg-white shadow p-6">
+      <h2 class="text-lg font-medium text-gray-900 mb-4">Scopes</h2>
+      <div class="flex flex-wrap gap-2">
+        <% @token.scopes.each do |scope| %>
+          <span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800"><%= scope %></span>
+        <% end %>
+      </div>
+    </div>
+
+    <% if @token.environment_access.present? %>
+      <div class="rounded-lg bg-white shadow p-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">Environment Access</h2>
+        <div class="flex flex-wrap gap-2">
+          <% @token.environment_access.each do |env| %>
+            <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800"><%= env %></span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <% unless @token.revoked? %>
+      <div class="rounded-lg bg-white shadow p-6">
+        <h2 class="text-lg font-medium text-red-600 mb-4">Danger Zone</h2>
+        <%= button_to "Revoke Token", dashboard_project_access_token_path(@current_project, @token),
+            method: :delete,
+            data: { confirm: "Revoke this token? This cannot be undone." },
+            class: "w-full rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500" %>
+      </div>
+    <% end %>
+  </div>
+</div>

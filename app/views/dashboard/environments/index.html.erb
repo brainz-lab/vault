@@ -1,0 +1,54 @@
+<% content_for :title, "Environments" %>
+
+<div class="sm:flex sm:items-center">
+  <div class="sm:flex-auto">
+    <h1 class="text-2xl font-semibold text-gray-900">Environments</h1>
+    <p class="mt-2 text-sm text-gray-700">Manage secret environments for <%= @current_project.name %></p>
+  </div>
+  <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+    <%= link_to "New Environment", new_dashboard_project_environment_path(@current_project),
+        class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  </div>
+</div>
+
+<div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  <% @environments.each do |env| %>
+    <div class="relative flex flex-col rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <span class="text-2xl mr-3"><%= env.locked? ? "🔒" : "🌐" %></span>
+          <div>
+            <h3 class="text-lg font-medium text-gray-900"><%= env.name %></h3>
+            <p class="text-sm text-gray-500"><%= env.slug %></p>
+          </div>
+        </div>
+        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium <%= env.locked? ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' %>">
+          <%= env.locked? ? "Locked" : "Open" %>
+        </span>
+      </div>
+
+      <% if env.inherits_from.present? %>
+        <p class="mt-4 text-sm text-gray-500">
+          <span class="font-medium">Inherits from:</span> <%= env.inherits_from %>
+        </p>
+      <% end %>
+
+      <div class="mt-4 pt-4 border-t border-gray-100">
+        <p class="text-sm text-gray-500">
+          <%= env.secret_versions.select(:secret_id).distinct.count %> secrets
+        </p>
+      </div>
+
+      <div class="mt-4 flex space-x-3">
+        <%= link_to "Edit", edit_dashboard_project_environment_path(@current_project, env),
+            class: "flex-1 text-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+        <% unless env.secret_versions.exists? %>
+          <%= button_to "Delete", dashboard_project_environment_path(@current_project, env),
+              method: :delete,
+              data: { confirm: "Delete this environment?" },
+              class: "flex-1 text-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500" %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

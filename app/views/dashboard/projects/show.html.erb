@@ -1,0 +1,117 @@
+<% content_for :title, @project.name %>
+
+<div class="sm:flex sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-2xl font-semibold text-gray-900"><%= @project.name %></h1>
+    <p class="mt-1 text-sm text-gray-500">Project Overview</p>
+  </div>
+  <div class="mt-4 sm:mt-0 flex space-x-3">
+    <%= link_to "MCP Setup", mcp_setup_dashboard_project_path(@project),
+        class: "inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+    <%= link_to "Settings", edit_dashboard_project_path(@project),
+        class: "inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+    <dt class="truncate text-sm font-medium text-gray-500">Total Secrets</dt>
+    <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900"><%= @project.secrets.active.count %></dd>
+  </div>
+  <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+    <dt class="truncate text-sm font-medium text-gray-500">Environments</dt>
+    <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900"><%= @environments.count %></dd>
+  </div>
+  <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+    <dt class="truncate text-sm font-medium text-gray-500">Active Tokens</dt>
+    <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900"><%= @project.access_tokens.active.count %></dd>
+  </div>
+  <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+    <dt class="truncate text-sm font-medium text-gray-500">Audit Events</dt>
+    <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900"><%= @project.audit_logs.count %></dd>
+  </div>
+</div>
+
+<div class="mt-8 grid gap-8 lg:grid-cols-2">
+  <!-- Recent Secrets -->
+  <div class="overflow-hidden rounded-lg bg-white shadow">
+    <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+      <h2 class="text-lg font-medium text-gray-900">Recent Secrets</h2>
+      <%= link_to "View All", dashboard_project_secrets_path(@project), class: "text-sm text-indigo-600 hover:text-indigo-500" %>
+    </div>
+    <ul class="divide-y divide-gray-200">
+      <% @recent_secrets.each do |secret| %>
+        <li class="px-4 py-4 sm:px-6">
+          <%= link_to dashboard_project_secret_path(@project, secret), class: "flex items-center justify-between hover:bg-gray-50 -mx-4 -my-4 px-4 py-4 sm:-mx-6 sm:px-6" do %>
+            <div class="flex items-center">
+              <span class="text-lg mr-3">🔑</span>
+              <div>
+                <p class="text-sm font-medium text-gray-900"><%= secret.key %></p>
+                <p class="text-sm text-gray-500"><%= secret.description || "No description" %></p>
+              </div>
+            </div>
+            <span class="text-sm text-gray-400"><%= time_ago_in_words(secret.updated_at) %> ago</span>
+          <% end %>
+        </li>
+      <% end %>
+      <% if @recent_secrets.empty? %>
+        <li class="px-4 py-8 text-center">
+          <p class="text-sm text-gray-500">No secrets yet</p>
+          <%= link_to "Add Secret", new_dashboard_project_secret_path(@project), class: "mt-2 inline-block text-sm text-indigo-600 hover:text-indigo-500" %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="overflow-hidden rounded-lg bg-white shadow">
+    <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+      <h2 class="text-lg font-medium text-gray-900">Recent Activity</h2>
+      <%= link_to "View All", dashboard_project_audit_logs_path(@project), class: "text-sm text-indigo-600 hover:text-indigo-500" %>
+    </div>
+    <ul class="divide-y divide-gray-200">
+      <% @recent_logs.each do |log| %>
+        <li class="px-4 py-4 sm:px-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-900"><%= log.action.humanize %></p>
+              <p class="text-sm text-gray-500">
+                <%= log.secret&.key || "System" %> by <%= log.actor_name %>
+              </p>
+            </div>
+            <span class="text-sm text-gray-400"><%= time_ago_in_words(log.created_at) %> ago</span>
+          </div>
+        </li>
+      <% end %>
+      <% if @recent_logs.empty? %>
+        <li class="px-4 py-8 text-center">
+          <p class="text-sm text-gray-500">No activity yet</p>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+
+<!-- Environments -->
+<div class="mt-8">
+  <h2 class="text-lg font-medium text-gray-900 mb-4">Environments</h2>
+  <div class="grid gap-4 sm:grid-cols-3">
+    <% @environments.each do |env| %>
+      <div class="rounded-lg border border-gray-200 bg-white p-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <span class="text-lg mr-2"><%= env.locked? ? "🔒" : "🌐" %></span>
+            <span class="font-medium text-gray-900"><%= env.name %></span>
+          </div>
+          <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium <%= env.locked? ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' %>">
+            <%= env.locked? ? "Locked" : "Open" %>
+          </span>
+        </div>
+        <% if env.inherits_from.present? %>
+          <p class="mt-2 text-xs text-gray-500">Inherits from: <%= env.inherits_from %></p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

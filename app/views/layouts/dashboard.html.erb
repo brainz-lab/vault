@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+  <title><%= content_for?(:title) ? yield(:title) : "Vault" %> | Brainz Lab</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="turbo-cache-control" content="no-cache">
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+</head>
+
+<body class="h-full">
+  <div class="min-h-full">
+    <!-- Navigation -->
+    <nav class="bg-gray-900">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <%= link_to dashboard_projects_path, class: "flex items-center" do %>
+                <span class="text-2xl mr-2">🔐</span>
+                <span class="text-white font-bold text-lg">Vault</span>
+              <% end %>
+            </div>
+            <% if @current_project %>
+              <div class="hidden md:block ml-10">
+                <div class="flex items-baseline space-x-4">
+                  <%= link_to "Secrets", dashboard_project_secrets_path(@current_project),
+                      class: "#{request.path.include?('/secrets') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium" %>
+                  <%= link_to "Environments", dashboard_project_environments_path(@current_project),
+                      class: "#{request.path.include?('/environments') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium" %>
+                  <%= link_to "Access Tokens", dashboard_project_access_tokens_path(@current_project),
+                      class: "#{request.path.include?('/access_tokens') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium" %>
+                  <%= link_to "Audit Log", dashboard_project_audit_logs_path(@current_project),
+                      class: "#{request.path.include?('/audit_logs') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium" %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+          <div class="hidden md:block">
+            <div class="ml-4 flex items-center md:ml-6">
+              <% if @current_project %>
+                <span class="text-gray-400 text-sm mr-4"><%= @current_project.name %></span>
+              <% end %>
+              <span class="text-gray-300 text-sm"><%= current_user[:email] %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Flash messages -->
+    <% if notice %>
+      <div class="bg-green-50 border-l-4 border-green-400 p-4" data-controller="flash" data-flash-timeout-value="5000">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-green-700"><%= notice %></p>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <% if alert %>
+      <div class="bg-red-50 border-l-4 border-red-400 p-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-red-700"><%= alert %></p>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <main class="py-6">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <%= yield %>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

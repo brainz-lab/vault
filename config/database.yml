@@ -1,0 +1,33 @@
+# PostgreSQL configuration for Vault
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: vault_development
+  # For Docker: set DATABASE_URL=postgres://postgres:postgres@db:5432/vault_development
+
+test:
+  <<: *default
+  database: vault_test
+
+production:
+  primary: &primary_production
+    <<: *default
+    database: vault_production
+    username: vault
+    password: <%= ENV["VAULT_DATABASE_PASSWORD"] %>
+  cache:
+    <<: *primary_production
+    database: vault_production_cache
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *primary_production
+    database: vault_production_queue
+    migrations_paths: db/queue_migrate
+  cable:
+    <<: *primary_production
+    database: vault_production_cable
+    migrations_paths: db/cable_migrate

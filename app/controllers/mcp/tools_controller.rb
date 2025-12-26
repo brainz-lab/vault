@@ -1,0 +1,85 @@
+module Mcp
+  class ToolsController < ApplicationController
+    before_action :authenticate!
+
+    # GET /mcp/tools
+    def index
+      render json: {
+        tools: mcp_server.tools
+      }
+    end
+
+    # POST /mcp/tools/:name
+    def call
+      tool_name = params[:name]
+      tool_params = params.except(:controller, :action, :name).permit!.to_h
+
+      result = mcp_server.call(tool_name, tool_params.symbolize_keys)
+
+      render json: result
+    rescue ArgumentError => e
+      render json: { error: e.message }, status: :bad_request
+    end
+
+    # POST /mcp/rpc
+    def rpc
+      method = params[:method]
+      rpc_params = params[:params]&.permit!&.to_h || {}
+
+      result = mcp_server.rpc(method, rpc_params.symbolize_keys)
+
+      render json: result
+    end
+
+    private
+
+    def authenticate!
+      @current_token = authenticate_token
+      @current_project = @current_token&.project
+
+      unless @current_project
+        render json: { error: "Unauthorized" }, status: :unauthorized
+      end
+    end
+
+    def authenticate_token
+      raw_token = extract_token
+      return nil unless raw_token
+
+      prefix = raw_token.split("_").last&.first(8)
+      return nil unless prefix
+
+      AccessToken.active.where(token_prefix: prefix).find_each do |token|
+        if token.authenticate(raw_token)
+          return token
+        end
+      end
+
+      nil
+    end
+
+    def extract_token
+      auth_header = request.headers["Authorization"]
+      if auth_header&.start_with?("Bearer ")
+        return auth_header[7..]
+      end
+
+      api_key = request.headers["X-API-Key"]
+      return api_key if api_key.present?
+
+      nil
+    end
+
+    def mcp_server
+      @mcp_server ||= ::Mcp::Server.new(
+        project: @current_project,
+        environment: resolve_environment
+      )
+    end
+
+    def resolve_environment
+      slug = params[:environment] || request.headers["X-Vault-Environment"] || "development"
+      @current_project.secret_environments.find_by(slug: slug)
+    end
+  end
+end

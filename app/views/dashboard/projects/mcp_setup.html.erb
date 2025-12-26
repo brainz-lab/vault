@@ -1,0 +1,121 @@
+<% content_for :title, "MCP Setup" %>
+
+<div class="mx-auto max-w-3xl">
+  <h1 class="text-2xl font-semibold text-gray-900">MCP Setup</h1>
+  <p class="mt-2 text-sm text-gray-700">Connect Vault to Claude Desktop or Cursor</p>
+
+  <div class="mt-8 space-y-8">
+    <!-- Token Section -->
+    <div class="rounded-lg bg-white shadow p-6">
+      <h2 class="text-lg font-medium text-gray-900">API Token</h2>
+      <p class="mt-1 text-sm text-gray-500">Use this token to authenticate MCP requests</p>
+
+      <div class="mt-4">
+        <% if @raw_token %>
+          <div class="rounded-md bg-yellow-50 p-4 mb-4">
+            <div class="flex">
+              <div class="flex-shrink-0">⚠️</div>
+              <div class="ml-3">
+                <p class="text-sm text-yellow-700">
+                  <strong>Save this token now!</strong> You won't be able to see it again.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <code class="flex-1 block rounded-md bg-gray-900 text-green-400 p-3 text-sm font-mono break-all" data-controller="clipboard" data-clipboard-text="<%= @raw_token %>">
+              <%= @raw_token %>
+            </code>
+            <button type="button" class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" data-action="clipboard#copy">
+              Copy
+            </button>
+          </div>
+        <% else %>
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+            <div>
+              <p class="text-sm font-medium text-gray-900"><%= @token.name %></p>
+              <p class="text-xs text-gray-500">Created <%= time_ago_in_words(@token.created_at) %> ago</p>
+            </div>
+            <%= button_to "Regenerate", regenerate_dashboard_project_access_token_path(@project, @token),
+                method: :post,
+                data: { confirm: "This will invalidate the existing token. Continue?" },
+                class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Claude Desktop Config -->
+    <div class="rounded-lg bg-white shadow p-6">
+      <h2 class="text-lg font-medium text-gray-900">Claude Desktop Configuration</h2>
+      <p class="mt-1 text-sm text-gray-500">Add this to your Claude Desktop config file</p>
+
+      <div class="mt-4">
+        <p class="text-xs text-gray-500 mb-2">Config file: <code class="bg-gray-100 px-1 rounded">~/.config/claude-desktop/config.json</code></p>
+        <pre class="rounded-md bg-gray-900 text-green-400 p-4 text-sm font-mono overflow-x-auto"><code>{
+  "mcpServers": {
+    "vault": {
+      "url": "<%= request.base_url %>/mcp/rpc",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN_HERE"
+      }
+    }
+  }
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- Cursor Config -->
+    <div class="rounded-lg bg-white shadow p-6">
+      <h2 class="text-lg font-medium text-gray-900">Cursor Configuration</h2>
+      <p class="mt-1 text-sm text-gray-500">Add this to your Cursor MCP settings</p>
+
+      <div class="mt-4">
+        <p class="text-xs text-gray-500 mb-2">Config file: <code class="bg-gray-100 px-1 rounded">~/.cursor/mcp.json</code></p>
+        <pre class="rounded-md bg-gray-900 text-green-400 p-4 text-sm font-mono overflow-x-auto"><code>{
+  "vault": {
+    "url": "<%= request.base_url %>/mcp/rpc",
+    "apiKey": "YOUR_TOKEN_HERE"
+  }
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- Available Tools -->
+    <div class="rounded-lg bg-white shadow p-6">
+      <h2 class="text-lg font-medium text-gray-900">Available MCP Tools</h2>
+      <p class="mt-1 text-sm text-gray-500">These tools are available to AI assistants</p>
+
+      <ul class="mt-4 divide-y divide-gray-200">
+        <li class="py-3">
+          <p class="text-sm font-medium text-gray-900">vault_list_secrets</p>
+          <p class="text-sm text-gray-500">List all secret names in the vault</p>
+        </li>
+        <li class="py-3">
+          <p class="text-sm font-medium text-gray-900">vault_get_secret</p>
+          <p class="text-sm text-gray-500">Retrieve a secret value by key</p>
+        </li>
+        <li class="py-3">
+          <p class="text-sm font-medium text-gray-900">vault_set_secret</p>
+          <p class="text-sm text-gray-500">Create or update a secret</p>
+        </li>
+        <li class="py-3">
+          <p class="text-sm font-medium text-gray-900">vault_delete_secret</p>
+          <p class="text-sm text-gray-500">Archive (soft-delete) a secret</p>
+        </li>
+        <li class="py-3">
+          <p class="text-sm font-medium text-gray-900">vault_list_environments</p>
+          <p class="text-sm text-gray-500">List available environments</p>
+        </li>
+        <li class="py-3">
+          <p class="text-sm font-medium text-gray-900">vault_export</p>
+          <p class="text-sm text-gray-500">Export secrets in various formats</p>
+        </li>
+        <li class="py-3">
+          <p class="text-sm font-medium text-gray-900">vault_import</p>
+          <p class="text-sm text-gray-500">Import secrets from .env or JSON</p>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

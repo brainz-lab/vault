@@ -1,0 +1,30 @@
+FROM ruby:3.4.7-slim
+
+# Install dependencies
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+    build-essential \
+    curl \
+    git \
+    libpq-dev \
+    libyaml-dev \
+    nodejs \
+    npm \
+    postgresql-client && \
+    npm install -g yarn && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+WORKDIR /rails
+
+# Install gems
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+# Install JS dependencies
+COPY package.json yarn.lock ./
+RUN yarn install
+
+COPY . .
+
+EXPOSE 3000
+CMD ["bin/dev"]

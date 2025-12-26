@@ -1,0 +1,42 @@
+<% content_for :title, "Projects" %>
+
+<div class="sm:flex sm:items-center">
+  <div class="sm:flex-auto">
+    <h1 class="text-2xl font-semibold text-gray-900">Projects</h1>
+    <p class="mt-2 text-sm text-gray-700">Manage secrets for your projects</p>
+  </div>
+  <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+    <%= link_to "New Project", new_dashboard_project_path,
+        class: "block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  </div>
+</div>
+
+<div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  <% @projects.each do |project| %>
+    <%= link_to dashboard_project_path(project), class: "relative flex flex-col rounded-lg border border-gray-300 bg-white p-6 shadow-sm hover:border-indigo-500 hover:ring-1 hover:ring-indigo-500" do %>
+      <div class="flex items-center">
+        <span class="text-2xl mr-3">📁</span>
+        <div>
+          <h3 class="text-lg font-medium text-gray-900"><%= project.name %></h3>
+          <p class="text-sm text-gray-500"><%= project.secrets.active.count %> secrets</p>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center text-sm text-gray-500">
+        <span class="mr-4"><%= project.secret_environments.count %> environments</span>
+        <span><%= project.access_tokens.active.count %> tokens</span>
+      </div>
+    <% end %>
+  <% end %>
+
+  <% if @projects.empty? %>
+    <div class="col-span-full text-center py-12">
+      <span class="text-4xl">🔐</span>
+      <h3 class="mt-2 text-sm font-semibold text-gray-900">No projects</h3>
+      <p class="mt-1 text-sm text-gray-500">Get started by creating a new project.</p>
+      <div class="mt-6">
+        <%= link_to "New Project", new_dashboard_project_path,
+            class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+      </div>
+    </div>
+  <% end %>
+</div>

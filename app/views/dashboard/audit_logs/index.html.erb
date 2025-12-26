@@ -1,0 +1,113 @@
+<% content_for :title, "Audit Log" %>
+
+<div class="sm:flex sm:items-center">
+  <div class="sm:flex-auto">
+    <h1 class="text-2xl font-semibold text-gray-900">Audit Log</h1>
+    <p class="mt-2 text-sm text-gray-700">Track all secret access and changes</p>
+  </div>
+  <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+    <%= link_to "Export CSV", dashboard_project_audit_logs_path(@current_project, format: :csv),
+        class: "inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="mt-6 bg-white rounded-lg shadow p-4">
+  <%= form_with url: dashboard_project_audit_logs_path(@current_project), method: :get, class: "flex flex-wrap gap-4" do |f| %>
+    <div class="flex-1 min-w-[150px]">
+      <%= f.select :action_filter, options_for_select([
+          ["All Actions", ""],
+          ["Read Secret", "read_secret"],
+          ["Create Secret", "create_secret"],
+          ["Update Secret", "update_secret"],
+          ["Archive Secret", "archive_secret"],
+          ["Rollback Secret", "rollback_secret"],
+          ["Export Secrets", "export_secrets"],
+          ["Import Secrets", "import_secrets"]
+        ], params[:action_filter]),
+        {}, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+    </div>
+    <div class="flex-1 min-w-[150px]">
+      <%= f.date_field :from, value: params[:from], placeholder: "From date",
+          class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+    </div>
+    <div class="flex-1 min-w-[150px]">
+      <%= f.date_field :to, value: params[:to], placeholder: "To date",
+          class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+    </div>
+    <%= f.submit "Filter", class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer" %>
+    <%= link_to "Clear", dashboard_project_audit_logs_path(@current_project), class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+  <% end %>
+</div>
+
+<div class="mt-6 overflow-hidden rounded-lg bg-white shadow">
+  <table class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-gray-50">
+      <tr>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Timestamp</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Action</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Secret</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Actor</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">IP Address</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200 bg-white">
+      <% @logs.each do |log| %>
+        <tr class="hover:bg-gray-50">
+          <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+            <%= log.created_at.strftime("%b %d, %H:%M:%S") %>
+          </td>
+          <td class="whitespace-nowrap px-6 py-4">
+            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium <%= action_badge_class(log.action) %>">
+              <%= log.action.humanize %>
+            </span>
+          </td>
+          <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+            <% if log.secret %>
+              <%= link_to log.secret.key, dashboard_project_secret_path(@current_project, log.secret), class: "text-indigo-600 hover:text-indigo-500" %>
+            <% else %>
+              <span class="text-gray-400">—</span>
+            <% end %>
+          </td>
+          <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+            <div class="flex items-center">
+              <span class="mr-1"><%= log.actor_type == "user" ? "👤" : "🤖" %></span>
+              <%= log.actor_name %>
+            </div>
+          </td>
+          <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 font-mono">
+            <%= log.ip_address || "—" %>
+          </td>
+        </tr>
+      <% end %>
+      <% if @logs.empty? %>
+        <tr>
+          <td colspan="5" class="px-6 py-12 text-center">
+            <span class="text-4xl">📋</span>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900">No audit logs</h3>
+            <p class="mt-1 text-sm text-gray-500">Activity will appear here once secrets are accessed.</p>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<%# Pagination %>
+<% if @logs.respond_to?(:total_pages) && @logs.total_pages > 1 %>
+  <div class="mt-6 flex items-center justify-between">
+    <div class="text-sm text-gray-500">
+      Showing <%= @logs.offset_value + 1 %> to <%= [@logs.offset_value + @logs.limit_value, @logs.total_count].min %> of <%= @logs.total_count %> entries
+    </div>
+    <nav class="flex space-x-2">
+      <% if @logs.current_page > 1 %>
+        <%= link_to "Previous", dashboard_project_audit_logs_path(@current_project, page: @logs.current_page - 1),
+            class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+      <% end %>
+      <% if @logs.current_page < @logs.total_pages %>
+        <%= link_to "Next", dashboard_project_audit_logs_path(@current_project, page: @logs.current_page + 1),
+            class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+      <% end %>
+    </nav>
+  </div>
+<% end %>

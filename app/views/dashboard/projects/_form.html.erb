@@ -1,0 +1,39 @@
+<%= form_with model: [:dashboard, project], class: "mt-8 space-y-6" do |f| %>
+  <% if project.errors.any? %>
+    <div class="rounded-md bg-red-50 p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">There were errors with your submission</h3>
+          <ul class="mt-2 list-disc list-inside text-sm text-red-700">
+            <% project.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :name, class: "block text-sm font-medium text-gray-700" %>
+    <%= f.text_field :name, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", placeholder: "My Project" %>
+  </div>
+
+  <div>
+    <%= f.label :platform_project_id, "Platform Project ID (optional)", class: "block text-sm font-medium text-gray-700" %>
+    <%= f.text_field :platform_project_id, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", placeholder: "UUID from Brainz Lab Platform" %>
+    <p class="mt-1 text-xs text-gray-500">Link to a project in Brainz Lab Platform for unified billing and access control</p>
+  </div>
+
+  <div class="flex justify-end space-x-3">
+    <%= link_to "Cancel", (project.persisted? ? dashboard_project_path(project) : dashboard_projects_path),
+        class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+    <%= f.submit project.persisted? ? "Update Project" : "Create Project",
+        class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer" %>
+  </div>
+<% end %>
