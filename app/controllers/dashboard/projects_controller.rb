@@ -4,9 +4,14 @@ module Dashboard
     before_action :set_project, only: [:show, :edit, :update, :destroy, :setup, :mcp_setup]
 
     def index
-      @projects = Project.where(organization_id: current_user[:organization_id])
-                         .or(Project.where(organization_id: nil))
-                         .order(:name)
+      # In development, show all projects
+      @projects = if Rails.env.development?
+        Project.all.order(:name)
+      else
+        Project.where(organization_id: current_user[:organization_id])
+               .or(Project.where(organization_id: nil))
+               .order(:name)
+      end
     end
 
     def show
@@ -22,7 +27,8 @@ module Dashboard
 
     def create
       @project = Project.new(project_params)
-      @project.organization_id = current_user[:organization_id]
+      # Only set organization_id in production
+      @project.organization_id = current_user[:organization_id] if @project.respond_to?(:organization_id=)
 
       if @project.save
         create_default_environments(@project)
