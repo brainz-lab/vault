@@ -21,7 +21,10 @@ module Dashboard
         @logs = @logs.where("created_at <= ?", Date.parse(params[:to]).end_of_day)
       end
 
-      @logs = @logs.page(params[:page]).per(50)
+      @page = (params[:page] || 1).to_i
+      @per_page = 50
+      @total_count = @logs.count
+      @logs = @logs.limit(@per_page).offset((@page - 1) * @per_page)
 
       respond_to do |format|
         format.html

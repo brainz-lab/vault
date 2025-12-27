@@ -27,9 +27,9 @@
         </span>
       </div>
 
-      <% if env.inherits_from.present? %>
+      <% if env.parent_environment.present? %>
         <p class="mt-4 text-sm text-gray-500">
-          <span class="font-medium">Inherits from:</span> <%= env.inherits_from %>
+          <span class="font-medium">Inherits from:</span> <%= env.parent_environment.name %>
         </p>
       <% end %>
 

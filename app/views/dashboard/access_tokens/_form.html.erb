@@ -22,19 +22,19 @@
   </div>
 
   <div>
-    <span class="block text-sm font-medium text-gray-700 mb-2">Scopes</span>
+    <span class="block text-sm font-medium text-gray-700 mb-2">Permissions</span>
     <div class="space-y-2">
-      <% %w[read write admin].each do |scope| %>
+      <% %w[read write delete].each do |perm| %>
         <label class="flex items-center">
-          <%= check_box_tag "access_token[scopes][]", scope, token.scopes.include?(scope),
+          <%= check_box_tag "access_token[permissions][]", perm, (token.permissions || []).include?(perm),
               class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
           <span class="ml-2 text-sm text-gray-700">
-            <strong><%= scope.capitalize %></strong>
+            <strong><%= perm.capitalize %></strong>
             <span class="text-gray-500">
-              <%= case scope
+              <%= case perm
                   when "read" then "— Read secret values"
                   when "write" then "— Create and update secrets"
-                  when "admin" then "— Manage tokens and policies"
+                  when "delete" then "— Delete secrets"
                   end %>
             </span>
           </span>
@@ -48,7 +48,7 @@
     <div class="space-y-2">
       <% @current_project.secret_environments.order(:position).each do |env| %>
         <label class="flex items-center">
-          <%= check_box_tag "access_token[environment_access][]", env.slug, token.environment_access.include?(env.slug),
+          <%= check_box_tag "access_token[environments][]", env.slug, (token.environments || []).include?(env.slug),
               class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
           <span class="ml-2 text-sm text-gray-700">
             <span class="mr-1"><%= env.locked? ? "🔒" : "🌐" %></span>

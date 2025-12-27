@@ -24,11 +24,11 @@
   </div>
 
   <div>
-    <%= f.label :inherits_from, "Inherits From", class: "block text-sm font-medium text-gray-700" %>
-    <%= f.select :inherits_from,
+    <%= f.label :parent_environment_id, "Inherits From", class: "block text-sm font-medium text-gray-700" %>
+    <%= f.select :parent_environment_id,
         options_for_select(
-          [["None", ""]] + @current_project.secret_environments.where.not(id: environment.id).map { |e| [e.name, e.slug] },
-          environment.inherits_from
+          [["None", ""]] + @current_project.secret_environments.where.not(id: environment.id).map { |e| [e.name, e.id] },
+          environment.parent_environment_id
         ),
         {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
     <p class="mt-1 text-xs text-gray-500">If a secret doesn't exist in this environment, it will be inherited from the selected environment</p>

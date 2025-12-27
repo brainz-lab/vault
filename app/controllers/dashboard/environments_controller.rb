@@ -54,7 +54,7 @@ module Dashboard
     end
 
     def environment_params
-      params.require(:secret_environment).permit(:name, :slug, :inherits_from, :position, :locked)
+      params.require(:secret_environment).permit(:name, :slug, :parent_environment_id, :position, :locked)
     end
   end
 end
