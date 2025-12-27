@@ -31,7 +31,7 @@ module Dashboard
       @project.organization_id = current_user[:organization_id] if @project.respond_to?(:organization_id=)
 
       if @project.save
-        create_default_environments(@project)
+        # Note: default environments are created by model callback
         redirect_to dashboard_project_path(@project), notice: "Project created successfully"
       else
         render :new, status: :unprocessable_entity
@@ -80,16 +80,6 @@ module Dashboard
 
     def project_params
       params.require(:project).permit(:name, :platform_project_id)
-    end
-
-    def create_default_environments(project)
-      [
-        { name: "Production", slug: "production", position: 0, locked: true },
-        { name: "Staging", slug: "staging", position: 1, inherits_from: "production" },
-        { name: "Development", slug: "development", position: 2, inherits_from: "staging" }
-      ].each do |env|
-        project.secret_environments.create!(env)
-      end
     end
   end
 end

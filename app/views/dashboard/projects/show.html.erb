@@ -108,8 +108,8 @@
             <%= env.locked? ? "Locked" : "Open" %>
           </span>
         </div>
-        <% if env.inherits_from.present? %>
-          <p class="mt-2 text-xs text-gray-500">Inherits from: <%= env.inherits_from %></p>
+        <% if env.parent_environment.present? %>
+          <p class="mt-2 text-xs text-gray-500">Inherits from: <%= env.parent_environment.name %></p>
         <% end %>
       </div>
     <% end %>

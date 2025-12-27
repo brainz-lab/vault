@@ -1,89 +1,143 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-gray-50">
+<html lang="en" class="h-full">
 <head>
-  <title><%= content_for?(:title) ? yield(:title) : "Vault" %> | Brainz Lab</title>
+  <title>Vault - <%= content_for(:title) || "Secrets Management" %></title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="turbo-cache-control" content="no-cache">
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
-
-  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-  <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-cream-50: #FAF9F7;
+      --color-cream-100: #F5F3EF;
+      --color-cream-200: #E8E5E0;
+      --color-ink-900: #1A1A1A;
+      --color-ink-700: #3D3D3D;
+      --color-ink-600: #525252;
+      --color-ink-500: #6B6B6B;
+      --color-ink-400: #8B8780;
+      --color-ink-300: #A8A29E;
+      --color-vault: #6366F1;
+      --color-vault-dark: #4F46E5;
+      --color-success: #22C55E;
+      --color-warning: #F59E0B;
+      --color-error: #EF4444;
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; }
+  </style>
 </head>
-
-<body class="h-full">
-  <div class="min-h-full">
-    <!-- Navigation -->
-    <nav class="bg-gray-900">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="flex h-16 items-center justify-between">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <%= link_to dashboard_projects_path, class: "flex items-center" do %>
-                <span class="text-2xl mr-2">🔐</span>
-                <span class="text-white font-bold text-lg">Vault</span>
-              <% end %>
-            </div>
-            <% if @current_project %>
-              <div class="hidden md:block ml-10">
-                <div class="flex items-baseline space-x-4">
-                  <%= link_to "Secrets", dashboard_project_secrets_path(@current_project),
-                      class: "#{request.path.include?('/secrets') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium" %>
-                  <%= link_to "Environments", dashboard_project_environments_path(@current_project),
-                      class: "#{request.path.include?('/environments') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium" %>
-                  <%= link_to "Access Tokens", dashboard_project_access_tokens_path(@current_project),
-                      class: "#{request.path.include?('/access_tokens') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium" %>
-                  <%= link_to "Audit Log", dashboard_project_audit_logs_path(@current_project),
-                      class: "#{request.path.include?('/audit_logs') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} rounded-md px-3 py-2 text-sm font-medium" %>
-                </div>
-              </div>
-            <% end %>
-          </div>
-          <div class="hidden md:block">
-            <div class="ml-4 flex items-center md:ml-6">
-              <% if @current_project %>
-                <span class="text-gray-400 text-sm mr-4"><%= @current_project.name %></span>
-              <% end %>
-              <span class="text-gray-300 text-sm"><%= current_user[:email] %></span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </nav>
-
-    <!-- Flash messages -->
-    <% if notice %>
-      <div class="bg-green-50 border-l-4 border-green-400 p-4" data-controller="flash" data-flash-timeout-value="5000">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+<body class="h-full antialiased" style="background: var(--color-cream-50);">
+  <div class="flex h-full">
+    <!-- Sidebar -->
+    <aside class="w-64 border-r flex flex-col" style="border-color: var(--color-cream-200); background: #FFFFFE;">
+      <div class="p-5 border-b" style="border-color: var(--color-cream-100);">
+        <%= link_to dashboard_projects_path, class: "flex items-center gap-2.5" do %>
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: var(--color-vault);">
+            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0110 0v4"/>
             </svg>
           </div>
-          <div class="ml-3">
-            <p class="text-sm text-green-700"><%= notice %></p>
-          </div>
-        </div>
+          <span class="font-semibold" style="color: var(--color-ink-900);">Vault</span>
+        <% end %>
       </div>
-    <% end %>
 
-    <% if alert %>
-      <div class="bg-red-50 border-l-4 border-red-400 p-4">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+      <% if @current_project %>
+        <!-- Project Selector -->
+        <div class="px-4 py-3 border-b" style="border-color: var(--color-cream-100);">
+          <%= link_to dashboard_projects_path, class: "flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--color-cream-100)] transition" do %>
+            <div class="w-6 h-6 rounded flex items-center justify-center text-xs font-semibold" style="background: var(--color-cream-200); color: var(--color-ink-600);">
+              <%= @current_project.name.first.upcase %>
+            </div>
+            <span class="flex-1 text-sm font-medium truncate" style="color: var(--color-ink-700);"><%= @current_project.name %></span>
+            <svg class="w-4 h-4" style="color: var(--color-ink-400);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
             </svg>
-          </div>
-          <div class="ml-3">
-            <p class="text-sm text-red-700"><%= alert %></p>
+          <% end %>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="p-4 space-y-1 flex-1">
+          <% secrets_active = request.path.include?('/secrets') %>
+          <%= link_to dashboard_project_secrets_path(@current_project),
+              class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition",
+              style: "#{secrets_active ? 'background: rgba(99, 102, 241, 0.1); color: var(--color-vault);' : 'color: var(--color-ink-600);'}" do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+            </svg>
+            Secrets
+          <% end %>
+
+          <% environments_active = request.path.include?('/environments') %>
+          <%= link_to dashboard_project_environments_path(@current_project),
+              class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition",
+              style: "#{environments_active ? 'background: rgba(99, 102, 241, 0.1); color: var(--color-vault);' : 'color: var(--color-ink-600);'}" do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+            Environments
+          <% end %>
+
+          <% tokens_active = request.path.include?('/access_tokens') %>
+          <%= link_to dashboard_project_access_tokens_path(@current_project),
+              class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition",
+              style: "#{tokens_active ? 'background: rgba(99, 102, 241, 0.1); color: var(--color-vault);' : 'color: var(--color-ink-600);'}" do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+            </svg>
+            Access Tokens
+          <% end %>
+
+          <% audit_active = request.path.include?('/audit_logs') %>
+          <%= link_to dashboard_project_audit_logs_path(@current_project),
+              class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition",
+              style: "#{audit_active ? 'background: rgba(99, 102, 241, 0.1); color: var(--color-vault);' : 'color: var(--color-ink-600);'}" do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+            </svg>
+            Audit Log
+          <% end %>
+        </nav>
+      <% else %>
+        <nav class="p-4 flex-1">
+          <p class="px-3 text-xs font-medium uppercase tracking-wider mb-3" style="color: var(--color-ink-400);">Select a project</p>
+        </nav>
+      <% end %>
+
+      <!-- User Menu -->
+      <% if defined?(current_user) && current_user && current_user[:email] %>
+        <div class="p-4 border-t" style="border-color: var(--color-cream-100);">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold" style="background: rgba(99, 102, 241, 0.15); color: var(--color-vault);">
+              <%= current_user[:name]&.first&.upcase || current_user[:email]&.first&.upcase || "?" %>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium truncate" style="color: var(--color-ink-900);"><%= current_user[:name] || current_user[:email]&.split('@')&.first || "User" %></p>
+              <p class="text-xs truncate" style="color: var(--color-ink-500);"><%= current_user[:email] %></p>
+            </div>
           </div>
         </div>
-      </div>
-    <% end %>
+      <% end %>
+    </aside>
 
-    <main class="py-6">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <!-- Main Content -->
+    <main class="flex-1 overflow-auto">
+      <% if notice %>
+        <div class="m-8 mb-0 px-4 py-3 rounded-xl text-sm font-medium" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); color: #166534;">
+          <%= notice %>
+        </div>
+      <% end %>
+      <% if alert %>
+        <div class="m-8 mb-0 px-4 py-3 rounded-xl text-sm font-medium" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #991B1B;">
+          <%= alert %>
+        </div>
+      <% end %>
+
+      <div class="p-8">
         <%= yield %>
       </div>
     </main>

@@ -11,6 +11,7 @@ class Project < ApplicationRecord
   validates :api_key, uniqueness: true, allow_nil: true
   validates :ingest_key, uniqueness: true, allow_nil: true
 
+  before_validation :ensure_platform_project_id
   before_create :generate_keys
   after_create :create_default_environments
 
@@ -29,6 +30,10 @@ class Project < ApplicationRecord
   end
 
   private
+
+  def ensure_platform_project_id
+    self.platform_project_id ||= SecureRandom.uuid
+  end
 
   def generate_keys
     self.api_key ||= "vlt_api_#{SecureRandom.hex(16)}"
