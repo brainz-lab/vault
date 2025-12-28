@@ -54,6 +54,24 @@ class AccessToken < ApplicationRecord
     revoked_at.present?
   end
 
+  # Verify a raw token matches this access token
+  def authenticate(raw_token)
+    return false unless raw_token.present?
+
+    digest = Digest::SHA256.hexdigest(raw_token)
+    if token_digest == digest
+      update_columns(last_used_at: Time.current, use_count: use_count + 1)
+      true
+    else
+      false
+    end
+  end
+
+  # Check if token has a specific permission
+  def has_permission?(permission)
+    permissions.include?(permission.to_s)
+  end
+
   private
 
   def generate_token

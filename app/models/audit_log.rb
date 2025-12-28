@@ -14,21 +14,42 @@ class AuditLog < ApplicationRecord
   RESOURCE_TYPES = %w[secret environment token policy folder].freeze
   ACTOR_TYPES = %w[user token system].freeze
 
-  def self.log_access(secret, environment, token:, ip:, success: true, error: nil)
-    create!(
-      project: secret.project,
-      action: success ? "read" : "access_denied",
-      resource_type: "secret",
-      resource_id: secret.id,
-      resource_path: secret.path,
-      environment: environment.name,
-      actor_type: "token",
-      actor_id: token.id,
-      actor_name: token.name,
-      ip_address: ip,
-      success: success,
-      error_message: error
-    )
+  def self.log_access(secret = nil, environment = nil, token: nil, ip: nil, success: true, error: nil, **attrs)
+    # Handle flexible call signatures
+    if secret && token
+      create!(
+        project: secret.project,
+        action: success ? "read" : "access_denied",
+        resource_type: "secret",
+        resource_id: secret.id,
+        resource_path: secret.path,
+        environment: environment&.name || attrs[:environment],
+        actor_type: "token",
+        actor_id: token.id,
+        actor_name: token.name,
+        ip_address: ip,
+        success: success,
+        error_message: error
+      )
+    else
+      # Generic logging from controller
+      create!(
+        project: attrs[:project],
+        action: attrs[:action],
+        resource_type: attrs[:resource_type] || "secret",
+        resource_id: attrs[:secret]&.id || attrs[:resource_id],
+        resource_path: attrs[:secret]&.path || attrs[:resource_path],
+        environment: attrs[:environment],
+        actor_type: attrs[:actor_type] || "token",
+        actor_id: attrs[:actor_id],
+        actor_name: attrs[:actor_name],
+        ip_address: attrs[:ip_address],
+        user_agent: attrs[:user_agent],
+        metadata: attrs[:details] || {},
+        success: success,
+        error_message: error
+      )
+    end
   end
 
   # Make it append-only (enforced via database rules too)

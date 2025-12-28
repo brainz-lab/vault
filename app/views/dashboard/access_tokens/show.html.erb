@@ -1,18 +1,25 @@
 <% content_for :title, @token.name %>
 
 <% if flash[:token] %>
-  <div class="rounded-md bg-yellow-50 p-4 mb-6">
+  <div class="alert-warning mb-6">
     <div class="flex">
-      <div class="flex-shrink-0">⚠️</div>
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+      </div>
       <div class="ml-3 flex-1">
-        <p class="text-sm text-yellow-700 mb-2">
+        <p class="text-sm text-yellow-800 mb-3">
           <strong>Copy your token now!</strong> You won't be able to see it again.
         </p>
-        <div class="flex items-center space-x-2">
-          <code class="flex-1 block rounded-md bg-gray-900 text-green-400 p-3 text-sm font-mono break-all">
+        <div class="flex items-center gap-3">
+          <code class="flex-1 code-block text-sm break-all">
             <%= flash[:token] %>
           </code>
-          <button type="button" class="rounded-md bg-yellow-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-yellow-500" onclick="navigator.clipboard.writeText('<%= flash[:token] %>')">
+          <button type="button" class="btn-primary" onclick="navigator.clipboard.writeText('<%= flash[:token] %>')">
+            <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+            </svg>
             Copy
           </button>
         </div>
@@ -24,56 +31,88 @@
 <div class="sm:flex sm:items-center sm:justify-between">
   <div>
     <div class="flex items-center">
-      <span class="text-2xl mr-3">🔐</span>
-      <h1 class="text-2xl font-semibold text-gray-900"><%= @token.name %></h1>
+      <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100">
+        <svg class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+        </svg>
+      </div>
+      <div class="ml-4">
+        <h1 class="page-title"><%= @token.name %></h1>
+        <p class="page-subtitle"><%= @token.description || "No description" %></p>
+      </div>
     </div>
-    <p class="mt-1 text-sm text-gray-500"><%= @token.description || "No description" %></p>
   </div>
-  <div class="mt-4 sm:mt-0 flex space-x-3">
+  <div class="mt-4 sm:mt-0 flex gap-3">
     <% unless @token.revoked? %>
-      <%= button_to "Regenerate", regenerate_dashboard_project_access_token_path(@current_project, @token),
+      <%= button_to regenerate_dashboard_project_access_token_path(@current_project, @token),
           method: :post,
           data: { confirm: "This will invalidate the existing token. Continue?" },
-          class: "inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
-      <%= link_to "Edit", edit_dashboard_project_access_token_path(@current_project, @token),
-          class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+          class: "btn-secondary" do %>
+        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+        Regenerate
+      <% end %>
+      <%= link_to edit_dashboard_project_access_token_path(@current_project, @token), class: "btn-primary" do %>
+        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+        </svg>
+        Edit
+      <% end %>
     <% end %>
   </div>
 </div>
 
+<!-- Status Badge -->
+<div class="mt-4">
+  <% if @token.revoked? %>
+    <span class="badge-red inline-flex items-center">
+      <svg class="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+      </svg>
+      Revoked
+    </span>
+  <% elsif @token.expired? %>
+    <span class="badge-yellow inline-flex items-center">
+      <svg class="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      Expired
+    </span>
+  <% else %>
+    <span class="badge-green inline-flex items-center">
+      <svg class="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      Active
+    </span>
+  <% end %>
+</div>
+
 <div class="mt-8 grid gap-8 lg:grid-cols-2">
-  <div class="rounded-lg bg-white shadow p-6">
-    <h2 class="text-lg font-medium text-gray-900 mb-4">Token Details</h2>
+  <div class="card p-6">
+    <h2 class="text-lg font-semibold text-stone-900 mb-4">Token Details</h2>
     <dl class="space-y-4">
       <div>
-        <dt class="text-sm font-medium text-gray-500">Token Prefix</dt>
-        <dd class="mt-1 text-sm text-gray-900 font-mono"><%= @token.token_prefix %>...</dd>
+        <dt class="text-xs font-medium text-stone-500 uppercase tracking-wide">Token Prefix</dt>
+        <dd class="mt-1 text-sm text-stone-900 font-mono"><%= @token.token_prefix %>...</dd>
       </div>
       <div>
-        <dt class="text-sm font-medium text-gray-500">Status</dt>
-        <dd class="mt-1">
-          <% if @token.revoked? %>
-            <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">Revoked</span>
-          <% elsif @token.expired? %>
-            <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">Expired</span>
-          <% else %>
-            <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Active</span>
-          <% end %>
-        </dd>
+        <dt class="text-xs font-medium text-stone-500 uppercase tracking-wide">Created</dt>
+        <dd class="mt-1 text-sm text-stone-900"><%= @token.created_at.strftime("%b %d, %Y at %H:%M") %></dd>
       </div>
       <div>
-        <dt class="text-sm font-medium text-gray-500">Created</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @token.created_at.strftime("%b %d, %Y at %H:%M") %></dd>
-      </div>
-      <div>
-        <dt class="text-sm font-medium text-gray-500">Last Used</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @token.last_used_at ? @token.last_used_at.strftime("%b %d, %Y at %H:%M") : "Never" %></dd>
+        <dt class="text-xs font-medium text-stone-500 uppercase tracking-wide">Last Used</dt>
+        <dd class="mt-1 text-sm text-stone-900"><%= @token.last_used_at ? @token.last_used_at.strftime("%b %d, %Y at %H:%M") : "Never" %></dd>
       </div>
       <% if @token.expires_at %>
         <div>
-          <dt class="text-sm font-medium text-gray-500">Expires</dt>
-          <dd class="mt-1 text-sm <%= @token.expired? ? 'text-red-600' : 'text-gray-900' %>">
+          <dt class="text-xs font-medium text-stone-500 uppercase tracking-wide">Expires</dt>
+          <dd class="mt-1 text-sm <%= @token.expired? ? 'text-red-600 font-medium' : 'text-stone-900' %>">
             <%= @token.expires_at.strftime("%b %d, %Y") %>
+            <% if @token.expired? %>
+              <span class="badge-red ml-2">Expired</span>
+            <% end %>
           </dd>
         </div>
       <% end %>
@@ -81,33 +120,44 @@
   </div>
 
   <div class="space-y-6">
-    <div class="rounded-lg bg-white shadow p-6">
-      <h2 class="text-lg font-medium text-gray-900 mb-4">Scopes</h2>
+    <div class="card p-6">
+      <h2 class="text-lg font-semibold text-stone-900 mb-4">Scopes</h2>
       <div class="flex flex-wrap gap-2">
         <% @token.scopes.each do |scope| %>
-          <span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800"><%= scope %></span>
+          <span class="badge-blue"><%= scope %></span>
         <% end %>
       </div>
     </div>
 
     <% if @token.environment_access.present? %>
-      <div class="rounded-lg bg-white shadow p-6">
-        <h2 class="text-lg font-medium text-gray-900 mb-4">Environment Access</h2>
+      <div class="card p-6">
+        <h2 class="text-lg font-semibold text-stone-900 mb-4">Environment Access</h2>
         <div class="flex flex-wrap gap-2">
           <% @token.environment_access.each do |env| %>
-            <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800"><%= env %></span>
+            <span class="badge-green"><%= env %></span>
           <% end %>
         </div>
       </div>
     <% end %>
 
     <% unless @token.revoked? %>
-      <div class="rounded-lg bg-white shadow p-6">
-        <h2 class="text-lg font-medium text-red-600 mb-4">Danger Zone</h2>
-        <%= button_to "Revoke Token", dashboard_project_access_token_path(@current_project, @token),
+      <div class="card p-6 border-red-200">
+        <h2 class="text-lg font-semibold text-red-600 mb-3 flex items-center">
+          <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+          Danger Zone
+        </h2>
+        <p class="text-sm text-stone-500 mb-4">Revoking a token will immediately prevent it from being used.</p>
+        <%= button_to dashboard_project_access_token_path(@current_project, @token),
             method: :delete,
             data: { confirm: "Revoke this token? This cannot be undone." },
-            class: "w-full rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500" %>
+            class: "btn-danger w-full justify-center" do %>
+          <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+          </svg>
+          Revoke Token
+        <% end %>
       </div>
     <% end %>
   </div>

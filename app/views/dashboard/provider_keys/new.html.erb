@@ -1,0 +1,91 @@
+<% content_for :title, "Add Provider Key" %>
+
+<div class="mb-8">
+  <%= link_to dashboard_provider_keys_path(project_id: current_project&.id), class: "inline-flex items-center gap-2 text-sm text-stone-500 hover:text-stone-700 transition" do %>
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+    </svg>
+    Back to Provider Keys
+  <% end %>
+</div>
+
+<h1 class="text-2xl font-semibold text-stone-900 mb-2">Add Provider Key</h1>
+<p class="text-sm text-stone-500 mb-8">Add an API key for an AI provider</p>
+
+<div class="max-w-2xl">
+  <div class="bg-white rounded-2xl border border-stone-200 p-6">
+    <%= form_with model: @provider_key, url: dashboard_provider_keys_path(project_id: current_project&.id), class: "space-y-6" do |form| %>
+      <% if @provider_key.errors.any? %>
+        <div class="rounded-xl p-4 bg-red-50 border border-red-100">
+          <p class="text-sm font-medium text-red-800"><%= pluralize(@provider_key.errors.count, "error") %> prevented this key from being saved:</p>
+          <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+            <% @provider_key.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= form.label :name, class: "block text-sm font-medium text-stone-700 mb-2" %>
+        <%= form.text_field :name,
+            class: "w-full rounded-xl px-4 py-3 text-sm border border-stone-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition",
+            placeholder: "e.g., Production OpenAI Key" %>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <%= form.label :provider, class: "block text-sm font-medium text-stone-700 mb-2" %>
+          <%= form.select :provider,
+              ProviderKey::PROVIDERS.map { |p| [p.titleize, p] },
+              {},
+              class: "w-full rounded-xl px-4 py-3 text-sm border border-stone-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition cursor-pointer" %>
+        </div>
+
+        <div>
+          <%= form.label :model_type, "Model Type", class: "block text-sm font-medium text-stone-700 mb-2" %>
+          <%= form.select :model_type,
+              ProviderKey::MODEL_TYPES.map { |t| [t.upcase, t] },
+              {},
+              class: "w-full rounded-xl px-4 py-3 text-sm border border-stone-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition cursor-pointer" %>
+        </div>
+      </div>
+
+      <div>
+        <%= form.label :api_key, "API Key", class: "block text-sm font-medium text-stone-700 mb-2" %>
+        <%= form.password_field :api_key,
+            class: "w-full rounded-xl px-4 py-3 text-sm border border-stone-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition font-mono",
+            placeholder: "sk-...",
+            autocomplete: "off" %>
+        <p class="mt-1 text-xs text-stone-500">The key will be encrypted at rest using AES-256-GCM</p>
+      </div>
+
+      <div>
+        <%= form.label :priority, class: "block text-sm font-medium text-stone-700 mb-2" %>
+        <%= form.number_field :priority,
+            class: "w-full rounded-xl px-4 py-3 text-sm border border-stone-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition",
+            value: 0,
+            min: 0,
+            max: 100 %>
+        <p class="mt-1 text-xs text-stone-500">Higher priority keys are used first (0-100)</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <%= form.check_box :global,
+            class: "w-4 h-4 rounded border-stone-300 text-orange-600 focus:ring-orange-500",
+            checked: @provider_key.global? %>
+        <%= form.label :global, class: "text-sm text-stone-700" do %>
+          <span class="font-medium">Global Key</span>
+          <span class="text-stone-500">- Available to all projects</span>
+        <% end %>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-stone-100">
+        <%= link_to "Cancel", dashboard_provider_keys_path(project_id: current_project&.id),
+            class: "px-4 py-2.5 text-sm font-medium text-stone-600 hover:text-stone-900 transition" %>
+        <%= form.submit "Add Key",
+            class: "px-6 py-2.5 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-xl transition cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -2,19 +2,44 @@ module DashboardHelper
   def action_badge_class(action)
     case action
     when /create/
-      "bg-green-100 text-green-800"
+      "badge-green"
     when /update/, /set/
-      "bg-blue-100 text-blue-800"
+      "badge-blue"
     when /delete/, /archive/, /revoke/
-      "bg-red-100 text-red-800"
+      "badge-red"
     when /read/, /get/, /list/, /export/
-      "bg-gray-100 text-gray-800"
+      "badge-gray"
     when /rollback/
-      "bg-yellow-100 text-yellow-800"
+      "badge-yellow"
     when /import/
-      "bg-purple-100 text-purple-800"
+      "badge-orange"
     else
-      "bg-gray-100 text-gray-800"
+      "badge-gray"
+    end
+  end
+
+  def provider_badge_class(provider)
+    case provider.to_s.downcase
+    when "openai"
+      "bg-green-100 text-green-700"
+    when "anthropic"
+      "bg-orange-100 text-orange-700"
+    when "google"
+      "bg-blue-100 text-blue-700"
+    when "azure"
+      "bg-sky-100 text-sky-700"
+    when "cohere"
+      "bg-purple-100 text-purple-700"
+    when "mistral"
+      "bg-indigo-100 text-indigo-700"
+    when "groq"
+      "bg-yellow-100 text-yellow-700"
+    when "replicate"
+      "bg-pink-100 text-pink-700"
+    when "huggingface"
+      "bg-amber-100 text-amber-700"
+    else
+      "bg-stone-100 text-stone-700"
     end
   end
 end

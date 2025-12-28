@@ -1,52 +1,70 @@
 <% content_for :title, "Environments" %>
 
-<div class="sm:flex sm:items-center">
-  <div class="sm:flex-auto">
-    <h1 class="text-2xl font-semibold text-gray-900">Environments</h1>
-    <p class="mt-2 text-sm text-gray-700">Manage secret environments for <%= @current_project.name %></p>
+<div class="sm:flex sm:items-center sm:justify-between">
+  <div class="page-header">
+    <h1 class="page-title">Environments</h1>
+    <p class="page-subtitle">Manage secret environments for <%= @current_project.name %></p>
   </div>
-  <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-    <%= link_to "New Environment", new_dashboard_project_environment_path(@current_project),
-        class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  <div class="mt-4 sm:mt-0">
+    <%= link_to new_dashboard_project_environment_path(@current_project), class: "btn-primary" do %>
+      <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+      </svg>
+      New Environment
+    <% end %>
   </div>
 </div>
 
 <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
   <% @environments.each do |env| %>
-    <div class="relative flex flex-col rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+    <div class="card p-6">
       <div class="flex items-center justify-between">
         <div class="flex items-center">
-          <span class="text-2xl mr-3"><%= env.locked? ? "🔒" : "🌐" %></span>
-          <div>
-            <h3 class="text-lg font-medium text-gray-900"><%= env.name %></h3>
-            <p class="text-sm text-gray-500"><%= env.slug %></p>
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl <%= env.locked? ? 'bg-red-100' : 'bg-emerald-100' %>">
+            <svg class="h-6 w-6 <%= env.locked? ? 'text-red-600' : 'text-emerald-600' %>" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <% if env.locked? %>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              <% else %>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              <% end %>
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-lg font-semibold text-stone-900"><%= env.name %></h3>
+            <p class="text-sm text-stone-500 font-mono"><%= env.slug %></p>
           </div>
         </div>
-        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium <%= env.locked? ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' %>">
+        <span class="<%= env.locked? ? 'badge-red' : 'badge-green' %>">
           <%= env.locked? ? "Locked" : "Open" %>
         </span>
       </div>
 
       <% if env.parent_environment.present? %>
-        <p class="mt-4 text-sm text-gray-500">
+        <p class="mt-4 text-sm text-stone-500">
           <span class="font-medium">Inherits from:</span> <%= env.parent_environment.name %>
         </p>
       <% end %>
 
-      <div class="mt-4 pt-4 border-t border-gray-100">
-        <p class="text-sm text-gray-500">
+      <div class="mt-4 pt-4 border-t border-stone-100">
+        <div class="flex items-center text-sm text-stone-500">
+          <svg class="h-4 w-4 mr-1.5 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+          </svg>
           <%= env.secret_versions.select(:secret_id).distinct.count %> secrets
-        </p>
+        </div>
       </div>
 
-      <div class="mt-4 flex space-x-3">
-        <%= link_to "Edit", edit_dashboard_project_environment_path(@current_project, env),
-            class: "flex-1 text-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+      <div class="mt-5 flex gap-3">
+        <%= link_to edit_dashboard_project_environment_path(@current_project, env), class: "btn-secondary flex-1 justify-center" do %>
+          Edit
+        <% end %>
         <% unless env.secret_versions.exists? %>
-          <%= button_to "Delete", dashboard_project_environment_path(@current_project, env),
+          <%= button_to dashboard_project_environment_path(@current_project, env),
               method: :delete,
               data: { confirm: "Delete this environment?" },
-              class: "flex-1 text-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500" %>
+              class: "btn-danger flex-1 justify-center" do %>
+            Delete
+          <% end %>
         <% end %>
       </div>
     </div>

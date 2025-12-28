@@ -10,11 +10,24 @@ module Api
       protected
 
       def authenticate!
+        # Try token-based auth first
         @current_token = authenticate_token
         @current_project = @current_token&.project
 
+        # Fall back to direct project API key auth (for SDK)
+        unless @current_project
+          @current_project = authenticate_project_api_key
+        end
+
         unless @current_project
           render json: { error: "Unauthorized" }, status: :unauthorized
+        end
+      end
+
+      def require_project!
+        # Already handled by authenticate! but kept for explicitness
+        unless current_project
+          render json: { error: "Project required" }, status: :unauthorized
         end
       end
 
@@ -43,9 +56,11 @@ module Api
 
       def log_access(action:, secret: nil, details: {})
         AuditLog.log_access(
+          nil, nil,
           project: current_project,
           secret: secret,
           action: action,
+          environment: current_environment&.slug,
           actor_type: "token",
           actor_id: current_token.id.to_s,
           actor_name: current_token.name,
@@ -86,6 +101,16 @@ module Api
         return api_key if api_key.present?
 
         nil
+      end
+
+      def authenticate_project_api_key
+        raw_key = extract_token
+        return nil unless raw_key
+
+        # Check if this is a project API key (vlt_api_...)
+        return nil unless raw_key.start_with?("vlt_api_")
+
+        Project.find_by(api_key: raw_key)
       end
 
       def not_found(exception)

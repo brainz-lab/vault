@@ -37,6 +37,18 @@ Rails.application.routes.draw do
         end
       end
 
+      # Provider keys (API keys for LLMs, etc.)
+      resources :provider_keys, only: [:index, :create, :destroy] do
+        collection do
+          get :resolve
+          get :bulk
+        end
+        member do
+          post :activate
+          post :deactivate
+        end
+      end
+
       # Project provisioning (internal API for SDK auto-setup)
       post "projects/provision", to: "projects#provision"
       get "projects/lookup", to: "projects#lookup"
@@ -58,6 +70,13 @@ Rails.application.routes.draw do
 
   # Dashboard
   namespace :dashboard do
+    # Global provider keys (not project-scoped)
+    resources :provider_keys do
+      member do
+        post :toggle_active
+      end
+    end
+
     resources :projects do
       member do
         get :setup

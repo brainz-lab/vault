@@ -1,6 +1,6 @@
-<%= form_with model: [@current_project, token], url: token.persisted? ? dashboard_project_access_token_path(@current_project, token) : dashboard_project_access_tokens_path(@current_project), class: "mt-8 space-y-6" do |f| %>
+<%= form_with model: [@current_project, token], url: token.persisted? ? dashboard_project_access_token_path(@current_project, token) : dashboard_project_access_tokens_path(@current_project), class: "card mt-8 p-6 space-y-6" do |f| %>
   <% if token.errors.any? %>
-    <div class="rounded-md bg-red-50 p-4">
+    <div class="alert-error">
       <ul class="list-disc list-inside text-sm text-red-700">
         <% token.errors.full_messages.each do |message| %>
           <li><%= message %></li>
@@ -10,31 +10,29 @@
   <% end %>
 
   <div>
-    <%= f.label :name, class: "block text-sm font-medium text-gray-700" %>
-    <%= f.text_field :name, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
-        placeholder: "CI/CD Token" %>
+    <%= f.label :name, class: "form-label" %>
+    <%= f.text_field :name, class: "form-input", placeholder: "CI/CD Token" %>
   </div>
 
   <div>
-    <%= f.label :description, class: "block text-sm font-medium text-gray-700" %>
-    <%= f.text_field :description, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
-        placeholder: "Used for GitHub Actions deployments" %>
+    <%= f.label :description, class: "form-label" %>
+    <%= f.text_field :description, class: "form-input", placeholder: "Used for GitHub Actions deployments" %>
   </div>
 
   <div>
-    <span class="block text-sm font-medium text-gray-700 mb-2">Permissions</span>
-    <div class="space-y-2">
+    <span class="form-label">Permissions</span>
+    <div class="mt-2 space-y-3 rounded-lg border border-stone-200 p-4 bg-stone-50">
       <% %w[read write delete].each do |perm| %>
-        <label class="flex items-center">
+        <label class="flex items-start cursor-pointer group">
           <%= check_box_tag "access_token[permissions][]", perm, (token.permissions || []).include?(perm),
-              class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
-          <span class="ml-2 text-sm text-gray-700">
-            <strong><%= perm.capitalize %></strong>
-            <span class="text-gray-500">
+              class: "form-checkbox mt-0.5" %>
+          <span class="ml-3">
+            <span class="block text-sm font-medium text-stone-900 group-hover:text-orange-600 transition-colors"><%= perm.capitalize %></span>
+            <span class="block text-xs text-stone-500">
               <%= case perm
-                  when "read" then "— Read secret values"
-                  when "write" then "— Create and update secrets"
-                  when "delete" then "— Delete secrets"
+                  when "read" then "Read secret values"
+                  when "write" then "Create and update secrets"
+                  when "delete" then "Delete secrets"
                   end %>
             </span>
           </span>
@@ -44,32 +42,38 @@
   </div>
 
   <div>
-    <span class="block text-sm font-medium text-gray-700 mb-2">Environment Access</span>
-    <div class="space-y-2">
+    <span class="form-label">Environment Access</span>
+    <div class="mt-2 space-y-3 rounded-lg border border-stone-200 p-4 bg-stone-50">
       <% @current_project.secret_environments.order(:position).each do |env| %>
-        <label class="flex items-center">
+        <label class="flex items-center cursor-pointer group">
           <%= check_box_tag "access_token[environments][]", env.slug, (token.environments || []).include?(env.slug),
-              class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
-          <span class="ml-2 text-sm text-gray-700">
-            <span class="mr-1"><%= env.locked? ? "🔒" : "🌐" %></span>
-            <%= env.name %>
-          </span>
+              class: "form-checkbox" %>
+          <div class="ml-3 flex items-center">
+            <div class="flex h-6 w-6 items-center justify-center rounded <%= env.locked? ? 'bg-red-100' : 'bg-emerald-100' %> mr-2">
+              <svg class="h-3.5 w-3.5 <%= env.locked? ? 'text-red-600' : 'text-emerald-600' %>" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <% if env.locked? %>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                <% else %>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                <% end %>
+              </svg>
+            </div>
+            <span class="text-sm text-stone-700 group-hover:text-orange-600 transition-colors"><%= env.name %></span>
+          </div>
         </label>
       <% end %>
     </div>
-    <p class="mt-1 text-xs text-gray-500">Leave unchecked to allow access to all environments</p>
+    <p class="form-hint">Leave unchecked to allow access to all environments</p>
   </div>
 
   <div>
-    <%= f.label :expires_at, "Expiration Date", class: "block text-sm font-medium text-gray-700" %>
-    <%= f.datetime_local_field :expires_at, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-    <p class="mt-1 text-xs text-gray-500">Leave blank for no expiration</p>
+    <%= f.label :expires_at, "Expiration Date", class: "form-label" %>
+    <%= f.datetime_local_field :expires_at, class: "form-input" %>
+    <p class="form-hint">Leave blank for no expiration</p>
   </div>
 
-  <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-    <%= link_to "Cancel", dashboard_project_access_tokens_path(@current_project),
-        class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
-    <%= f.submit token.persisted? ? "Update Token" : "Create Token",
-        class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer" %>
+  <div class="flex justify-end gap-3 pt-6 border-t border-stone-100">
+    <%= link_to "Cancel", dashboard_project_access_tokens_path(@current_project), class: "btn-secondary" %>
+    <%= f.submit token.persisted? ? "Update Token" : "Create Token", class: "btn-primary cursor-pointer" %>
   </div>
 <% end %>

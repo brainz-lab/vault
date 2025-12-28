@@ -9,52 +9,34 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    :root {
-      --color-cream-50: #FAF9F7;
-      --color-cream-100: #F5F3EF;
-      --color-cream-200: #E8E5E0;
-      --color-ink-900: #1A1A1A;
-      --color-ink-700: #3D3D3D;
-      --color-ink-600: #525252;
-      --color-ink-500: #6B6B6B;
-      --color-ink-400: #8B8780;
-      --color-ink-300: #A8A29E;
-      --color-vault: #6366F1;
-      --color-vault-dark: #4F46E5;
-      --color-success: #22C55E;
-      --color-warning: #F59E0B;
-      --color-error: #EF4444;
-    }
-    body { font-family: 'Inter', system-ui, sans-serif; }
-  </style>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
 </head>
-<body class="h-full antialiased" style="background: var(--color-cream-50);">
+<body class="h-full min-h-screen bg-[#FAF9F6] text-stone-800 antialiased">
   <div class="flex h-full">
     <!-- Sidebar -->
-    <aside class="w-64 border-r flex flex-col" style="border-color: var(--color-cream-200); background: #FFFFFE;">
-      <div class="p-5 border-b" style="border-color: var(--color-cream-100);">
+    <aside class="w-64 border-r border-stone-200 flex flex-col bg-white">
+      <div class="p-5 border-b border-stone-100">
         <%= link_to dashboard_projects_path, class: "flex items-center gap-2.5" do %>
-          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: var(--color-vault);">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-orange-600">
             <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
               <path d="M7 11V7a5 5 0 0110 0v4"/>
             </svg>
           </div>
-          <span class="font-semibold" style="color: var(--color-ink-900);">Vault</span>
+          <span class="font-semibold text-stone-900">Vault</span>
         <% end %>
       </div>
 
       <% if @current_project %>
         <!-- Project Selector -->
-        <div class="px-4 py-3 border-b" style="border-color: var(--color-cream-100);">
-          <%= link_to dashboard_projects_path, class: "flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--color-cream-100)] transition" do %>
-            <div class="w-6 h-6 rounded flex items-center justify-center text-xs font-semibold" style="background: var(--color-cream-200); color: var(--color-ink-600);">
+        <div class="px-4 py-3 border-b border-stone-100">
+          <%= link_to dashboard_projects_path, class: "flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-stone-50 transition" do %>
+            <div class="w-6 h-6 rounded flex items-center justify-center text-xs font-semibold bg-orange-100 text-orange-700">
               <%= @current_project.name.first.upcase %>
             </div>
-            <span class="flex-1 text-sm font-medium truncate" style="color: var(--color-ink-700);"><%= @current_project.name %></span>
-            <svg class="w-4 h-4" style="color: var(--color-ink-400);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span class="flex-1 text-sm font-medium truncate text-stone-700"><%= @current_project.name %></span>
+            <svg class="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
             </svg>
           <% end %>
@@ -64,8 +46,7 @@
         <nav class="p-4 space-y-1 flex-1">
           <% secrets_active = request.path.include?('/secrets') %>
           <%= link_to dashboard_project_secrets_path(@current_project),
-              class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition",
-              style: "#{secrets_active ? 'background: rgba(99, 102, 241, 0.1); color: var(--color-vault);' : 'color: var(--color-ink-600);'}" do %>
+              class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition #{secrets_active ? 'bg-orange-50 text-orange-700' : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'}" do %>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
             </svg>
@@ -74,8 +55,7 @@
 
           <% environments_active = request.path.include?('/environments') %>
           <%= link_to dashboard_project_environments_path(@current_project),
-              class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition",
-              style: "#{environments_active ? 'background: rgba(99, 102, 241, 0.1); color: var(--color-vault);' : 'color: var(--color-ink-600);'}" do %>
+              class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition #{environments_active ? 'bg-orange-50 text-orange-700' : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'}" do %>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
             </svg>
@@ -84,8 +64,7 @@
 
           <% tokens_active = request.path.include?('/access_tokens') %>
           <%= link_to dashboard_project_access_tokens_path(@current_project),
-              class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition",
-              style: "#{tokens_active ? 'background: rgba(99, 102, 241, 0.1); color: var(--color-vault);' : 'color: var(--color-ink-600);'}" do %>
+              class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition #{tokens_active ? 'bg-orange-50 text-orange-700' : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'}" do %>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
             </svg>
@@ -94,30 +73,58 @@
 
           <% audit_active = request.path.include?('/audit_logs') %>
           <%= link_to dashboard_project_audit_logs_path(@current_project),
-              class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition",
-              style: "#{audit_active ? 'background: rgba(99, 102, 241, 0.1); color: var(--color-vault);' : 'color: var(--color-ink-600);'}" do %>
+              class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition #{audit_active ? 'bg-orange-50 text-orange-700' : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'}" do %>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
             </svg>
             Audit Log
           <% end %>
+
+          <div class="pt-4 mt-4 border-t border-stone-100">
+            <% provider_keys_active = request.path.include?('/provider_keys') %>
+            <%= link_to dashboard_provider_keys_path(project_id: @current_project&.id),
+                class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition #{provider_keys_active ? 'bg-orange-50 text-orange-700' : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'}" do %>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+              Provider Keys
+            <% end %>
+
+            <% settings_active = request.path.include?('/edit') && request.path.include?('/projects/') %>
+            <%= link_to edit_dashboard_project_path(@current_project),
+                class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition #{settings_active ? 'bg-orange-50 text-orange-700' : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'}" do %>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              Project Settings
+            <% end %>
+
+            <%= link_to mcp_setup_dashboard_project_path(@current_project),
+                class: "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-stone-600 hover:bg-stone-50 hover:text-stone-900" do %>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              MCP Setup
+            <% end %>
+          </div>
         </nav>
       <% else %>
         <nav class="p-4 flex-1">
-          <p class="px-3 text-xs font-medium uppercase tracking-wider mb-3" style="color: var(--color-ink-400);">Select a project</p>
+          <p class="px-3 text-xs font-medium uppercase tracking-wider mb-3 text-stone-400">Select a project</p>
         </nav>
       <% end %>
 
       <!-- User Menu -->
       <% if defined?(current_user) && current_user && current_user[:email] %>
-        <div class="p-4 border-t" style="border-color: var(--color-cream-100);">
+        <div class="p-4 border-t border-stone-100">
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold" style="background: rgba(99, 102, 241, 0.15); color: var(--color-vault);">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold bg-orange-100 text-orange-700">
               <%= current_user[:name]&.first&.upcase || current_user[:email]&.first&.upcase || "?" %>
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium truncate" style="color: var(--color-ink-900);"><%= current_user[:name] || current_user[:email]&.split('@')&.first || "User" %></p>
-              <p class="text-xs truncate" style="color: var(--color-ink-500);"><%= current_user[:email] %></p>
+              <p class="text-sm font-medium truncate text-stone-900"><%= current_user[:name] || current_user[:email]&.split('@')&.first || "User" %></p>
+              <p class="text-xs truncate text-stone-500"><%= current_user[:email] %></p>
             </div>
           </div>
         </div>
@@ -127,12 +134,12 @@
     <!-- Main Content -->
     <main class="flex-1 overflow-auto">
       <% if notice %>
-        <div class="m-8 mb-0 px-4 py-3 rounded-xl text-sm font-medium" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); color: #166534;">
+        <div class="m-8 mb-0 alert-success">
           <%= notice %>
         </div>
       <% end %>
       <% if alert %>
-        <div class="m-8 mb-0 px-4 py-3 rounded-xl text-sm font-medium" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #991B1B;">
+        <div class="m-8 mb-0 alert-error">
           <%= alert %>
         </div>
       <% end %>

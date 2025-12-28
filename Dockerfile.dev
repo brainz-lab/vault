@@ -8,10 +8,7 @@ RUN apt-get update -qq && \
     git \
     libpq-dev \
     libyaml-dev \
-    nodejs \
-    npm \
     postgresql-client && \
-    npm install -g yarn && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 WORKDIR /rails
@@ -19,10 +16,6 @@ WORKDIR /rails
 # Install gems
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
-
-# Install JS dependencies
-COPY package.json yarn.lock ./
-RUN yarn install
 
 COPY . .
 

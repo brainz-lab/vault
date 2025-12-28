@@ -20,6 +20,16 @@ class Secret < ApplicationRecord
     versions.where(secret_environment: environment, current: true).first
   end
 
+  # Returns the current version number for a given environment
+  # If no environment is passed, returns the highest version number across all environments
+  def current_version_number(environment = nil)
+    if environment
+      current_version(environment)&.version
+    else
+      versions.where(current: true).maximum(:version)
+    end
+  end
+
   def value(environment)
     version = current_version(environment)
     return nil unless version
