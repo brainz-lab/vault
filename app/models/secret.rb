@@ -17,7 +17,12 @@ class Secret < ApplicationRecord
   scope :with_tag, ->(key, value) { where("tags->>? = ?", key, value) }
 
   def current_version(environment)
-    versions.where(secret_environment: environment, current: true).first
+    # Use preloaded versions if available (avoids N+1), otherwise query
+    if versions.loaded?
+      versions.find { |v| v.secret_environment_id == environment.id && v.current }
+    else
+      versions.where(secret_environment: environment, current: true).first
+    end
   end
 
   # Returns the current version number for a given environment

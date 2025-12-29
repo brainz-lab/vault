@@ -1,11 +1,11 @@
 // Import and register all controllers
-import { application } from "./application"
+import { application } from "controllers/application"
 
-import DropdownController from "./dropdown_controller"
-import FlashController from "./flash_controller"
-import SecretRevealController from "./secret_reveal_controller"
-import ClipboardController from "./clipboard_controller"
-import SearchController from "./search_controller"
+import DropdownController from "controllers/dropdown_controller"
+import FlashController from "controllers/flash_controller"
+import SecretRevealController from "controllers/secret_reveal_controller"
+import ClipboardController from "controllers/clipboard_controller"
+import SearchController from "controllers/search_controller"
 
 application.register("dropdown", DropdownController)
 application.register("flash", FlashController)

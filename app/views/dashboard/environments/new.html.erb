@@ -1,9 +1,19 @@
 <% content_for :title, "New Environment" %>
 
-<div class="mx-auto max-w-2xl">
+<div class="max-w-2xl mx-auto">
+  <!-- Header -->
   <div class="mb-8">
-    <h1 class="section-header">New Environment</h1>
-    <p class="section-subheader">Create a new environment for secrets</p>
+    <div class="flex items-center gap-3 mb-1">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);">
+        <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="section-header">New Environment</h1>
+        <p class="section-subheader">Create a new environment for <%= @current_project.name %></p>
+      </div>
+    </div>
   </div>
 
   <%= render "form", environment: @environment %>

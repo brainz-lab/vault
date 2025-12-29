@@ -1,61 +1,103 @@
-<%= form_with model: [@current_project, environment], url: environment.persisted? ? dashboard_project_environment_path(@current_project, environment) : dashboard_project_environments_path(@current_project), class: "card mt-8 p-6 space-y-6" do |f| %>
+<%= form_with model: [@current_project, environment], url: environment.persisted? ? dashboard_project_environment_path(@current_project, environment) : dashboard_project_environments_path(@current_project), class: "space-y-6" do |f| %>
   <% if environment.errors.any? %>
-    <div class="alert-error">
-      <ul class="list-disc list-inside text-sm text-red-700">
-        <% environment.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
+    <div class="alert alert-error">
+      <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+      </svg>
+      <div>
+        <p class="font-medium">Please fix the following errors:</p>
+        <ul class="mt-1 list-disc list-inside text-sm">
+          <% environment.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
     </div>
   <% end %>
 
-  <div>
-    <%= f.label :name, class: "form-label" %>
-    <%= f.text_field :name, class: "form-input", placeholder: "Production" %>
+  <div class="card">
+    <div class="card-body space-y-6">
+      <!-- Environment Name -->
+      <div>
+        <label for="secret_environment_name" class="label">Environment Name</label>
+        <%= f.text_field :name, class: "input", placeholder: "Production", autofocus: true %>
+        <p class="text-xs mt-1.5" style="color: var(--color-ink-400);">A human-readable name for this environment</p>
+      </div>
+
+      <!-- Slug -->
+      <div>
+        <label for="secret_environment_slug" class="label">
+          Slug
+          <% if environment.persisted? %>
+            <span class="font-normal" style="color: var(--color-ink-400);">(cannot be changed)</span>
+          <% end %>
+        </label>
+        <%= f.text_field :slug, class: "input font-mono",
+            placeholder: "production",
+            disabled: environment.persisted?,
+            style: environment.persisted? ? "background: var(--color-cream-100); cursor: not-allowed;" : "" %>
+        <p class="text-xs mt-1.5" style="color: var(--color-ink-400);">Lowercase letters, numbers, and hyphens only. Used in API calls.</p>
+      </div>
+
+      <!-- Parent Environment -->
+      <div>
+        <label for="secret_environment_parent_environment_id" class="label">
+          Inherits From
+          <span class="font-normal" style="color: var(--color-ink-400);">(optional)</span>
+        </label>
+        <%= f.select :parent_environment_id,
+            options_for_select(
+              [["No inheritance", ""]] + @current_project.secret_environments.where.not(id: environment.id).order(:position).map { |e| [e.name, e.id] },
+              environment.parent_environment_id
+            ),
+            {}, class: "input" %>
+        <p class="text-xs mt-1.5" style="color: var(--color-ink-400);">If a secret doesn't exist in this environment, it will fall back to the parent environment</p>
+      </div>
+
+      <!-- Position -->
+      <div>
+        <label for="secret_environment_position" class="label">
+          Display Order
+          <span class="font-normal" style="color: var(--color-ink-400);">(optional)</span>
+        </label>
+        <%= f.number_field :position, class: "input", min: 0, placeholder: "0" %>
+        <p class="text-xs mt-1.5" style="color: var(--color-ink-400);">Lower numbers appear first in dropdowns and lists</p>
+      </div>
+
+      <!-- Locked Toggle -->
+      <div class="rounded-xl p-4" style="background: var(--color-cream-50); border: 1px solid var(--color-cream-200);">
+        <label class="flex items-start cursor-pointer group">
+          <%= f.check_box :locked, class: "mt-1 h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500" %>
+          <span class="ml-3">
+            <span class="flex items-center text-sm font-medium transition-colors group-hover:text-orange-600" style="color: var(--color-ink-900);">
+              <svg class="h-4 w-4 mr-1.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+              Locked Environment
+            </span>
+            <span class="block text-xs mt-0.5" style="color: var(--color-ink-500);">Locked environments are marked as protected and require extra caution when modifying secrets</span>
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="card-footer flex justify-end gap-3">
+      <%= link_to dashboard_project_environments_path(@current_project), class: "btn-secondary" do %>
+        Cancel
+      <% end %>
+      <%= f.submit environment.persisted? ? "Update Environment" : "Create Environment", class: "btn-primary cursor-pointer" %>
+    </div>
   </div>
 
-  <div>
-    <%= f.label :slug, class: "form-label" %>
-    <%= f.text_field :slug, class: "form-input font-mono lowercase",
-        placeholder: "production",
-        disabled: environment.persisted? %>
-    <p class="form-hint">Lowercase letters, numbers, and hyphens only</p>
-  </div>
-
-  <div>
-    <%= f.label :parent_environment_id, "Inherits From", class: "form-label" %>
-    <%= f.select :parent_environment_id,
-        options_for_select(
-          [["None", ""]] + @current_project.secret_environments.where.not(id: environment.id).map { |e| [e.name, e.id] },
-          environment.parent_environment_id
-        ),
-        {}, class: "form-input" %>
-    <p class="form-hint">If a secret doesn't exist in this environment, it will be inherited from the selected environment</p>
-  </div>
-
-  <div>
-    <%= f.label :position, class: "form-label" %>
-    <%= f.number_field :position, class: "form-input", min: 0 %>
-    <p class="form-hint">Display order (lower numbers appear first)</p>
-  </div>
-
-  <div class="rounded-lg border border-stone-200 p-4 bg-stone-50">
-    <label class="flex items-start cursor-pointer group">
-      <%= f.check_box :locked, class: "form-checkbox mt-0.5" %>
-      <span class="ml-3">
-        <span class="flex items-center text-sm font-medium text-stone-900 group-hover:text-orange-600 transition-colors">
-          <svg class="h-4 w-4 mr-1.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-          </svg>
-          Locked Environment
-        </span>
-        <span class="block text-xs text-stone-500 mt-0.5">Require additional approval for changes</span>
-      </span>
-    </label>
-  </div>
-
-  <div class="flex justify-end gap-3 pt-6 border-t border-stone-100">
-    <%= link_to "Cancel", dashboard_project_environments_path(@current_project), class: "btn-secondary" %>
-    <%= f.submit environment.persisted? ? "Update Environment" : "Create Environment", class: "btn-primary cursor-pointer" %>
+  <!-- Info Box -->
+  <div class="rounded-xl p-4 flex items-start gap-3" style="background: var(--color-cream-100);">
+    <svg class="h-5 w-5 flex-shrink-0 mt-0.5" style="color: var(--color-ink-500);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+    </svg>
+    <div class="text-sm" style="color: var(--color-ink-600);">
+      <p class="font-medium" style="color: var(--color-ink-700);">About Environments</p>
+      <p class="mt-1">Environments allow you to manage different secret values for development, staging, and production. Each environment can have its own set of secrets, or inherit from a parent environment.</p>
+    </div>
   </div>
 <% end %>

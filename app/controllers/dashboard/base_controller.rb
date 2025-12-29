@@ -27,6 +27,8 @@ module Dashboard
 
     def set_current_project
       return unless defined?(Project)
+      # Skip if already loaded (prevents duplicate queries)
+      return if @current_project.present?
 
       if params[:project_id]
         @current_project = Project.find(params[:project_id])

@@ -16,63 +16,93 @@
   </div>
 
   <% if @environments.any? %>
-    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      <% @environments.each do |env| %>
-        <div class="card p-6 transition-all hover:shadow-md">
-          <div class="flex items-start justify-between">
-            <div class="flex items-center">
-              <div class="flex h-11 w-11 items-center justify-center rounded-xl transition-colors" style="background: <%= env.locked? ? 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)' : 'linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%)' %>;">
-                <svg class="h-5 w-5 <%= env.locked? ? 'text-red-600' : 'text-emerald-600' %>" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <% if env.locked? %>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                  <% else %>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+    <div class="card overflow-hidden">
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Environment</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Inherits From</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Secrets</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Status</th>
+            <th class="px-6 py-3" style="background: var(--color-cream-50);"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y" style="border-color: var(--color-cream-100);">
+          <% @environments.each do |env| %>
+            <tr class="transition-colors hover:bg-stone-50">
+              <td class="whitespace-nowrap px-6 py-4">
+                <div class="flex items-center">
+                  <div class="flex h-9 w-9 items-center justify-center rounded-lg" style="background: <%= env.locked? ? 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)' : 'linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%)' %>;">
+                    <svg class="h-4 w-4 <%= env.locked? ? 'text-red-600' : 'text-emerald-600' %>" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <% if env.locked? %>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                      <% else %>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                      <% end %>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm font-medium" style="color: var(--color-ink-900);"><%= env.name %></p>
+                    <p class="text-xs font-mono" style="color: var(--color-ink-400);"><%= env.slug %></p>
+                  </div>
+                </div>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm" style="color: var(--color-ink-500);">
+                <% if env.parent_environment.present? %>
+                  <div class="flex items-center">
+                    <svg class="h-4 w-4 mr-1.5" style="color: var(--color-ink-400);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
+                    </svg>
+                    <%= env.parent_environment.name %>
+                  </div>
+                <% else %>
+                  <span style="color: var(--color-ink-400);">—</span>
+                <% end %>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4">
+                <%= link_to dashboard_project_secrets_path(@current_project, environment: env.slug), class: "inline-flex items-center text-sm font-medium transition-colors hover:text-orange-600", style: "color: var(--color-ink-700);" do %>
+                  <span class="badge badge-neutral mr-2"><%= env.distinct_secrets_count %></span>
+                  View secrets
+                  <svg class="h-3.5 w-3.5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  </svg>
+                <% end %>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4">
+                <% if env.locked? %>
+                  <span class="badge badge-error">Locked</span>
+                <% else %>
+                  <span class="badge badge-success">Open</span>
+                <% end %>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-right">
+                <%= link_to edit_dashboard_project_environment_path(@current_project, env), class: "text-sm font-medium transition-colors hover:text-orange-600", style: "color: var(--color-primary-500);" do %>
+                  Edit
+                <% end %>
+                <% if env.distinct_secrets_count.zero? %>
+                  <%= button_to dashboard_project_environment_path(@current_project, env),
+                      method: :delete,
+                      data: { turbo_confirm: "Delete the #{env.name} environment? This cannot be undone." },
+                      class: "ml-4 text-sm font-medium text-red-600 hover:text-red-500 transition-colors" do %>
+                    Delete
                   <% end %>
-                </svg>
-              </div>
-              <div class="ml-3">
-                <h3 class="text-base font-semibold" style="color: var(--color-ink-900);"><%= env.name %></h3>
-                <p class="text-sm font-mono" style="color: var(--color-ink-400);"><%= env.slug %></p>
-              </div>
-            </div>
-            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium <%= env.locked? ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700' %>">
-              <%= env.locked? ? "Locked" : "Open" %>
-            </span>
-          </div>
-
-          <% if env.parent_environment.present? %>
-            <div class="mt-4 flex items-center text-sm" style="color: var(--color-ink-500);">
-              <svg class="h-4 w-4 mr-1.5" style="color: var(--color-ink-400);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
-              </svg>
-              Inherits from <span class="font-medium ml-1"><%= env.parent_environment.name %></span>
-            </div>
+                <% end %>
+              </td>
+            </tr>
           <% end %>
+        </tbody>
+      </table>
+    </div>
 
-          <div class="mt-4 pt-4 border-t" style="border-color: var(--color-cream-100);">
-            <div class="flex items-center text-sm" style="color: var(--color-ink-500);">
-              <svg class="h-4 w-4 mr-1.5" style="color: var(--color-ink-400);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-              </svg>
-              <%= env.distinct_secrets_count %> secrets
-            </div>
-          </div>
-
-          <div class="mt-5 flex gap-3">
-            <%= link_to edit_dashboard_project_environment_path(@current_project, env), class: "btn-secondary flex-1 justify-center text-sm" do %>
-              Edit
-            <% end %>
-            <% if env.distinct_secrets_count.zero? %>
-              <%= button_to dashboard_project_environment_path(@current_project, env),
-                  method: :delete,
-                  data: { confirm: "Delete this environment?" },
-                  class: "btn-danger flex-1 justify-center text-sm" do %>
-                Delete
-              <% end %>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
+    <!-- Quick Info -->
+    <div class="mt-6 rounded-xl p-4 flex items-start gap-3" style="background: var(--color-cream-100);">
+      <svg class="h-5 w-5 flex-shrink-0 mt-0.5" style="color: var(--color-ink-500);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+      </svg>
+      <div class="text-sm" style="color: var(--color-ink-600);">
+        <p class="font-medium" style="color: var(--color-ink-700);">Environment Inheritance</p>
+        <p class="mt-1">Environments can inherit secrets from parent environments. When a secret is requested, Vault checks the current environment first, then falls back to parent environments.</p>
+      </div>
     </div>
   <% else %>
     <!-- Empty State -->

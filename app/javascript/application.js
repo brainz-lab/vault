@@ -1,3 +1,3 @@
-// Entry point for Vault JavaScript bundled with esbuild
+// Entry point for Vault JavaScript
 import "@hotwired/turbo-rails"
-import "./controllers"
+import "controllers"

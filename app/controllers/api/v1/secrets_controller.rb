@@ -189,7 +189,7 @@ module Api
       end
 
       def secret_params
-        params.permit(:key, :path, :description, :folder_id, :expires_at, :rotation_days, tags: {})
+        params.permit(:key, :path, :description, :secret_folder_id, :rotation_interval_days, tags: {})
       end
 
       def secret_summary(secret)
