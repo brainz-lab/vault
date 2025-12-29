@@ -1,9 +1,9 @@
 <% content_for :title, "Edit #{@environment.name}" %>
 
 <div class="mx-auto max-w-2xl">
-  <div class="page-header">
-    <h1 class="page-title">Edit Environment</h1>
-    <p class="page-subtitle">Update settings for <%= @environment.name %></p>
+  <div class="mb-8">
+    <h1 class="section-header">Edit Environment</h1>
+    <p class="section-subheader">Update settings for <span class="font-medium"><%= @environment.name %></span></p>
   </div>
 
   <%= render "form", environment: @environment %>

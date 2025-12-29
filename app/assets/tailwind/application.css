@@ -1,0 +1,5 @@
+/* BrainzLab Unified Design System */
+@import "tailwindcss";
+@import "/brainzlab-ui/app/assets/stylesheets/brainzlab_ui/base.css";
+
+/* Project-specific overrides below */

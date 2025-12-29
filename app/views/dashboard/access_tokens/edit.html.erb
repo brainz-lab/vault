@@ -1,9 +1,9 @@
 <% content_for :title, "Edit #{@token.name}" %>
 
 <div class="mx-auto max-w-2xl">
-  <div class="page-header">
-    <h1 class="page-title">Edit Access Token</h1>
-    <p class="page-subtitle">Update settings for <%= @token.name %></p>
+  <div class="mb-8">
+    <h1 class="section-header">Edit Access Token</h1>
+    <p class="section-subheader">Update settings for <span class="font-medium"><%= @token.name %></span></p>
   </div>
 
   <%= render "form", token: @token %>

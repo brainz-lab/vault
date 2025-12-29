@@ -46,6 +46,17 @@ class AccessToken < ApplicationRecord
     )
   end
 
+  def regenerate!
+    new_token = SecureRandom.urlsafe_base64(32)
+    update!(
+      token_prefix: new_token[0..7],
+      token_digest: Digest::SHA256.hexdigest(new_token),
+      use_count: 0,
+      last_used_at: nil
+    )
+    new_token
+  end
+
   def expired?
     expires_at.present? && expires_at < Time.current
   end
@@ -75,6 +86,8 @@ class AccessToken < ApplicationRecord
   private
 
   def generate_token
+    return if @skip_generate
+
     self.plain_token = SecureRandom.urlsafe_base64(32)
     self.token_prefix = plain_token[0..7]
     self.token_digest = Digest::SHA256.hexdigest(plain_token)

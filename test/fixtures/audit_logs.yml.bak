@@ -1,0 +1,150 @@
+# Audit logs for tracking access and changes
+# Note: These are append-only and cannot be deleted
+
+# Acme Corp audit logs
+acme_log_create_secret:
+  project: acme
+  action: create_secret
+  resource_type: secret
+  resource_id: <%= SecureRandom.uuid %>
+  resource_path: database/DATABASE_URL
+  actor_type: user
+  actor_id: user_admin_001
+  actor_name: Admin User
+  environment: development
+  ip_address: 192.168.1.100
+  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+  metadata: '<%= { "version" => 1 }.to_json %>'
+  success: true
+  created_at: <%= 30.days.ago %>
+
+acme_log_read_secret:
+  project: acme
+  action: read_secret
+  resource_type: secret
+  resource_id: <%= SecureRandom.uuid %>
+  resource_path: database/DATABASE_URL
+  actor_type: token
+  actor_id: <%= SecureRandom.uuid %>
+  actor_name: Read-Only Token
+  environment: development
+  ip_address: 10.0.0.50
+  metadata: '<%= { "version" => 2 }.to_json %>'
+  success: true
+  created_at: <%= 1.hour.ago %>
+
+acme_log_update_secret:
+  project: acme
+  action: update_secret
+  resource_type: secret
+  resource_id: <%= SecureRandom.uuid %>
+  resource_path: database/DATABASE_URL
+  actor_type: user
+  actor_id: user_admin_001
+  actor_name: Admin User
+  environment: development
+  ip_address: 192.168.1.100
+  metadata: '<%= { "version" => 2, "previous_version" => 1 }.to_json %>'
+  success: true
+  created_at: <%= 15.days.ago %>
+
+acme_log_rollback_secret:
+  project: acme
+  action: rollback_secret
+  resource_type: secret
+  resource_id: <%= SecureRandom.uuid %>
+  resource_path: database/DATABASE_URL
+  actor_type: user
+  actor_id: user_admin_001
+  actor_name: Admin User
+  environment: development
+  ip_address: 192.168.1.100
+  metadata: '<%= { "from_version" => 2, "to_version" => 1 }.to_json %>'
+  success: true
+  created_at: <%= 10.days.ago %>
+
+acme_log_archive_secret:
+  project: acme
+  action: archive_secret
+  resource_type: secret
+  resource_id: <%= SecureRandom.uuid %>
+  resource_path: OLD_API_KEY
+  actor_type: user
+  actor_id: user_admin_001
+  actor_name: Admin User
+  environment: development
+  ip_address: 192.168.1.100
+  metadata: "{}"
+  success: true
+  created_at: <%= 30.days.ago %>
+
+acme_log_create_token:
+  project: acme
+  action: create_token
+  resource_type: access_token
+  resource_id: <%= SecureRandom.uuid %>
+  actor_type: user
+  actor_id: user_admin_001
+  actor_name: Admin User
+  ip_address: 192.168.1.100
+  metadata: '<%= { "token_name" => "Admin Token" }.to_json %>'
+  success: true
+  created_at: <%= 30.days.ago %>
+
+acme_log_revoke_token:
+  project: acme
+  action: revoke_token
+  resource_type: access_token
+  resource_id: <%= SecureRandom.uuid %>
+  actor_type: user
+  actor_id: user_admin_001
+  actor_name: Admin User
+  ip_address: 192.168.1.100
+  metadata: '<%= { "token_name" => "Revoked Token" }.to_json %>'
+  success: true
+  created_at: <%= 5.days.ago %>
+
+acme_log_export_secrets:
+  project: acme
+  action: export_secrets
+  resource_type: project
+  resource_id: <%= SecureRandom.uuid %>
+  actor_type: token
+  actor_id: <%= SecureRandom.uuid %>
+  actor_name: CI/CD Token
+  environment: staging
+  ip_address: 10.0.0.100
+  metadata: '<%= { "format" => "dotenv", "count" => 5 }.to_json %>'
+  success: true
+  created_at: <%= 2.days.ago %>
+
+# Startup Inc audit logs
+startup_log_create_secret:
+  project: startup
+  action: create_secret
+  resource_type: secret
+  resource_id: <%= SecureRandom.uuid %>
+  resource_path: config/JWT_SECRET
+  actor_type: user
+  actor_id: user_startup_001
+  actor_name: Startup User
+  environment: development
+  ip_address: 172.16.0.10
+  metadata: '<%= { "version" => 1 }.to_json %>'
+  success: true
+  created_at: <%= 10.days.ago %>
+
+startup_log_read_secret:
+  project: startup
+  action: read_secret
+  resource_type: secret
+  resource_id: <%= SecureRandom.uuid %>
+  resource_path: OPENAI_API_KEY
+  actor_type: token
+  actor_id: <%= SecureRandom.uuid %>
+  actor_name: Main Token
+  environment: development
+  ip_address: 172.16.0.20
+  metadata: '<%= { "version" => 1 }.to_json %>'
+  success: true
+  created_at: <%= 2.hours.ago %>

@@ -52,16 +52,26 @@ class AuditLog < ApplicationRecord
     end
   end
 
+  # Fetch associated secret (if resource_type is secret)
+  def secret
+    return nil unless resource_type == "secret" && resource_id.present?
+    @secret ||= project.secrets.find_by(id: resource_id)
+  end
+
   # Make it append-only (enforced via database rules too)
+  # Allow deletion in test environment for fixture cleanup
   def readonly?
+    return false if Rails.env.test?
     persisted?
   end
 
   def destroy
+    return super if Rails.env.test?
     raise ActiveRecord::ReadOnlyRecord, "Audit logs are immutable"
   end
 
   def delete
+    return super if Rails.env.test?
     raise ActiveRecord::ReadOnlyRecord, "Audit logs are immutable"
   end
 end

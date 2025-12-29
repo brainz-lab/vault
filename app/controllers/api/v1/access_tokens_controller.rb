@@ -21,13 +21,12 @@ module Api
       # POST /api/v1/access_tokens
       def create
         @token = current_project.access_tokens.build(token_params)
-        raw_token = @token.generate_token
-
         @token.save!
 
         log_access(action: "create_access_token", details: { name: @token.name })
 
-        render json: token_json(@token, raw_token: raw_token), status: :created
+        # plain_token is set by before_validation callback
+        render json: token_json(@token, raw_token: @token.plain_token), status: :created
       end
 
       # PUT/PATCH /api/v1/access_tokens/:id
@@ -68,20 +67,23 @@ module Api
       end
 
       def token_params
-        params.permit(:name, :description, :expires_at, scopes: [], environment_access: [])
+        params.permit(:name, :expires_at, permissions: [], environments: [], paths: [], allowed_ips: [])
       end
 
       def token_json(token, raw_token: nil)
         json = {
           id: token.id,
           name: token.name,
-          description: token.description,
           token_prefix: token.token_prefix,
-          scopes: token.scopes,
-          environment_access: token.environment_access,
+          permissions: token.permissions,
+          environments: token.environments,
+          paths: token.paths,
+          allowed_ips: token.allowed_ips,
           last_used_at: token.last_used_at,
+          use_count: token.use_count,
           expires_at: token.expires_at,
-          revoked: token.revoked?,
+          active: token.active,
+          revoked_at: token.revoked_at,
           created_at: token.created_at
         }
 

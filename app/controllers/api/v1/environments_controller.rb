@@ -63,7 +63,7 @@ module Api
       end
 
       def environment_params
-        params.permit(:name, :slug, :inherits_from, :position, :locked)
+        params.permit(:name, :slug, :parent_environment_id, :position, :locked, :protected, :color)
       end
 
       def environment_json(env)
@@ -71,8 +71,10 @@ module Api
           id: env.id,
           name: env.name,
           slug: env.slug,
-          inherits_from: env.inherits_from,
+          parent_environment_id: env.parent_environment_id,
+          protected: env.protected,
           locked: env.locked,
+          color: env.color,
           position: env.position,
           secrets_count: env.secret_versions.select(:secret_id).distinct.count,
           created_at: env.created_at

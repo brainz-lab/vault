@@ -1,10 +1,16 @@
 <% content_for :title, "New Project" %>
-<% content_for :navigation, true %>
 
-<div class="mx-auto max-w-2xl">
-  <div class="page-header">
-    <h1 class="page-title">New Project</h1>
-    <p class="page-subtitle">Create a new project to manage secrets</p>
+<div class="max-w-xl mx-auto">
+  <!-- Header -->
+  <div class="mb-8">
+    <%= link_to dashboard_projects_path, class: "inline-flex items-center gap-1.5 text-sm font-medium mb-4 transition-colors", style: "color: var(--color-ink-500);", onmouseover: "this.style.color='var(--color-ink-700)'" , onmouseout: "this.style.color='var(--color-ink-500)'" do %>
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+      </svg>
+      Back to Projects
+    <% end %>
+    <h1 class="section-header">Create a New Project</h1>
+    <p class="section-subheader">Set up a new project to securely manage your secrets</p>
   </div>
 
   <%= render "form", project: @project %>

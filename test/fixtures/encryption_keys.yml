@@ -1,0 +1,53 @@
+# Encryption keys for testing
+# Note: For fixture tests, we need properly formatted binary data
+# The encryption service tests will create their own fresh keys
+# These fixtures are for model association tests that don't need to decrypt
+
+acme_active_key:
+  project: acme
+  key_id: key_acme_active_001
+  encrypted_key: !!binary "dGVzdF9lbmNyeXB0aW9uX2tleV8zMmJ5dGVzISE="
+  encryption_iv: !!binary "cmFuZG9tX2l2XzEy"
+  key_type: aes-256-gcm
+  kms_provider: local
+  status: active
+  activated_at: <%= 30.days.ago %>
+  created_at: <%= 30.days.ago %>
+  updated_at: <%= 30.days.ago %>
+
+acme_retired_key:
+  project: acme
+  key_id: key_acme_retired_001
+  encrypted_key: !!binary "b2xkX2VuY3J5cHRpb25fa2V5XzMyYnl0ZXMhISEh"
+  encryption_iv: !!binary "cmFuZG9tX2l2XzEz"
+  key_type: aes-256-gcm
+  kms_provider: local
+  status: retired
+  activated_at: <%= 60.days.ago %>
+  retired_at: <%= 30.days.ago %>
+  created_at: <%= 60.days.ago %>
+  updated_at: <%= 30.days.ago %>
+
+startup_active_key:
+  project: startup
+  key_id: key_startup_active_001
+  encrypted_key: !!binary "c3RhcnR1cF9lbmNyeXB0aW9uX2tleV8zMmJ5dGU="
+  encryption_iv: !!binary "cmFuZG9tX2l2XzE0"
+  key_type: aes-256-gcm
+  kms_provider: local
+  status: active
+  activated_at: <%= 10.days.ago %>
+  created_at: <%= 10.days.ago %>
+  updated_at: <%= 10.days.ago %>
+
+sandbox_active_key:
+  project: sandbox
+  key_id: key_sandbox_active_001
+  encrypted_key: !!binary "c2FuZGJveF9lbmNyeXB0aW9uX2tleV8zMmJ5dGU="
+  encryption_iv: !!binary "cmFuZG9tX2l2XzE1"
+  key_type: aes-256-gcm
+  kms_provider: local
+  status: active
+  activated_at: <%= 5.days.ago %>
+  created_at: <%= 5.days.ago %>
+  updated_at: <%= 5.days.ago %>

@@ -6,8 +6,8 @@ module Api
       # GET /api/v1/provider_keys
       # List available providers (doesn't expose actual keys)
       def index
-        global_keys = ProviderKey.global_keys.active.select(:id, :name, :provider, :model_type, :priority, :global)
-        project_keys = ProviderKey.for_project(current_project).active.select(:id, :name, :provider, :model_type, :priority, :global)
+        global_keys = ProviderKey.global_keys.active.select(:id, :name, :provider, :model_type, :priority, :global, :active, :key_prefix, :last_used_at, :usage_count)
+        project_keys = ProviderKey.for_project(current_project).active.select(:id, :name, :provider, :model_type, :priority, :global, :active, :key_prefix, :last_used_at, :usage_count)
 
         render json: {
           global: global_keys.map { |k| key_summary(k) },

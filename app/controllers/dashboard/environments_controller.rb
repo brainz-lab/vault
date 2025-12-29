@@ -4,7 +4,16 @@ module Dashboard
     before_action :set_environment, only: [:show, :edit, :update, :destroy]
 
     def index
-      @environments = current_project.secret_environments.order(:position)
+      @environments = current_project.secret_environments
+        .left_joins(:secret_versions)
+        .select(
+          "secret_environments.*",
+          "COUNT(DISTINCT secret_versions.secret_id) AS distinct_secrets_count"
+        )
+        .group("secret_environments.id")
+        .includes(:parent_environment)
+        .order(:position)
+        .load  # Force evaluation in controller, not view
     end
 
     def show

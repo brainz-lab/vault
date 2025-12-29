@@ -1,9 +1,10 @@
 <% content_for :title, "Provider Keys" %>
 
+<div class="max-w-6xl">
 <div class="flex items-center justify-between mb-8">
   <div>
-    <h1 class="text-2xl font-semibold text-stone-900">Provider Keys</h1>
-    <p class="text-sm text-stone-500 mt-1">API keys for AI providers (OpenAI, Anthropic, etc.)</p>
+    <h1 class="section-header">Provider Keys</h1>
+    <p class="section-subheader">API keys for AI providers (OpenAI, Anthropic, etc.)</p>
   </div>
   <div class="flex items-center gap-3">
     <%= link_to new_dashboard_provider_key_path(global: true, project_id: current_project&.id),
@@ -204,4 +205,5 @@
     <li><strong>Resolution Order:</strong> Project keys take priority over global keys for the same provider.</li>
     <li><strong>API Access:</strong> Other services can fetch keys via <code class="bg-orange-100 px-1 rounded">GET /api/v1/provider_keys/resolve?provider=openai</code></li>
   </ul>
+</div>
 </div>

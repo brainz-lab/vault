@@ -1,0 +1,2 @@
+# Audit logs should be created dynamically in tests since they're append-only
+# No fixtures needed - the model tests create their own instances

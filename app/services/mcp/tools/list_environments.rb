@@ -17,7 +17,7 @@ module Mcp
               slug: env.slug,
               name: env.name,
               locked: env.locked,
-              inherits_from: env.inherits_from
+              inherits_from: env.parent_environment&.slug
             }
           end,
           current: environment.slug

@@ -1,104 +1,105 @@
 <% content_for :title, "Access Tokens" %>
 
-<div class="sm:flex sm:items-center sm:justify-between">
-  <div class="page-header">
-    <h1 class="page-title">Access Tokens</h1>
-    <p class="page-subtitle">API tokens for accessing secrets programmatically</p>
-  </div>
-  <div class="mt-4 sm:mt-0">
+<div class="max-w-6xl">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="section-header">Access Tokens</h1>
+      <p class="section-subheader">API tokens for accessing secrets programmatically</p>
+    </div>
     <%= link_to new_dashboard_project_access_token_path(@current_project), class: "btn-primary" do %>
-      <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
       </svg>
       New Token
     <% end %>
   </div>
-</div>
 
-<div class="mt-8 table-container">
-  <table class="min-w-full divide-y divide-stone-100">
-    <thead class="table-header">
-      <tr>
-        <th scope="col" class="table-header-cell">Name</th>
-        <th scope="col" class="table-header-cell">Scopes</th>
-        <th scope="col" class="table-header-cell">Last Used</th>
-        <th scope="col" class="table-header-cell">Status</th>
-        <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-stone-100 bg-white">
-      <% @tokens.each do |token| %>
-        <tr class="table-row <%= token.revoked? ? 'opacity-50' : '' %>">
-          <td class="whitespace-nowrap table-cell">
-            <div class="flex items-center">
-              <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100">
-                <svg class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 004.5 10.5a7.464 7.464 0 01-1.15 3.993m1.989 3.559A11.209 11.209 0 008.25 10.5a3.75 3.75 0 117.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 01-3.6 9.75m6.633-4.596a18.666 18.666 0 01-2.485 5.33" />
-                </svg>
-              </div>
-              <div class="ml-3">
-                <p class="text-sm font-medium text-stone-900"><%= token.name %></p>
-                <p class="text-xs text-stone-400 font-mono"><%= token.token_prefix %>...</p>
-              </div>
-            </div>
-          </td>
-          <td class="table-cell">
-            <div class="flex flex-wrap gap-1">
-              <% token.scopes.each do |scope| %>
-                <span class="badge-blue"><%= scope %></span>
-              <% end %>
-            </div>
-          </td>
-          <td class="whitespace-nowrap table-cell text-sm text-stone-500">
-            <%= token.last_used_at ? "#{time_ago_in_words(token.last_used_at)} ago" : "Never" %>
-          </td>
-          <td class="whitespace-nowrap table-cell">
-            <% if token.revoked? %>
-              <span class="badge-red">Revoked</span>
-            <% elsif token.expired? %>
-              <span class="badge-yellow">Expired</span>
-            <% else %>
-              <span class="badge-green">Active</span>
-            <% end %>
-          </td>
-          <td class="whitespace-nowrap table-cell text-right">
-            <% unless token.revoked? %>
-              <%= link_to edit_dashboard_project_access_token_path(@current_project, token), class: "link text-sm font-medium mr-4" do %>
-                Edit
-              <% end %>
-              <%= button_to dashboard_project_access_token_path(@current_project, token),
-                  method: :delete,
-                  data: { confirm: "Revoke this token? This cannot be undone." },
-                  class: "text-red-600 hover:text-red-500 text-sm font-medium transition-colors" do %>
-                Revoke
-              <% end %>
-            <% end %>
-          </td>
-        </tr>
-      <% end %>
-      <% if @tokens.empty? %>
-        <tr>
-          <td colspan="5" class="px-6 py-12">
-            <div class="text-center">
-              <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-orange-100">
-                <svg class="h-7 w-7 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 004.5 10.5a7.464 7.464 0 01-1.15 3.993m1.989 3.559A11.209 11.209 0 008.25 10.5a3.75 3.75 0 117.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 01-3.6 9.75m6.633-4.596a18.666 18.666 0 01-2.485 5.33" />
-                </svg>
-              </div>
-              <h3 class="mt-3 text-sm font-semibold text-stone-900">No tokens</h3>
-              <p class="mt-1 text-sm text-stone-500">Create a token to access secrets via API.</p>
-              <div class="mt-6">
-                <%= link_to new_dashboard_project_access_token_path(@current_project), class: "btn-primary" do %>
-                  <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                  </svg>
-                  New Token
+  <% if @tokens.any? %>
+    <div class="card overflow-hidden">
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Name</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Scopes</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Last Used</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Status</th>
+            <th class="px-6 py-3" style="background: var(--color-cream-50);"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y" style="border-color: var(--color-cream-100);">
+          <% @tokens.each do |token| %>
+            <tr class="transition-colors hover:bg-stone-50 <%= token.revoked? ? 'opacity-50' : '' %>">
+              <td class="whitespace-nowrap px-6 py-4">
+                <div class="flex items-center">
+                  <div class="flex h-9 w-9 items-center justify-center rounded-lg" style="background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);">
+                    <svg class="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 004.5 10.5a7.464 7.464 0 01-1.15 3.993m1.989 3.559A11.209 11.209 0 008.25 10.5a3.75 3.75 0 117.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 01-3.6 9.75m6.633-4.596a18.666 18.666 0 01-2.485 5.33" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm font-medium" style="color: var(--color-ink-900);"><%= token.name %></p>
+                    <p class="text-xs font-mono" style="color: var(--color-ink-400);"><%= token.token_prefix %>...</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex flex-wrap gap-1">
+                  <% token.permissions.each do |permission| %>
+                    <span class="badge badge-info"><%= permission %></span>
+                  <% end %>
+                </div>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm" style="color: var(--color-ink-500);">
+                <%= token.last_used_at ? "#{time_ago_in_words(token.last_used_at)} ago" : "Never" %>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4">
+                <% if token.revoked? %>
+                  <span class="badge badge-error">Revoked</span>
+                <% elsif token.expired? %>
+                  <span class="badge badge-warning">Expired</span>
+                <% else %>
+                  <span class="badge badge-success">Active</span>
                 <% end %>
-              </div>
-            </div>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-right">
+                <% unless token.revoked? %>
+                  <%= link_to edit_dashboard_project_access_token_path(@current_project, token), class: "text-sm font-medium transition-colors hover:text-orange-600", style: "color: var(--color-primary-500);" do %>
+                    Edit
+                  <% end %>
+                  <%= button_to dashboard_project_access_token_path(@current_project, token),
+                      method: :delete,
+                      data: { confirm: "Revoke this token? This cannot be undone." },
+                      class: "ml-4 text-sm font-medium text-red-600 hover:text-red-500 transition-colors" do %>
+                    Revoke
+                  <% end %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <!-- Empty State -->
+    <div class="card">
+      <div class="empty-state py-16">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style="background: linear-gradient(135deg, var(--color-vault-bg) 0%, var(--color-cream-200) 100%);">
+          <svg class="w-8 h-8" style="color: var(--color-vault);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 004.5 10.5a7.464 7.464 0 01-1.15 3.993m1.989 3.559A11.209 11.209 0 008.25 10.5a3.75 3.75 0 117.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 01-3.6 9.75m6.633-4.596a18.666 18.666 0 01-2.485 5.33" />
+          </svg>
+        </div>
+        <h3 class="empty-state-title">No tokens</h3>
+        <p class="empty-state-description">Create a token to access secrets via API.</p>
+        <div class="mt-8">
+          <%= link_to new_dashboard_project_access_token_path(@current_project), class: "btn-primary" do %>
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            New Token
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
 </div>

@@ -91,7 +91,11 @@ Rails.application.routes.draw do
       end
 
       resources :environments
-      resources :access_tokens
+      resources :access_tokens do
+        member do
+          post :regenerate
+        end
+      end
       resources :audit_logs, only: [:index, :show]
     end
 

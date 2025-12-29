@@ -61,11 +61,25 @@ gem "faraday", "~> 2.0"
 gem "rack-cors"
 
 # BrainzLab SDK - use local path in Docker, published gem otherwise
-if File.exist?("/brainzlab-sdk")
-  gem "brainzlab", path: "/brainzlab-sdk"
+sdk_path = ENV.fetch("BRAINZLAB_SDK_PATH", nil) || "/brainzlab-sdk"
+if File.exist?(sdk_path)
+  gem "brainzlab", path: sdk_path
+elsif File.exist?("../brainzlab-sdk")
+  gem "brainzlab", path: "../brainzlab-sdk"
 else
   gem "brainzlab", "~> 0.1.1"
 end
+
+# BrainzLab UI - Unified design system with Phlex components
+ui_path = ENV.fetch("BRAINZLAB_UI_PATH", nil) || "/brainzlab-ui"
+if File.exist?(ui_path)
+  gem "brainzlab-ui", path: ui_path
+elsif File.exist?("../brainzlab-ui")
+  gem "brainzlab-ui", path: "../brainzlab-ui"
+else
+  gem "brainzlab-ui", "~> 0.1.0"
+end
+gem "phlex-rails", "~> 2.0"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -90,4 +104,19 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+
+  # Test coverage reporting
+  gem "simplecov", require: false
+
+  # HTTP request mocking
+  gem "webmock"
+
+  # Time manipulation for testing
+  gem "timecop"
+
+  # Better test output
+  gem "minitest-reporters"
+
+  # Pin minitest to compatible version with Rails 8.1
+  gem "minitest", "~> 5.25"
 end

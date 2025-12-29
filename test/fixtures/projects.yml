@@ -1,0 +1,32 @@
+# Test projects for Vault
+#
+# Note: Rails generates UUIDs from fixture labels automatically
+# Projects auto-generate api_key and ingest_key on creation via callbacks
+# We set them explicitly here for predictable testing
+
+acme:
+  platform_project_id: <%= SecureRandom.uuid %>
+  name: Acme Corp
+  environment: live
+  api_key: vlt_api_acme123456789012345678901234
+  ingest_key: vlt_ingest_acme12345678901234567890
+  created_at: <%= 30.days.ago %>
+  updated_at: <%= 1.day.ago %>
+
+startup:
+  platform_project_id: <%= SecureRandom.uuid %>
+  name: Startup Inc
+  environment: live
+  api_key: vlt_api_startup23456789012345678901
+  ingest_key: vlt_ingest_startup234567890123456
+  created_at: <%= 10.days.ago %>
+  updated_at: <%= 1.hour.ago %>
+
+sandbox:
+  platform_project_id: <%= SecureRandom.uuid %>
+  name: Sandbox Project
+  environment: sandbox
+  api_key: vlt_api_sandbox3456789012345678901
+  ingest_key: vlt_ingest_sandbox34567890123456
+  created_at: <%= 5.days.ago %>
+  updated_at: <%= 5.days.ago %>

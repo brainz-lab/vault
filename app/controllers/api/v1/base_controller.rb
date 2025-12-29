@@ -49,21 +49,36 @@ module Api
       end
 
       def require_permission!(permission)
+        # When using project API key auth (no token), grant all permissions
+        return if current_token.nil?
+
         unless current_token.has_permission?(permission)
           render json: { error: "Forbidden: #{permission} permission required" }, status: :forbidden
         end
       end
 
       def log_access(action:, secret: nil, details: {})
+        # Determine actor info based on auth method
+        if current_token
+          actor_type = "token"
+          actor_id = current_token.id.to_s
+          actor_name = current_token.name
+        else
+          # Project API key auth
+          actor_type = "api_key"
+          actor_id = current_project.id.to_s
+          actor_name = "Project API Key"
+        end
+
         AuditLog.log_access(
           nil, nil,
           project: current_project,
           secret: secret,
           action: action,
           environment: current_environment&.slug,
-          actor_type: "token",
-          actor_id: current_token.id.to_s,
-          actor_name: current_token.name,
+          actor_type: actor_type,
+          actor_id: actor_id,
+          actor_name: actor_name,
           ip_address: request.remote_ip,
           user_agent: request.user_agent,
           details: details

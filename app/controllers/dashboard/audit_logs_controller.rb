@@ -10,7 +10,7 @@ module Dashboard
       end
 
       if params[:secret_id].present?
-        @logs = @logs.where(secret_id: params[:secret_id])
+        @logs = @logs.where(resource_type: "secret", resource_id: params[:secret_id])
       end
 
       if params[:from].present?
@@ -51,7 +51,7 @@ module Dashboard
             log.secret&.key,
             log.actor_name,
             log.ip_address,
-            log.details.to_json
+            log.metadata.to_json
           ]
         end
       end

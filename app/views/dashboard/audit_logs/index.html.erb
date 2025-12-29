@@ -1,142 +1,145 @@
 <% content_for :title, "Audit Log" %>
 
-<div class="sm:flex sm:items-center sm:justify-between">
-  <div class="page-header">
-    <h1 class="page-title">Audit Log</h1>
-    <p class="page-subtitle">Track all secret access and changes</p>
-  </div>
-  <div class="mt-4 sm:mt-0">
+<div class="max-w-6xl">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="section-header">Audit Log</h1>
+      <p class="section-subheader">Track all secret access and changes</p>
+    </div>
     <%= link_to dashboard_project_audit_logs_path(@current_project, format: :csv), class: "btn-secondary" do %>
-      <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
       </svg>
       Export CSV
     <% end %>
   </div>
-</div>
 
-<!-- Filters -->
-<div class="mt-6 card p-5">
-  <%= form_with url: dashboard_project_audit_logs_path(@current_project), method: :get, class: "flex flex-wrap gap-4 items-end" do |f| %>
-    <div class="flex-1 min-w-[150px]">
-      <label class="form-label">Action</label>
-      <%= f.select :action_filter, options_for_select([
-          ["All Actions", ""],
-          ["Read Secret", "read_secret"],
-          ["Create Secret", "create_secret"],
-          ["Update Secret", "update_secret"],
-          ["Archive Secret", "archive_secret"],
-          ["Rollback Secret", "rollback_secret"],
-          ["Export Secrets", "export_secrets"],
-          ["Import Secrets", "import_secrets"]
-        ], params[:action_filter]),
-        {}, class: "form-input" %>
+  <!-- Filters -->
+  <div class="card p-5 mb-6">
+    <%= form_with url: dashboard_project_audit_logs_path(@current_project), method: :get, class: "flex flex-wrap gap-4 items-end" do |f| %>
+      <div class="flex-1 min-w-[150px]">
+        <label class="form-label">Action</label>
+        <%= f.select :action_filter, options_for_select([
+            ["All Actions", ""],
+            ["Read Secret", "read_secret"],
+            ["Create Secret", "create_secret"],
+            ["Update Secret", "update_secret"],
+            ["Archive Secret", "archive_secret"],
+            ["Rollback Secret", "rollback_secret"],
+            ["Export Secrets", "export_secrets"],
+            ["Import Secrets", "import_secrets"]
+          ], params[:action_filter]),
+          {}, class: "input" %>
+      </div>
+      <div class="flex-1 min-w-[150px]">
+        <label class="form-label">From</label>
+        <%= f.date_field :from, value: params[:from], placeholder: "From date", class: "input" %>
+      </div>
+      <div class="flex-1 min-w-[150px]">
+        <label class="form-label">To</label>
+        <%= f.date_field :to, value: params[:to], placeholder: "To date", class: "input" %>
+      </div>
+      <div class="flex gap-2">
+        <%= f.submit "Filter", class: "btn-primary cursor-pointer" %>
+        <%= link_to "Clear", dashboard_project_audit_logs_path(@current_project), class: "btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @logs.any? %>
+    <div class="card overflow-hidden">
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Timestamp</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Action</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Secret</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Actor</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">IP Address</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y" style="border-color: var(--color-cream-100);">
+          <% @logs.each do |log| %>
+            <tr class="transition-colors hover:bg-stone-50">
+              <td class="whitespace-nowrap px-6 py-4 text-sm" style="color: var(--color-ink-500);">
+                <%= log.created_at.strftime("%b %d, %H:%M:%S") %>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4">
+                <span class="<%= action_badge_class(log.action) %>">
+                  <%= log.action.humanize %>
+                </span>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm" style="color: var(--color-ink-900);">
+                <% if log.secret %>
+                  <%= link_to dashboard_project_secret_path(@current_project, log.secret), class: "font-medium transition-colors hover:text-orange-600", style: "color: var(--color-primary-500);" do %>
+                    <%= log.secret.key %>
+                  <% end %>
+                <% else %>
+                  <span style="color: var(--color-ink-400);">-</span>
+                <% end %>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm" style="color: var(--color-ink-500);">
+                <div class="flex items-center">
+                  <div class="flex h-7 w-7 items-center justify-center rounded-full mr-2" style="background: <%= log.actor_type == 'user' ? 'linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%)' : 'linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%)' %>;">
+                    <svg class="h-3.5 w-3.5 <%= log.actor_type == 'user' ? 'text-sky-600' : 'text-violet-600' %>" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <% if log.actor_type == "user" %>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                      <% else %>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+                      <% end %>
+                    </svg>
+                  </div>
+                  <%= log.actor_name %>
+                </div>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm font-mono" style="color: var(--color-ink-400);">
+                <%= log.ip_address || "-" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
     </div>
-    <div class="flex-1 min-w-[150px]">
-      <label class="form-label">From</label>
-      <%= f.date_field :from, value: params[:from], placeholder: "From date", class: "form-input" %>
-    </div>
-    <div class="flex-1 min-w-[150px]">
-      <label class="form-label">To</label>
-      <%= f.date_field :to, value: params[:to], placeholder: "To date", class: "form-input" %>
-    </div>
-    <div class="flex gap-2">
-      <%= f.submit "Filter", class: "btn-primary cursor-pointer" %>
-      <%= link_to "Clear", dashboard_project_audit_logs_path(@current_project), class: "btn-secondary" %>
+
+    <%# Pagination %>
+    <% if @logs.respond_to?(:total_pages) && @logs.total_pages > 1 %>
+      <div class="mt-6 flex items-center justify-between">
+        <div class="text-sm" style="color: var(--color-ink-500);">
+          Showing <%= @logs.offset_value + 1 %> to <%= [@logs.offset_value + @logs.limit_value, @logs.total_count].min %> of <%= @logs.total_count %> entries
+        </div>
+        <nav class="flex gap-2">
+          <% if @logs.current_page > 1 %>
+            <%= link_to dashboard_project_audit_logs_path(@current_project, page: @logs.current_page - 1), class: "btn-secondary" do %>
+              <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+              Previous
+            <% end %>
+          <% end %>
+          <% if @logs.current_page < @logs.total_pages %>
+            <%= link_to dashboard_project_audit_logs_path(@current_project, page: @logs.current_page + 1), class: "btn-secondary" do %>
+              Next
+              <svg class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            <% end %>
+          <% end %>
+        </nav>
+      </div>
+    <% end %>
+  <% else %>
+    <!-- Empty State -->
+    <div class="card">
+      <div class="empty-state py-16">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style="background: linear-gradient(135deg, var(--color-cream-100) 0%, var(--color-cream-200) 100%);">
+          <svg class="w-8 h-8" style="color: var(--color-ink-400);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+          </svg>
+        </div>
+        <h3 class="empty-state-title">No audit logs</h3>
+        <p class="empty-state-description">Activity will appear here once secrets are accessed.</p>
+      </div>
     </div>
   <% end %>
 </div>
-
-<div class="mt-6 table-container">
-  <table class="min-w-full divide-y divide-stone-100">
-    <thead class="table-header">
-      <tr>
-        <th scope="col" class="table-header-cell">Timestamp</th>
-        <th scope="col" class="table-header-cell">Action</th>
-        <th scope="col" class="table-header-cell">Secret</th>
-        <th scope="col" class="table-header-cell">Actor</th>
-        <th scope="col" class="table-header-cell">IP Address</th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-stone-100 bg-white">
-      <% @logs.each do |log| %>
-        <tr class="table-row">
-          <td class="whitespace-nowrap table-cell text-sm text-stone-500">
-            <%= log.created_at.strftime("%b %d, %H:%M:%S") %>
-          </td>
-          <td class="whitespace-nowrap table-cell">
-            <span class="<%= action_badge_class(log.action) %>">
-              <%= log.action.humanize %>
-            </span>
-          </td>
-          <td class="whitespace-nowrap table-cell text-sm text-stone-900">
-            <% if log.secret %>
-              <%= link_to log.secret.key, dashboard_project_secret_path(@current_project, log.secret), class: "link font-medium" %>
-            <% else %>
-              <span class="text-stone-400">-</span>
-            <% end %>
-          </td>
-          <td class="whitespace-nowrap table-cell text-sm text-stone-500">
-            <div class="flex items-center">
-              <div class="flex h-7 w-7 items-center justify-center rounded-full <%= log.actor_type == 'user' ? 'bg-sky-100' : 'bg-violet-100' %> mr-2">
-                <svg class="h-4 w-4 <%= log.actor_type == 'user' ? 'text-sky-600' : 'text-violet-600' %>" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <% if log.actor_type == "user" %>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                  <% else %>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
-                  <% end %>
-                </svg>
-              </div>
-              <%= log.actor_name %>
-            </div>
-          </td>
-          <td class="whitespace-nowrap table-cell text-sm text-stone-400 font-mono">
-            <%= log.ip_address || "-" %>
-          </td>
-        </tr>
-      <% end %>
-      <% if @logs.empty? %>
-        <tr>
-          <td colspan="5" class="px-6 py-12">
-            <div class="text-center">
-              <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-stone-100">
-                <svg class="h-7 w-7 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
-                </svg>
-              </div>
-              <h3 class="mt-3 text-sm font-semibold text-stone-900">No audit logs</h3>
-              <p class="mt-1 text-sm text-stone-500">Activity will appear here once secrets are accessed.</p>
-            </div>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-</div>
-
-<%# Pagination %>
-<% if @logs.respond_to?(:total_pages) && @logs.total_pages > 1 %>
-  <div class="mt-6 flex items-center justify-between">
-    <div class="text-sm text-stone-500">
-      Showing <%= @logs.offset_value + 1 %> to <%= [@logs.offset_value + @logs.limit_value, @logs.total_count].min %> of <%= @logs.total_count %> entries
-    </div>
-    <nav class="flex gap-2">
-      <% if @logs.current_page > 1 %>
-        <%= link_to dashboard_project_audit_logs_path(@current_project, page: @logs.current_page - 1), class: "btn-secondary" do %>
-          <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-          </svg>
-          Previous
-        <% end %>
-      <% end %>
-      <% if @logs.current_page < @logs.total_pages %>
-        <%= link_to dashboard_project_audit_logs_path(@current_project, page: @logs.current_page + 1), class: "btn-secondary" do %>
-          Next
-          <svg class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-          </svg>
-        <% end %>
-      <% end %>
-    </nav>
-  </div>
-<% end %>

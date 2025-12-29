@@ -26,7 +26,12 @@ class Secret < ApplicationRecord
     if environment
       current_version(environment)&.version
     else
-      versions.where(current: true).maximum(:version)
+      # Use preloaded versions if available (avoids N+1), otherwise query
+      if versions.loaded?
+        versions.select(&:current).map(&:version).max
+      else
+        versions.where(current: true).maximum(:version)
+      end
     end
   end
 

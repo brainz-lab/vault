@@ -115,7 +115,7 @@ module Dashboard
         actor_name: current_user[:name] || current_user[:email],
         ip_address: request.remote_ip,
         user_agent: request.user_agent,
-        details: { provider: resource.provider, global: resource.global? }
+        metadata: { provider: resource.provider, global: resource.global? }
       )
     end
   end

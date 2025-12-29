@@ -1,0 +1,108 @@
+# Access tokens for API authentication
+# Note: token_digest is SHA256 of the raw token, token_prefix is first 8 chars
+
+# Acme Corp tokens
+acme_admin_token:
+  project: acme
+  name: Admin Token
+  token_prefix: vlt_acme
+  token_digest: <%= Digest::SHA256.hexdigest("vlt_acme_admin_token_full_access_12345") %>
+  permissions:
+    - read
+    - write
+    - delete
+    - admin
+  environments: []
+  paths: []
+  active: true
+  use_count: 150
+  last_used_at: <%= 1.hour.ago %>
+  created_at: <%= 30.days.ago %>
+  updated_at: <%= 1.hour.ago %>
+
+acme_readonly_token:
+  project: acme
+  name: Read-Only Token
+  token_prefix: vlt_acme
+  token_digest: <%= Digest::SHA256.hexdigest("vlt_acme_readonly_token_secrets_67890") %>
+  permissions:
+    - read
+  environments:
+    - development
+    - staging
+  paths: []
+  active: true
+  use_count: 500
+  last_used_at: <%= 30.minutes.ago %>
+  created_at: <%= 25.days.ago %>
+  updated_at: <%= 30.minutes.ago %>
+
+acme_ci_token:
+  project: acme
+  name: CI/CD Token
+  token_prefix: vlt_acme
+  token_digest: <%= Digest::SHA256.hexdigest("vlt_acme_cicd_token_pipeline_11111") %>
+  permissions:
+    - read
+    - write
+  environments:
+    - development
+    - staging
+  paths: []
+  active: true
+  use_count: 1000
+  last_used_at: <%= 5.minutes.ago %>
+  created_at: <%= 20.days.ago %>
+  updated_at: <%= 5.minutes.ago %>
+
+acme_revoked_token:
+  project: acme
+  name: Revoked Token
+  token_prefix: vlt_acme
+  token_digest: <%= Digest::SHA256.hexdigest("vlt_acme_revoked_token_old_22222") %>
+  permissions:
+    - read
+    - write
+  environments: []
+  paths: []
+  active: false
+  revoked_at: <%= 5.days.ago %>
+  revoked_by: admin_user
+  use_count: 50
+  last_used_at: <%= 6.days.ago %>
+  created_at: <%= 30.days.ago %>
+  updated_at: <%= 5.days.ago %>
+
+acme_expired_token:
+  project: acme
+  name: Expired Token
+  token_prefix: vlt_acme
+  token_digest: <%= Digest::SHA256.hexdigest("vlt_acme_expired_token_old_33333") %>
+  permissions:
+    - read
+  environments: []
+  paths: []
+  active: true
+  expires_at: <%= 1.day.ago %>
+  use_count: 25
+  last_used_at: <%= 2.days.ago %>
+  created_at: <%= 30.days.ago %>
+  updated_at: <%= 2.days.ago %>
+
+# Startup Inc tokens
+startup_main_token:
+  project: startup
+  name: Main Token
+  token_prefix: vlt_star
+  token_digest: <%= Digest::SHA256.hexdigest("vlt_startup_main_token_primary_44444") %>
+  permissions:
+    - read
+    - write
+    - admin
+  environments: []
+  paths: []
+  active: true
+  use_count: 75
+  last_used_at: <%= 2.hours.ago %>
+  created_at: <%= 10.days.ago %>
+  updated_at: <%= 2.hours.ago %>

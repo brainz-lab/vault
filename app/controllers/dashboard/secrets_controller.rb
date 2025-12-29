@@ -1,20 +1,25 @@
 module Dashboard
   class SecretsController < BaseController
     before_action :require_project!
+    before_action :load_environments, only: [:index]
     before_action :set_environment
     before_action :set_secret, only: [:show, :edit, :update, :destroy, :history, :rollback]
 
     def index
-      @secrets = current_project.secrets.active.order(:key)
+      # Build secrets query with filters
+      secrets_scope = current_project.secrets.active
 
       if params[:folder].present?
         folder = current_project.secret_folders.find_by(path: params[:folder])
-        @secrets = @secrets.in_folder(folder) if folder
+        secrets_scope = secrets_scope.in_folder(folder) if folder
       end
 
       if params[:search].present?
-        @secrets = @secrets.where("key ILIKE ?", "%#{params[:search]}%")
+        secrets_scope = secrets_scope.where("key ILIKE ?", "%#{params[:search]}%")
       end
+
+      # Eager load secrets with versions to avoid N+1 on current_version_number
+      @secrets = secrets_scope.includes(:versions).order(:key).load
 
       respond_to do |format|
         format.html
@@ -103,10 +108,20 @@ module Dashboard
 
     private
 
+    def load_environments
+      # Eager load all environments for dropdown (used by index action)
+      @environments = current_project.secret_environments.order(:position).load
+    end
+
     def set_environment
       slug = params[:environment] || session[:current_environment] || "development"
-      @environment = current_project.secret_environments.find_by(slug: slug) ||
-                     current_project.secret_environments.first
+      # Reuse @environments if already loaded (avoids duplicate query)
+      if @environments
+        @environment = @environments.find { |e| e.slug == slug } || @environments.first
+      else
+        @environment = current_project.secret_environments.find_by(slug: slug) ||
+                       current_project.secret_environments.first
+      end
       session[:current_environment] = @environment&.slug
     end
 

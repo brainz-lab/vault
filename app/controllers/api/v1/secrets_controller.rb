@@ -127,7 +127,7 @@ module Api
 
       # GET /api/v1/secrets/:key/versions
       def versions
-        versions = @secret.secret_versions
+        versions = @secret.versions
                           .order(version: :desc)
                           .limit(params[:limit] || 20)
 
@@ -142,10 +142,10 @@ module Api
           versions: versions.map do |v|
             {
               version: v.version,
-              environment: v.secret_environment.slug,
+              environment: v.secret_environment&.slug,
               created_at: v.created_at,
-              created_by: v.created_by_type == "user" ? v.created_by_name : "system",
-              note: v.note
+              created_by: v.created_by || "system",
+              note: v.change_note
             }
           end
         }
@@ -156,7 +156,7 @@ module Api
         require_permission!("write")
 
         version_number = params[:version].to_i
-        target_version = @secret.secret_versions.find_by!(
+        target_version = @secret.versions.find_by!(
           version: version_number,
           secret_environment: current_environment
         )
@@ -197,7 +197,7 @@ module Api
           key: secret.key,
           path: secret.path,
           description: secret.description,
-          has_value: secret.secret_versions.exists?,
+          has_value: secret.versions.exists?,
           version: secret.current_version_number,
           tags: secret.tags,
           updated_at: secret.updated_at

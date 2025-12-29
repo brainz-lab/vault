@@ -11,7 +11,7 @@ development:
 
 test:
   <<: *default
-  database: vault_test
+  url: <%= ENV.fetch("TEST_DATABASE_URL", "postgres://postgres:postgres@db:5432/vault_test") %>
 
 production:
   primary: &primary_production

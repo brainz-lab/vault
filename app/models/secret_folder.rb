@@ -14,6 +14,8 @@ class SecretFolder < ApplicationRecord
   scope :ordered, -> { order(:path) }
 
   def full_path
+    return nil if name.blank?
+
     if parent_folder
       "#{parent_folder.full_path}/#{name.parameterize}"
     else

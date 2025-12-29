@@ -1,0 +1,139 @@
+# Access policies for RBAC
+# Note: Conditions are JSON-encoded in the model
+
+# Acme Corp policies
+acme_admin_policy:
+  project: acme
+  name: Admin Full Access
+  description: Full access to all secrets
+  principal_type: user
+  principal_id: user_admin_001
+  permissions:
+    - read
+    - write
+    - delete
+    - admin
+  environments:
+    - "*"
+  paths:
+    - "*"
+  conditions: "{}"
+  enabled: true
+  created_at: <%= 30.days.ago %>
+  updated_at: <%= 30.days.ago %>
+
+acme_dev_readonly:
+  project: acme
+  name: Development Read Access
+  description: Read access to development secrets only
+  principal_type: team
+  principal_id: team_developers_001
+  permissions:
+    - read
+  environments:
+    - development
+  paths:
+    - "*"
+  conditions: "{}"
+  enabled: true
+  created_at: <%= 28.days.ago %>
+  updated_at: <%= 28.days.ago %>
+
+acme_database_restricted:
+  project: acme
+  name: Database Secrets Access
+  description: Access to database folder secrets only
+  principal_type: token
+  principal_id: token_db_access_001
+  permissions:
+    - read
+  environments:
+    - development
+    - staging
+  paths:
+    - "/database/*"
+  conditions:
+    allowed_ips:
+      - "10.0.0.0/8"
+      - "192.168.1.0/24"
+  enabled: true
+  created_at: <%= 25.days.ago %>
+  updated_at: <%= 25.days.ago %>
+
+acme_mfa_required:
+  project: acme
+  name: Production MFA Required
+  description: Production access requires MFA
+  principal_type: user
+  principal_id: "*"
+  permissions:
+    - read
+    - write
+  environments:
+    - production
+  paths:
+    - "*"
+  conditions:
+    require_mfa: true
+  enabled: true
+  created_at: <%= 20.days.ago %>
+  updated_at: <%= 20.days.ago %>
+
+acme_time_window:
+  project: acme
+  name: Business Hours Only
+  description: Access only during business hours
+  principal_type: team
+  principal_id: team_support_001
+  permissions:
+    - read
+  environments:
+    - staging
+  paths:
+    - "*"
+  conditions:
+    time_window:
+      start: "09:00"
+      end: "17:00"
+      timezone: "America/New_York"
+  enabled: true
+  created_at: <%= 15.days.ago %>
+  updated_at: <%= 15.days.ago %>
+
+acme_inactive_policy:
+  project: acme
+  name: Inactive Policy
+  description: Policy that is not active
+  principal_type: user
+  principal_id: user_temp_001
+  permissions:
+    - read
+  environments:
+    - development
+  paths:
+    - "*"
+  conditions: "{}"
+  enabled: false
+  created_at: <%= 30.days.ago %>
+  updated_at: <%= 10.days.ago %>
+
+# Startup Inc policies
+startup_full_access:
+  project: startup
+  name: Full Access
+  description: Full access to all secrets
+  principal_type: user
+  principal_id: user_startup_owner
+  permissions:
+    - read
+    - write
+    - delete
+    - admin
+  environments:
+    - "*"
+  paths:
+    - "*"
+  conditions: "{}"
+  enabled: true
+  created_at: <%= 10.days.ago %>
+  updated_at: <%= 10.days.ago %>
