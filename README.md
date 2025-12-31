@@ -22,6 +22,18 @@ bin/rails test
 bin/rubocop
 ```
 
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+Thanks to all our contributors! See [all-contributors](https://allcontributors.org) for how to add yourself.
+
+
 ## License
 
 This project is licensed under the [OSAaSy License](LICENSE) - see the LICENSE file for details.
