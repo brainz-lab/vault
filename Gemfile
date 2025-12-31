@@ -60,11 +60,12 @@ gem "faraday", "~> 2.0"
 # CORS support
 gem "rack-cors"
 
-# BrainzLab SDK - use local path in Docker, published gem otherwise
-sdk_path = ENV.fetch("BRAINZLAB_SDK_PATH", nil) || "/brainzlab-sdk"
-if File.exist?(sdk_path)
-  gem "brainzlab", path: sdk_path
-elsif File.exist?("../brainzlab-sdk")
+# BrainzLab SDK - use RubyGems in production/Docker, local path in development
+if ENV["BUNDLE_DEPLOYMENT"] == "1"
+  gem "brainzlab", "~> 0.1.1"
+elsif File.exist?("/brainzlab-sdk")
+  gem "brainzlab", path: "/brainzlab-sdk"
+elsif File.exist?(File.expand_path("../brainzlab-sdk", __dir__))
   gem "brainzlab", path: "../brainzlab-sdk"
 else
   gem "brainzlab", "~> 0.1.1"
