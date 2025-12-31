@@ -26,7 +26,7 @@ module Mcp
         secret = project.secrets.find_by(key: key)
         return error("Secret not found: #{key}") unless secret
 
-        versions = secret.secret_versions
+        versions = secret.versions
                          .where(secret_environment: environment)
                          .order(version: :desc)
                          .limit(limit)

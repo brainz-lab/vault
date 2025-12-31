@@ -33,15 +33,9 @@ class CheckSecretExpiryJobTest < ActiveSupport::TestCase
   end
 
   test "ignores recently rotated secrets" do
-    @secret.update!(rotation_interval_days: 30)
-
-    # Create a recent version
-    create_secret_version(
-      secret: @secret,
-      environment: @environment,
-      value: "new_value",
-      version: 1
-    )
+    # Use a secret that has recent versions (startup secrets are 8-10 days old)
+    secret = secrets(:startup_openai_key)
+    secret.update!(rotation_interval_days: 30)
 
     assert_nothing_raised do
       CheckSecretExpiryJob.perform_now

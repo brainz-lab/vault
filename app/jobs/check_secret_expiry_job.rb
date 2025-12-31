@@ -7,7 +7,7 @@ class CheckSecretExpiryJob < ApplicationJob
 
     # Check rotation schedules based on rotation_interval_days
     Secret.active.where.not(rotation_interval_days: nil).find_each do |secret|
-      last_rotation = secret.secret_versions.maximum(:created_at)
+      last_rotation = secret.versions.maximum(:created_at)
       next unless last_rotation
 
       days_since_rotation = (Date.current - last_rotation.to_date).to_i

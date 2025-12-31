@@ -55,6 +55,9 @@ class ExpireTokensJobTest < ActiveSupport::TestCase
   end
 
   test "creates audit log for expired tokens" do
+    # Clean up any existing expired tokens first
+    AccessToken.where("expires_at < ?", Time.current).update_all(revoked_at: Time.current)
+
     token = @project.access_tokens.create!(
       name: "Expired Token",
       permissions: %w[read],

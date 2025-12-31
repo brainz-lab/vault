@@ -23,7 +23,7 @@ class CleanupVersionsJob < ApplicationJob
 
     project.secrets.find_each do |secret|
       # Group by environment and keep recent versions
-      secret.secret_versions
+      secret.versions
             .group_by(&:secret_environment_id)
             .each do |_env_id, versions|
               # Skip if not enough versions

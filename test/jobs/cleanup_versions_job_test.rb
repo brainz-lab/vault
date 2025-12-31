@@ -28,16 +28,7 @@ class CleanupVersionsJobTest < ActiveSupport::TestCase
   end
 
   test "keeps recent versions" do
-    # Create versions
-    5.times do |i|
-      create_secret_version(
-        secret: @secret,
-        environment: @environment,
-        value: "value_#{i}",
-        version: i + 1
-      )
-    end
-
+    # Fixtures already have versions for this secret
     initial_count = @secret.versions.count
 
     CleanupVersionsJob.perform_now(
@@ -46,7 +37,7 @@ class CleanupVersionsJobTest < ActiveSupport::TestCase
       older_than_days: 0
     )
 
-    # Should keep all since we keep 10 and only have 5
+    # Should keep all since we keep 10 and have fewer
     assert_equal initial_count, @secret.versions.count
   end
 

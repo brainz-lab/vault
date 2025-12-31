@@ -1,0 +1,18 @@
+# Lefthook configuration for git hooks
+# https://github.com/evilmartians/lefthook
+
+pre-commit:
+  parallel: true
+  commands:
+    rubocop:
+      glob: "*.rb"
+      run: bin/rubocop --force-exclusion {staged_files}
+      stage_fixed: true
+
+pre-push:
+  parallel: true
+  commands:
+    brakeman:
+      run: bin/brakeman --quiet --no-pager
+    bundler-audit:
+      run: bundle exec bundler-audit check --update

@@ -5,7 +5,10 @@ class ExpireTokensJob < ApplicationJob
   def perform
     expired_count = 0
 
-    AccessToken.active.where("expires_at < ?", Time.current).find_each do |token|
+    # Find tokens that are still active but have expired
+    # Note: Can't use `active` scope as it filters out expired tokens
+    AccessToken.where(active: true, revoked_at: nil)
+               .where("expires_at < ?", Time.current).find_each do |token|
       token.revoke!
       expired_count += 1
 
