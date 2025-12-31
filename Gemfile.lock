@@ -1,7 +1,7 @@
 PATH
   remote: ../brainzlab-sdk
   specs:
-    brainzlab (0.1.1)
+    brainzlab (0.1.2)
       concurrent-ruby (~> 1.0)
       logger (~> 1.5)
 
