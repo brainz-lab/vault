@@ -8,6 +8,8 @@ module Encryption
       Rails.application.config.vault_master_key = "test-master-key-for-testing"
       # Delete fixture keys which have invalid encrypted data
       EncryptionKey.delete_all
+      # Create a default project for tests that don't specify one
+      @default_project = create_project(name: "Encryptor Test Project")
     end
 
     test "ALGORITHM is aes-256-gcm" do
@@ -19,7 +21,7 @@ module Encryption
     end
 
     test "encrypt returns EncryptedData struct" do
-      result = Encryptor.encrypt("test data")
+      result = Encryptor.encrypt("test data", project_id: @default_project.id)
 
       assert result.is_a?(Encryptor::EncryptedData)
       assert result.ciphertext.present?
@@ -29,12 +31,13 @@ module Encryption
 
     test "encrypt and decrypt roundtrip" do
       plaintext = "secret data to encrypt"
-      encrypted = Encryptor.encrypt(plaintext)
+      encrypted = Encryptor.encrypt(plaintext, project_id: @default_project.id)
 
       decrypted = Encryptor.decrypt(
         encrypted.ciphertext,
         iv: encrypted.iv,
-        key_id: encrypted.key_id
+        key_id: encrypted.key_id,
+        project_id: @default_project.id
       )
 
       assert_equal plaintext, decrypted
@@ -59,26 +62,28 @@ module Encryption
     end
 
     test "decrypt with invalid key_id raises error" do
-      encrypted = Encryptor.encrypt("test")
+      encrypted = Encryptor.encrypt("test", project_id: @default_project.id)
 
       assert_raises(ActiveRecord::RecordNotFound) do
         Encryptor.decrypt(
           encrypted.ciphertext,
           iv: encrypted.iv,
-          key_id: "non-existent-key-id"
+          key_id: "non-existent-key-id",
+          project_id: @default_project.id
         )
       end
     end
 
     test "decrypt with wrong iv raises DecryptionError" do
-      encrypted = Encryptor.encrypt("test")
+      encrypted = Encryptor.encrypt("test", project_id: @default_project.id)
       wrong_iv = OpenSSL::Random.random_bytes(12)
 
       assert_raises(Encryptor::DecryptionError) do
         Encryptor.decrypt(
           encrypted.ciphertext,
           iv: wrong_iv,
-          key_id: encrypted.key_id
+          key_id: encrypted.key_id,
+          project_id: @default_project.id
         )
       end
     end
@@ -96,25 +101,28 @@ module Encryption
 
     test "handles unicode text encryption" do
       plaintext = "Hello 世界 🔐 Ключ"
-      encrypted = Encryptor.encrypt(plaintext)
+      encrypted = Encryptor.encrypt(plaintext, project_id: @default_project.id)
 
       decrypted = Encryptor.decrypt(
         encrypted.ciphertext,
         iv: encrypted.iv,
-        key_id: encrypted.key_id
+        key_id: encrypted.key_id,
+        project_id: @default_project.id
       )
 
-      assert_equal plaintext, decrypted
+      # Force UTF-8 encoding for comparison since decrypt returns binary
+      assert_equal plaintext, decrypted.force_encoding("UTF-8")
     end
 
     test "handles large data encryption" do
       plaintext = "A" * 100_000  # 100KB of data
-      encrypted = Encryptor.encrypt(plaintext)
+      encrypted = Encryptor.encrypt(plaintext, project_id: @default_project.id)
 
       decrypted = Encryptor.decrypt(
         encrypted.ciphertext,
         iv: encrypted.iv,
-        key_id: encrypted.key_id
+        key_id: encrypted.key_id,
+        project_id: @default_project.id
       )
 
       assert_equal plaintext, decrypted

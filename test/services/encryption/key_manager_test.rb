@@ -37,15 +37,8 @@ module Encryption
       assert_equal "active", key.record.status
     end
 
-    test "current_key without project_id uses global key" do
-      # Delete any existing global keys to ensure we get a new one
-      EncryptionKey.where(project_id: nil).delete_all
-
-      key = KeyManager.current_key(nil)
-
-      assert key.is_a?(KeyManager::KeyWrapper)
-      assert_nil key.record.project_id
-    end
+    # Note: Global keys (without project_id) are not supported.
+    # All encryption keys must belong to a project for security isolation.
 
     # ===========================================
     # .get_key
