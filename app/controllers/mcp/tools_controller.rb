@@ -12,7 +12,7 @@ module Mcp
     # POST /mcp/tools/:name
     def call
       tool_name = params[:name]
-      tool_params = params.except(:controller, :action, :name).permit!.to_h
+      tool_params = parse_json_body
 
       result = mcp_server.call(tool_name, tool_params.symbolize_keys)
 
@@ -23,8 +23,9 @@ module Mcp
 
     # POST /mcp/rpc
     def rpc
-      method = params[:method]
-      rpc_params = params[:params]&.permit!&.to_h || {}
+      body = parse_json_body
+      method = body[:method] || body["method"]
+      rpc_params = body[:params] || body["params"] || {}
 
       result = mcp_server.rpc(method, rpc_params.symbolize_keys)
 
@@ -80,6 +81,14 @@ module Mcp
     def resolve_environment
       slug = params[:environment] || request.headers["X-Vault-Environment"] || "development"
       @current_project.secret_environments.find_by(slug: slug)
+    end
+
+    def parse_json_body
+      return {} if request.raw_post.blank?
+
+      JSON.parse(request.raw_post, symbolize_names: true)
+    rescue JSON::ParserError
+      {}
     end
   end
 end
