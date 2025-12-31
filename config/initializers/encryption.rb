@@ -5,10 +5,10 @@ Rails.application.configure do
   # The master key is used to encrypt per-project data encryption keys
   # In production, this should be a strong 32+ character key
   config.vault_master_key = ENV.fetch("VAULT_MASTER_KEY") do
-    if Rails.env.production?
+    if Rails.env.production? && !ENV["SECRET_KEY_BASE_DUMMY"]
       raise "VAULT_MASTER_KEY environment variable must be set in production"
     else
-      # Development/test default (NOT SECURE - for development only)
+      # Development/test/asset-precompilation default (NOT SECURE - for development only)
       "bl_vault_master_dev_key_32chars!"
     end
   end
