@@ -1,7 +1,7 @@
 module Dashboard
   class AccessTokensController < BaseController
     before_action :require_project!
-    before_action :set_token, only: [:show, :edit, :update, :destroy, :regenerate]
+    before_action :set_token, only: [ :show, :edit, :update, :destroy, :regenerate ]
 
     def index
       @tokens = current_project.access_tokens.order(created_at: :desc)

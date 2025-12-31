@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       # Secrets - flat routing with key param
-      resources :secrets, param: :key, only: [:index, :show, :create, :update, :destroy] do
+      resources :secrets, param: :key, only: [ :index, :show, :create, :update, :destroy ] do
         member do
           get :versions
           post :rollback
@@ -11,7 +11,7 @@ Rails.application.routes.draw do
       end
 
       # Environments
-      resources :environments, param: :slug, only: [:index, :show, :create, :update, :destroy]
+      resources :environments, param: :slug, only: [ :index, :show, :create, :update, :destroy ]
 
       # Sync endpoints
       get "sync/export", to: "sync#export"
@@ -31,14 +31,14 @@ Rails.application.routes.draw do
       resources :access_policies
 
       # Audit logs (read-only)
-      resources :audit_logs, only: [:index] do
+      resources :audit_logs, only: [ :index ] do
         collection do
           get "secret/:key", to: "audit_logs#for_secret"
         end
       end
 
       # Provider keys (API keys for LLMs, etc.)
-      resources :provider_keys, only: [:index, :create, :destroy] do
+      resources :provider_keys, only: [ :index, :create, :destroy ] do
         collection do
           get :resolve
           get :bulk
@@ -96,7 +96,7 @@ Rails.application.routes.draw do
           post :regenerate
         end
       end
-      resources :audit_logs, only: [:index, :show]
+      resources :audit_logs, only: [ :index, :show ]
     end
 
     root to: "projects#index"
@@ -107,7 +107,7 @@ Rails.application.routes.draw do
 
   # Health check
   get "health", to: "health#show"
-  get "up", to: ->(_) { [200, {}, ["ok"]] }
+  get "up", to: ->(_) { [ 200, {}, [ "ok" ] ] }
 
   # WebSocket
   mount ActionCable.server => "/cable"

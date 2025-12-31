@@ -43,7 +43,7 @@ module Dashboard
       require "csv"
 
       CSV.generate(headers: true) do |csv|
-        csv << ["Timestamp", "Action", "Secret", "Actor", "IP Address", "Details"]
+        csv << [ "Timestamp", "Action", "Secret", "Actor", "IP Address", "Details" ]
         logs.each do |log|
           csv << [
             log.created_at.iso8601,

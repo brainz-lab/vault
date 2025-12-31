@@ -1,9 +1,9 @@
 module Api
   module V1
     class SecretsController < BaseController
-      before_action :require_permission!, only: [:create, :update, :destroy]
-      before_action :require_environment!, only: [:show, :create, :update]
-      before_action :set_secret, only: [:show, :update, :destroy, :versions, :rollback]
+      before_action :require_permission!, only: [ :create, :update, :destroy ]
+      before_action :require_environment!, only: [ :show, :create, :update ]
+      before_action :set_secret, only: [ :show, :update, :destroy, :versions, :rollback ]
 
       # GET /api/v1/secrets
       def index

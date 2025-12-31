@@ -168,7 +168,7 @@ class AccessPolicyTest < ActiveSupport::TestCase
 
   test "check_conditions handles invalid IP" do
     policy = AccessPolicy.new(
-      conditions: { "allowed_ips" => ["10.0.0.0/8"] }
+      conditions: { "allowed_ips" => [ "10.0.0.0/8" ] }
     )
 
     # Invalid IP should return false

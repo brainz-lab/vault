@@ -20,10 +20,10 @@ module DashboardHelper
   # Navigation helpers for sidebar
   def nav_active?(path_pattern)
     case path_pattern
-    when '/overview'
+    when "/overview"
       # Match /dashboard/projects/{uuid} exactly (not any sub-routes)
       request.path.match?(%r{^/dashboard/projects/[^/]+$})
-    when '/project_settings'
+    when "/project_settings"
       # Match /dashboard/projects/{uuid}/edit exactly (not /secrets/{id}/edit etc.)
       request.path.match?(%r{/dashboard/projects/[^/]+/edit$})
     else

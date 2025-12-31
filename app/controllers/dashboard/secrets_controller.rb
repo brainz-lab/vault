@@ -1,9 +1,9 @@
 module Dashboard
   class SecretsController < BaseController
     before_action :require_project!
-    before_action :load_environments, only: [:index]
+    before_action :load_environments, only: [ :index ]
     before_action :set_environment
-    before_action :set_secret, only: [:show, :edit, :update, :destroy, :history, :rollback]
+    before_action :set_secret, only: [ :show, :edit, :update, :destroy, :history, :rollback ]
 
     def index
       # Build secrets query with filters

@@ -1,7 +1,7 @@
 module Api
   module V1
     class FoldersController < BaseController
-      before_action :set_folder, only: [:show, :update, :destroy]
+      before_action :set_folder, only: [ :show, :update, :destroy ]
 
       # GET /api/v1/folders
       def index

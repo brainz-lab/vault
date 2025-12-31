@@ -14,7 +14,7 @@ module Mcp
             description: "Optional environment slug (defaults to development)"
           }
         },
-        required: ["key"]
+        required: [ "key" ]
       }.freeze
 
       def call(params)

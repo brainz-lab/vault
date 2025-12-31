@@ -36,10 +36,10 @@ class CreateAuditLogs < ActiveRecord::Migration[8.0]
 
       t.datetime :created_at, null: false
 
-      t.index [:project_id, :created_at]
-      t.index [:project_id, :resource_type, :resource_id], name: "idx_audit_logs_resource"
-      t.index [:project_id, :actor_type, :actor_id], name: "idx_audit_logs_actor"
-      t.index [:project_id, :action]
+      t.index [ :project_id, :created_at ]
+      t.index [ :project_id, :resource_type, :resource_id ], name: "idx_audit_logs_resource"
+      t.index [ :project_id, :actor_type, :actor_id ], name: "idx_audit_logs_actor"
+      t.index [ :project_id, :action ]
     end
 
     # Make it append-only (no updates/deletes)

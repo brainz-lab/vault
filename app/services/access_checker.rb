@@ -27,12 +27,12 @@ class AccessChecker
 
   def find_policies(principal)
     type, id = case principal
-               when AccessToken
-                 ["token", principal.id.to_s]
-               else
+    when AccessToken
+                 [ "token", principal.id.to_s ]
+    else
                  # For user/team, we'd need Platform integration
                  return []
-               end
+    end
 
     AccessPolicy.where(project: @project, enabled: true)
                 .where(principal_type: type, principal_id: id)

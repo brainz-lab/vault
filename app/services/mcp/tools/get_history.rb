@@ -14,7 +14,7 @@ module Mcp
             description: "Maximum number of versions to return (default: 10)"
           }
         },
-        required: ["key"]
+        required: [ "key" ]
       }.freeze
 
       def call(params)

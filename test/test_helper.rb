@@ -101,7 +101,7 @@ module ActiveSupport
         environments: []
       }.merge(attrs))
       token.save!
-      [token, token.plain_token]
+      [ token, token.plain_token ]
     end
 
     # Helper to create an encryption key for testing

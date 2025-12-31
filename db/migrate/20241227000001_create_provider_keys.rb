@@ -24,7 +24,7 @@ class CreateProviderKeys < ActiveRecord::Migration[8.0]
     add_index :provider_keys, :provider
     add_index :provider_keys, :global
     add_index :provider_keys, :active
-    add_index :provider_keys, [:project_id, :provider, :active]
-    add_index :provider_keys, [:global, :provider, :active]
+    add_index :provider_keys, [ :project_id, :provider, :active ]
+    add_index :provider_keys, [ :global, :provider, :active ]
   end
 end

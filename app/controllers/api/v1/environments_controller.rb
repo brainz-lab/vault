@@ -1,7 +1,7 @@
 module Api
   module V1
     class EnvironmentsController < BaseController
-      before_action :set_environment, only: [:show, :update, :destroy]
+      before_action :set_environment, only: [ :show, :update, :destroy ]
 
       # GET /api/v1/environments
       def index

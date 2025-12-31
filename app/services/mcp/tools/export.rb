@@ -11,7 +11,7 @@ module Mcp
           },
           format: {
             type: "string",
-            enum: ["json", "dotenv", "shell", "yaml"],
+            enum: [ "json", "dotenv", "shell", "yaml" ],
             description: "Output format (default: json)"
           },
           service: {
@@ -68,7 +68,7 @@ module Mcp
         return '""' if value.nil? || value.empty?
 
         if value.match?(/[\s#"'$\\]/) || value.include?("\n")
-          escaped = value.gsub('\\', '\\\\').gsub('"', '\\"').gsub("\n", '\\n')
+          escaped = value.gsub("\\", "\\\\").gsub('"', '\\"').gsub("\n", '\\n')
           "\"#{escaped}\""
         else
           value

@@ -10,7 +10,7 @@ module Mcp
             description: "The key/name of the secret to delete"
           }
         },
-        required: ["key"]
+        required: [ "key" ]
       }.freeze
 
       def call(params)

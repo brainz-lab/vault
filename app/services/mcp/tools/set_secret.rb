@@ -26,7 +26,7 @@ module Mcp
             description: "Optional note for this version"
           }
         },
-        required: ["key", "value"]
+        required: [ "key", "value" ]
       }.freeze
 
       def call(params)

@@ -11,7 +11,7 @@ class CreateSecretFolders < ActiveRecord::Migration[8.0]
 
       t.timestamps
 
-      t.index [:project_id, :path], unique: true
+      t.index [ :project_id, :path ], unique: true
     end
   end
 end

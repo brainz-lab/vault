@@ -1,7 +1,7 @@
 module Dashboard
   class EnvironmentsController < BaseController
     before_action :require_project!
-    before_action :set_environment, only: [:show, :edit, :update, :destroy]
+    before_action :set_environment, only: [ :show, :edit, :update, :destroy ]
 
     def index
       @environments = current_project.secret_environments

@@ -45,7 +45,7 @@ class EnvFileGenerator
 
     if needs_quotes
       # Double-quote and escape special characters
-      escaped = value.gsub('\\', '\\\\').gsub('"', '\\"').gsub("\n", '\\n')
+      escaped = value.gsub("\\", "\\\\").gsub('"', '\\"').gsub("\n", '\\n')
       "\"#{escaped}\""
     else
       value

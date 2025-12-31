@@ -19,9 +19,9 @@ module Encryption
       def get_key(key_id, project_id: nil)
         key_record = if project_id
                        EncryptionKey.find_by!(key_id: key_id, project_id: project_id)
-                     else
+        else
                        EncryptionKey.find_by!(key_id: key_id)
-                     end
+        end
         decrypt_key(key_record)
       end
 

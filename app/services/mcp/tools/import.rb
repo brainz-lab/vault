@@ -11,7 +11,7 @@ module Mcp
           },
           format: {
             type: "string",
-            enum: ["dotenv", "json"],
+            enum: [ "dotenv", "json" ],
             description: "Input format (default: dotenv)"
           },
           environment: {
@@ -19,7 +19,7 @@ module Mcp
             description: "Target environment slug (defaults to development)"
           }
         },
-        required: ["content"]
+        required: [ "content" ]
       }.freeze
 
       def call(params)

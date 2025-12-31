@@ -1,6 +1,6 @@
 module Dashboard
   class ProviderKeysController < BaseController
-    before_action :set_provider_key, only: [:show, :edit, :update, :destroy, :toggle_active]
+    before_action :set_provider_key, only: [ :show, :edit, :update, :destroy, :toggle_active ]
 
     def index
       @global_keys = ProviderKey.global_keys.active.by_priority

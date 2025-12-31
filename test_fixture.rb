@@ -4,7 +4,7 @@ require "erb"
 content = File.read(Rails.root.join("test/fixtures/projects.yml"))
 rendered = ERB.new(content).result
 
-fixture_data = YAML.safe_load(rendered, permitted_classes: [Date, Time, DateTime])
+fixture_data = YAML.safe_load(rendered, permitted_classes: [ Date, Time, DateTime ])
 
 puts "Fixture data:"
 fixture_data.each do |name, attrs|

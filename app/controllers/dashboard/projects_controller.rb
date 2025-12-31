@@ -2,8 +2,8 @@ module Dashboard
   class ProjectsController < BaseController
     # Skip set_current_project for actions that load their own project via set_project
     # This prevents duplicate Project.find queries (N+1 optimization)
-    skip_before_action :set_current_project, only: [:index, :new, :create, :show, :edit, :update, :destroy, :setup, :mcp_setup]
-    before_action :set_project, only: [:show, :edit, :update, :destroy, :setup, :mcp_setup]
+    skip_before_action :set_current_project, only: [ :index, :new, :create, :show, :edit, :update, :destroy, :setup, :mcp_setup ]
+    before_action :set_project, only: [ :show, :edit, :update, :destroy, :setup, :mcp_setup ]
 
     def index
       # In development, show all projects
@@ -74,7 +74,7 @@ module Dashboard
       unless @token
         @token = @project.access_tokens.build(
           name: "MCP Token",
-          permissions: ["read", "write"]  # Fixed: was 'scopes', removed non-existent 'description'
+          permissions: [ "read", "write" ]  # Fixed: was 'scopes', removed non-existent 'description'
         )
         @token.save!
         @raw_token = @token.plain_token  # Access the token set by before_validation callback

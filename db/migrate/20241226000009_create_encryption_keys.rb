@@ -24,8 +24,8 @@ class CreateEncryptionKeys < ActiveRecord::Migration[8.0]
 
       t.timestamps
 
-      t.index [:project_id, :key_id], unique: true
-      t.index [:project_id, :status]
+      t.index [ :project_id, :key_id ], unique: true
+      t.index [ :project_id, :status ]
     end
   end
 end

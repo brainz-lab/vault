@@ -10,7 +10,7 @@ class CreateAccessTokens < ActiveRecord::Migration[8.0]
       # Scope
       t.string :environments, array: true, default: []  # Empty = all
       t.string :paths, array: true, default: []         # Empty = all (glob patterns)
-      t.string :permissions, array: true, default: ["read"]  # read, write, delete
+      t.string :permissions, array: true, default: [ "read" ]  # read, write, delete
 
       # Restrictions
       t.string :allowed_ips, array: true, default: []   # IP allowlist
@@ -27,8 +27,8 @@ class CreateAccessTokens < ActiveRecord::Migration[8.0]
 
       t.timestamps
 
-      t.index [:project_id, :token_digest], unique: true
-      t.index [:project_id, :active]
+      t.index [ :project_id, :token_digest ], unique: true
+      t.index [ :project_id, :active ]
     end
   end
 end

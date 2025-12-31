@@ -2,7 +2,7 @@ module Api
   module V1
     class AccessPoliciesController < BaseController
       before_action :require_admin!
-      before_action :set_policy, only: [:show, :update, :destroy]
+      before_action :set_policy, only: [ :show, :update, :destroy ]
 
       # GET /api/v1/access_policies
       def index

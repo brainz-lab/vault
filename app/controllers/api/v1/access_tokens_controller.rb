@@ -2,7 +2,7 @@ module Api
   module V1
     class AccessTokensController < BaseController
       before_action :require_admin!
-      before_action :set_token, only: [:show, :update, :destroy, :regenerate]
+      before_action :set_token, only: [ :show, :update, :destroy, :regenerate ]
 
       # GET /api/v1/access_tokens
       def index

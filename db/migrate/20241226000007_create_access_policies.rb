@@ -33,7 +33,7 @@ class CreateAccessPolicies < ActiveRecord::Migration[8.0]
 
       t.timestamps
 
-      t.index [:project_id, :principal_type, :principal_id], name: "idx_access_policies_principal"
+      t.index [ :project_id, :principal_type, :principal_id ], name: "idx_access_policies_principal"
     end
   end
 end

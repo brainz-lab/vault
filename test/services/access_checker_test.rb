@@ -21,9 +21,9 @@ class AccessCheckerTest < ActiveSupport::TestCase
       name: "Test Policy",
       principal_type: "token",
       principal_id: @token.id.to_s,
-      permissions: ["read"],
-      environments: ["development"],
-      paths: ["*"],
+      permissions: [ "read" ],
+      environments: [ "development" ],
+      paths: [ "*" ],
       enabled: true
     )
 
@@ -40,9 +40,9 @@ class AccessCheckerTest < ActiveSupport::TestCase
       name: "Disabled Policy",
       principal_type: "token",
       principal_id: @token.id.to_s,
-      permissions: ["read"],
-      environments: ["development"],
-      paths: ["*"],
+      permissions: [ "read" ],
+      environments: [ "development" ],
+      paths: [ "*" ],
       enabled: false
     )
 
@@ -55,9 +55,9 @@ class AccessCheckerTest < ActiveSupport::TestCase
       name: "Staging Only Policy",
       principal_type: "token",
       principal_id: @token.id.to_s,
-      permissions: ["read"],
-      environments: ["staging"],
-      paths: ["*"],
+      permissions: [ "read" ],
+      environments: [ "staging" ],
+      paths: [ "*" ],
       enabled: true
     )
 
@@ -75,9 +75,9 @@ class AccessCheckerTest < ActiveSupport::TestCase
       name: "Database Only Policy",
       principal_type: "token",
       principal_id: @token.id.to_s,
-      permissions: ["read"],
+      permissions: [ "read" ],
       environments: [],
-      paths: ["/database/*"],
+      paths: [ "/database/*" ],
       enabled: true
     )
 
@@ -95,7 +95,7 @@ class AccessCheckerTest < ActiveSupport::TestCase
       name: "Read Only Policy",
       principal_type: "token",
       principal_id: @token.id.to_s,
-      permissions: ["read"],
+      permissions: [ "read" ],
       environments: [],
       paths: [],
       enabled: true
@@ -116,9 +116,9 @@ class AccessCheckerTest < ActiveSupport::TestCase
       name: "All Access",
       principal_type: "token",
       principal_id: @token.id.to_s,
-      permissions: ["read"],
-      environments: ["development"],
-      paths: ["*"],
+      permissions: [ "read" ],
+      environments: [ "development" ],
+      paths: [ "*" ],
       enabled: true
     )
 
@@ -138,9 +138,9 @@ class AccessCheckerTest < ActiveSupport::TestCase
       name: "Database Access",
       principal_type: "token",
       principal_id: @token.id.to_s,
-      permissions: ["read"],
+      permissions: [ "read" ],
       environments: [],
-      paths: ["/database/*"],
+      paths: [ "/database/*" ],
       enabled: true
     )
 
@@ -158,16 +158,16 @@ class AccessCheckerTest < ActiveSupport::TestCase
       name: "IP Restricted",
       principal_type: "token",
       principal_id: @token.id.to_s,
-      permissions: ["read"],
+      permissions: [ "read" ],
       environments: [],
       paths: [],
-      conditions: { allowed_ips: ["10.0.0.0/8"] },
+      conditions: { allowed_ips: [ "10.0.0.0/8" ] },
       enabled: true
     )
 
     context = { ip: "10.0.0.1" }
     result = @checker.check_conditions(policy, context)
     # Result depends on AccessPolicy#check_conditions implementation
-    assert [true, false].include?(result)
+    assert [ true, false ].include?(result)
   end
 end

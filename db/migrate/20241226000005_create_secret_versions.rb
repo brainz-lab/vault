@@ -26,8 +26,8 @@ class CreateSecretVersions < ActiveRecord::Migration[8.0]
 
       t.datetime :created_at, null: false
 
-      t.index [:secret_id, :secret_environment_id, :version], unique: true, name: "idx_secret_versions_unique"
-      t.index [:secret_id, :secret_environment_id, :current], name: "idx_secret_versions_current"
+      t.index [ :secret_id, :secret_environment_id, :version ], unique: true, name: "idx_secret_versions_unique"
+      t.index [ :secret_id, :secret_environment_id, :current ], name: "idx_secret_versions_current"
       t.index :expires_at
     end
   end

@@ -25,9 +25,9 @@ class CreateSecrets < ActiveRecord::Migration[8.0]
 
       t.timestamps
 
-      t.index [:project_id, :path], unique: true
-      t.index [:project_id, :key]
-      t.index [:project_id, :archived]
+      t.index [ :project_id, :path ], unique: true
+      t.index [ :project_id, :key ]
+      t.index [ :project_id, :archived ]
     end
   end
 end
