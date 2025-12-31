@@ -57,7 +57,7 @@ module Dashboard
     end
 
     def token_params
-      params.require(:access_token).permit(:name, :expires_at, permissions: [], environments: [])
+      params.require(:access_token).permit(:name, :description, :expires_at, permissions: [], environments: [])
     end
   end
 end

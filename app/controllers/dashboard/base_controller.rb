@@ -30,18 +30,24 @@ module Dashboard
       # Skip if already loaded (prevents duplicate queries)
       return if @current_project.present?
 
+      # Eager load secret_environments to avoid N+1 queries in layout navigation
+      # The layout sidebar uses @current_project.secret_environments for various links
       if params[:project_id]
-        @current_project = Project.find(params[:project_id])
+        @current_project = Project.includes(:secret_environments).find(params[:project_id])
       elsif session[:current_project_id]
-        @current_project = Project.find_by(id: session[:current_project_id])
+        @current_project = Project.includes(:secret_environments).find_by(id: session[:current_project_id])
       end
 
       # In development, auto-create a project if none exists
       if Rails.env.development? && @current_project.nil?
-        @current_project = Project.first || Project.create!(
-          platform_project_id: "dev_#{SecureRandom.hex(4)}",
-          name: "Development Project"
-        )
+        @current_project = Project.includes(:secret_environments).first
+        unless @current_project
+          @current_project = Project.create!(
+            platform_project_id: "dev_#{SecureRandom.hex(4)}",
+            name: "Development Project"
+          )
+          @current_project = Project.includes(:secret_environments).find(@current_project.id)
+        end
         session[:current_project_id] = @current_project.id
       end
     end

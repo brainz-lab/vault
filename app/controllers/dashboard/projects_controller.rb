@@ -84,7 +84,8 @@ module Dashboard
     private
 
     def set_project
-      @project = Project.find(params[:id])
+      # Eager load secret_environments for layout navigation sidebar
+      @project = Project.includes(:secret_environments).find(params[:id])
       @current_project = @project  # Reuse for layout navigation (avoids duplicate query)
     end
 
