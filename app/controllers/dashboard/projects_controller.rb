@@ -6,9 +6,9 @@ module Dashboard
     before_action :set_project, only: [ :show, :edit, :update, :destroy, :setup, :mcp_setup ]
 
     def index
-      # In development, show all projects
+      # In development or standalone mode, show all projects
       # Use scalar subqueries to load all counts in a single query (avoids N+1)
-      base_scope = if Rails.env.development?
+      base_scope = if Rails.env.development? || standalone_mode?
         Project.all
       else
         Project.where(organization_id: current_user[:organization_id])
