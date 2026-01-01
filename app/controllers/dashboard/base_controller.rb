@@ -2,13 +2,21 @@ module Dashboard
   class BaseController < ActionController::Base
     include ActionController::Cookies
 
-    before_action :require_session!, unless: -> { Rails.env.development? }
+    before_action :require_session!, unless: -> { skip_authentication? }
     before_action :set_current_project
-    helper_method :current_user, :current_project
+    helper_method :current_user, :current_project, :standalone_mode?
 
     layout "dashboard"
 
     private
+
+    def standalone_mode?
+      ENV["VAULT_STANDALONE_MODE"].present?
+    end
+
+    def skip_authentication?
+      Rails.env.development? || standalone_mode?
+    end
 
     def require_session!
       unless session[:user_id].present? && session[:expires_at].to_i > Time.current.to_i
@@ -17,12 +25,21 @@ module Dashboard
     end
 
     def current_user
-      @current_user ||= {
-        id: session[:user_id],
-        email: session[:email],
-        name: session[:name],
-        organization_id: session[:organization_id]
-      }
+      @current_user ||= if standalone_mode? && session[:user_id].blank?
+        {
+          id: "standalone_user",
+          email: "admin@localhost",
+          name: "Standalone Admin",
+          organization_id: "standalone_org"
+        }
+      else
+        {
+          id: session[:user_id],
+          email: session[:email],
+          name: session[:name],
+          organization_id: session[:organization_id]
+        }
+      end
     end
 
     def set_current_project
@@ -38,8 +55,8 @@ module Dashboard
         @current_project = Project.includes(:secret_environments).find_by(id: session[:current_project_id])
       end
 
-      # In development, auto-create a project if none exists
-      if Rails.env.development? && @current_project.nil?
+      # In development or standalone mode, auto-create a project if none exists
+      if (Rails.env.development? || standalone_mode?) && @current_project.nil?
         @current_project = Project.includes(:secret_environments).first
         unless @current_project
           @current_project = Project.create!(
