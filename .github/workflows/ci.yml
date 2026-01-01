@@ -100,5 +100,6 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          slug: brainz-lab/vault
           files: ./coverage/.resultset.json
           fail_ci_if_error: false
