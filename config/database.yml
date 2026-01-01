@@ -16,9 +16,7 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: vault_production
-    username: vault
-    password: <%= ENV["VAULT_DATABASE_PASSWORD"] %>
+    url: <%= ENV.fetch("DATABASE_URL", "postgres://vault:vault@localhost:5432/vault_production") %>
   cache:
     <<: *primary_production
     database: vault_production_cache

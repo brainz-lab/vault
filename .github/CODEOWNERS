@@ -1,0 +1,27 @@
+# CODEOWNERS - Automatically request reviews from the right people
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+*       @brainz-lab/core
+
+# Application code
+/app/   @brainz-lab/core
+/lib/   @brainz-lab/core
+
+# Configuration and infrastructure
+/config/        @brainz-lab/core
+/db/            @brainz-lab/core
+/.github/       @brainz-lab/core
+
+# Documentation
+*.md    @brainz-lab/core
+/docs/  @brainz-lab/core
+
+# Security-sensitive files
+/config/credentials*    @brainz-lab/security
+/config/secrets*        @brainz-lab/security
+SECURITY.md             @brainz-lab/security
+
+# Dependencies
+Gemfile         @brainz-lab/core
+Gemfile.lock    @brainz-lab/core

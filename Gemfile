@@ -60,28 +60,11 @@ gem "faraday", "~> 2.0"
 # CORS support
 gem "rack-cors"
 
-# BrainzLab SDK - use RubyGems in production/Docker, local path in development
-if ENV["BUNDLE_DEPLOYMENT"] == "1"
-  gem "brainzlab", "~> 0.1.1"
-elsif File.exist?("/brainzlab-sdk")
-  gem "brainzlab", path: "/brainzlab-sdk"
-elsif File.exist?(File.expand_path("../brainzlab-sdk", __dir__))
-  gem "brainzlab", path: "../brainzlab-sdk"
-else
-  gem "brainzlab", "~> 0.1.1"
-end
+# BrainzLab SDK
+gem "brainzlab", "~> 0.1.1"
 
 # BrainzLab UI - Unified design system with Phlex components
-# Use local path only in development, RubyGems in production/Docker
-if ENV["BUNDLE_DEPLOYMENT"] == "1"
-  gem "brainzlab-ui", "~> 0.1.0"
-elsif ENV.key?("BRAINZLAB_UI_PATH") && File.exist?(ENV["BRAINZLAB_UI_PATH"])
-  gem "brainzlab-ui", path: ENV["BRAINZLAB_UI_PATH"]
-elsif File.exist?("../brainzlab-ui")
-  gem "brainzlab-ui", path: "../brainzlab-ui"
-else
-  gem "brainzlab-ui", "~> 0.1.0"
-end
+gem "brainzlab-ui", "~> 0.1.0"
 gem "phlex-rails", "~> 2.0"
 
 group :development, :test do
