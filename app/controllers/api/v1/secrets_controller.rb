@@ -1,8 +1,8 @@
 module Api
   module V1
     class SecretsController < BaseController
-      before_action :require_permission!, only: [ :create, :update, :destroy ]
-      before_action :require_environment!, only: [ :show, :create, :update ]
+      # Note: write/admin permission checks are done inline in actions
+      before_action :require_environment!, only: [ :show, :create, :update, :rollback ]
       before_action :set_secret, only: [ :show, :update, :destroy, :versions, :rollback ]
 
       # GET /api/v1/secrets
@@ -51,7 +51,7 @@ module Api
 
       # POST /api/v1/secrets
       def create
-        require_permission!("write")
+        return unless require_permission!("write")
 
         @secret = current_project.secrets.find_or_initialize_by(key: secret_params[:key])
         @secret.attributes = secret_params.except(:value)
@@ -85,7 +85,7 @@ module Api
 
       # PUT/PATCH /api/v1/secrets/:key
       def update
-        require_permission!("write")
+        return unless require_permission!("write")
 
         ActiveRecord::Base.transaction do
           @secret.update!(secret_params.except(:value, :key))
@@ -116,7 +116,7 @@ module Api
 
       # DELETE /api/v1/secrets/:key
       def destroy
-        require_permission!("admin")
+        return unless require_permission!("admin")
 
         @secret.archive!
 
@@ -153,7 +153,7 @@ module Api
 
       # POST /api/v1/secrets/:key/rollback
       def rollback
-        require_permission!("write")
+        return unless require_permission!("write")
 
         version_number = params[:version].to_i
         target_version = @secret.versions.find_by!(
@@ -202,10 +202,6 @@ module Api
           tags: secret.tags,
           updated_at: secret.updated_at
         }
-      end
-
-      def require_permission!(permission = "read")
-        super
       end
     end
   end

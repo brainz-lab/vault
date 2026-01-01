@@ -47,8 +47,9 @@ module Mcp
       raw_token = extract_token
       return nil unless raw_token
 
-      prefix = raw_token.split("_").last&.first(8)
-      return nil unless prefix
+      # Token prefix is the first 8 characters of the raw token
+      prefix = raw_token[0, 8]
+      return nil unless prefix&.length == 8
 
       AccessToken.active.where(token_prefix: prefix).find_each do |token|
         if token.authenticate(raw_token)

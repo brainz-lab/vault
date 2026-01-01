@@ -50,11 +50,13 @@ module Api
 
       def require_permission!(permission)
         # When using project API key auth (no token), grant all permissions
-        return if current_token.nil?
+        return true if current_token.nil?
 
         unless current_token.has_permission?(permission)
           render json: { error: "Forbidden: #{permission} permission required" }, status: :forbidden
+          return false
         end
+        true
       end
 
       def log_access(action:, secret: nil, details: {})
@@ -92,8 +94,9 @@ module Api
         return nil unless raw_token
 
         # Try to find by token prefix for efficient lookup
-        prefix = raw_token.split("_").last&.first(8)
-        return nil unless prefix
+        # Token prefix is the first 8 characters of the raw token
+        prefix = raw_token[0, 8]
+        return nil unless prefix&.length == 8
 
         AccessToken.active.where("token_prefix = ?", prefix).find_each do |token|
           if token.authenticate(raw_token)

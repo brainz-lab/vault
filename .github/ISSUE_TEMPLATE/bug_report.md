@@ -7,23 +7,35 @@ assignees: ''
 ---
 
 ## Description
-A clear and concise description of the bug.
+
+A clear and concise description of what the bug is.
 
 ## Steps to Reproduce
+
 1. Go to '...'
 2. Click on '...'
-3. See error
+3. Scroll down to '...'
+4. See error
 
 ## Expected Behavior
-What you expected to happen.
+
+A clear and concise description of what you expected to happen.
 
 ## Actual Behavior
-What actually happened.
+
+What actually happened instead.
+
+## Screenshots
+
+If applicable, add screenshots to help explain your problem.
 
 ## Environment
-- Ruby version:
-- Rails version:
-- OS:
+
+- **Ruby version**: [e.g. 3.2.0]
+- **Rails version**: [e.g. 8.0.0]
+- **OS**: [e.g. macOS 14.0, Ubuntu 22.04]
+- **Browser** (if applicable): [e.g. Chrome 120]
 
 ## Additional Context
-Add any other context, logs, or screenshots.
+
+Add any other context about the problem here.

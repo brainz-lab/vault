@@ -34,7 +34,7 @@ module Api
       test "create creates new environment" do
         assert_difference "SecretEnvironment.count", 1 do
           post api_v1_environments_path,
-               params: { name: "Staging", slug: "staging" },
+               params: { name: "Test Environment", slug: "test-env-#{SecureRandom.hex(4)}" },
                headers: auth_headers
 
           assert_response :created

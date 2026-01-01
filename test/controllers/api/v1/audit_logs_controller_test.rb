@@ -21,7 +21,8 @@ module Api
       test "index returns list of audit logs" do
         get api_v1_audit_logs_path, headers: auth_headers
         assert_response :success
-        assert json_response["audit_logs"].is_a?(Array)
+        assert json_response["logs"].is_a?(Array)
+        assert json_response["pagination"].present?
       end
 
       test "index filters by action" do

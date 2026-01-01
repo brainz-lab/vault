@@ -2,6 +2,15 @@
 
 Thank you for your interest in contributing! We welcome contributions from the community.
 
+## Finding Your First Contribution
+
+New to the project? Look for issues labeled:
+
+- **`good first issue`** - Great for newcomers, well-documented and scoped
+- **`help wanted`** - We'd love help with these
+
+Browse our [good first issues](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) to get started!
+
 ## Getting Started
 
 1. **Fork the repository** on GitHub

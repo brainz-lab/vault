@@ -44,8 +44,8 @@ module Mcp
             {
               version: v.version,
               created_at: v.created_at.iso8601,
-              created_by: v.created_by_name,
-              note: v.note
+              created_by: v.created_by,
+              note: v.change_note
             }
           end
         )
