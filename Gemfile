@@ -61,7 +61,7 @@ gem "faraday", "~> 2.0"
 gem "rack-cors"
 
 # BrainzLab SDK
-gem "brainzlab", "~> 0.1.1"
+gem "brainzlab", "~> 0.1.9"
 
 # BrainzLab UI - Unified design system with Phlex components
 gem "brainzlab-ui", "~> 0.1.0"
