@@ -3,14 +3,22 @@
 #
 # Rails 8.1+ ActionController::Live has an `included` block that calls `class_attribute`.
 # When Phlex::Rails::Streaming includes this module as a plain module, the block executes
-# in the wrong context. Extending ActiveSupport::Concern defers the block to the actual
-# controller class where `class_attribute` exists.
+# in the wrong context.
+#
+# This patch redefines the module with ActiveSupport::Concern extended FIRST,
+# which defers the `included` block to the actual controller class.
 #
 # Remove this patch once phlex-rails fixes this issue.
 
-module Phlex
-  module Rails
-    module Streaming
+# Prevent phlex-rails from loading its problematic Streaming module
+# by ensuring our patched version loads first with proper Concern support
+Rails.application.config.after_initialize do
+  # Only patch if the module exists and has the problem
+  if defined?(Phlex::Rails::Streaming)
+    # Remove the old module and recreate with proper Concern extension
+    Phlex::Rails.send(:remove_const, :Streaming) if Phlex::Rails.const_defined?(:Streaming, false)
+
+    module Phlex::Rails::Streaming
       extend ActiveSupport::Concern
       include ActionController::Live
     end
