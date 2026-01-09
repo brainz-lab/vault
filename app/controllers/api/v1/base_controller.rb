@@ -125,10 +125,28 @@ module Api
         raw_key = extract_token
         return nil unless raw_key
 
-        # Check if this is a project API key (vlt_api_...)
-        return nil unless raw_key.start_with?("vlt_api_")
+        # Try local Vault-specific key first (vlt_api_...)
+        if raw_key.start_with?("vlt_api_")
+          return Project.find_by(api_key: raw_key)
+        end
 
-        Project.find_by(api_key: raw_key)
+        # Try Platform key (sk_live_... or sk_test_...)
+        if raw_key.start_with?("sk_live_", "sk_test_")
+          return validate_with_platform(raw_key)
+        end
+
+        nil
+      end
+
+      def validate_with_platform(key)
+        result = PlatformClient.validate_key(key)
+        return nil unless result.valid?
+
+        # Create/sync local project from Platform
+        PlatformClient.find_or_create_project(result, key)
+      rescue StandardError => e
+        Rails.logger.error "[BaseController] Platform validation error: #{e.message}"
+        nil
       end
 
       def not_found(exception)

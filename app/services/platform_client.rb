@@ -1,39 +1,99 @@
+# frozen_string_literal: true
+
+# Client for validating API keys against Platform
+# Enables unified authentication across all BrainzLab products
 class PlatformClient
-  class << self
-    def validate_key(raw_key)
-      return invalid_result("Missing API key") unless raw_key.present?
+  PLATFORM_URL = ENV.fetch("PLATFORM_URL", "https://platform.brainzlab.ai")
+  TIMEOUT = 5
 
-      # In development, skip Platform validation if not configured
-      if Rails.env.development? && !platform_configured?
-        return development_fallback_result
-      end
+  class ValidationResult
+    attr_reader :valid, :project_id, :project_slug, :organization_id,
+                :organization_slug, :environment, :plan, :scopes, :error
 
-      response = connection.post("/api/v1/keys/validate") do |req|
-        req.headers["X-Service-Key"] = service_key
-        req.body = { key: raw_key }.to_json
-      end
-
-      if response.success?
-        data = JSON.parse(response.body, symbolize_names: true)
-        {
-          valid: data[:valid],
-          project_id: data[:project_id],
-          organization_id: data[:organization_id],
-          features: data[:features] || {},
-          limits: data[:limits] || {}
-        }
-      else
-        invalid_result("Invalid API key")
-      end
-    rescue Faraday::Error => e
-      Rails.logger.error "PlatformClient error: #{e.message}"
-      if Rails.env.development?
-        development_fallback_result
-      else
-        invalid_result("Platform service unavailable")
-      end
+    def initialize(data)
+      @valid = data[:valid]
+      @project_id = data[:project_id]
+      @project_slug = data[:project_slug]
+      @organization_id = data[:organization_id]
+      @organization_slug = data[:organization_slug]
+      @environment = data[:environment]
+      @plan = data[:plan]
+      @scopes = data[:scopes] || []
+      @error = data[:error]
     end
 
+    def valid?
+      @valid == true
+    end
+  end
+
+  class << self
+    # Validate an API key against Platform
+    # @param key [String] The API key to validate (sk_live_xxx or sk_test_xxx)
+    # @return [ValidationResult] Result with project info if valid
+    def validate_key(key)
+      return ValidationResult.new(valid: false, error: "Key required") if key.blank?
+
+      uri = URI.parse("#{PLATFORM_URL}/api/v1/keys/validate")
+      request = Net::HTTP::Post.new(uri)
+      request["Content-Type"] = "application/json"
+      request["User-Agent"] = "vault/#{Rails.application.config.version rescue '1.0'}"
+      request.body = { key: key }.to_json
+
+      response = execute_request(uri, request)
+
+      if response.is_a?(Net::HTTPSuccess)
+        data = JSON.parse(response.body, symbolize_names: true)
+        ValidationResult.new(data)
+      else
+        error = begin
+          JSON.parse(response.body)["error"]
+        rescue
+          "Platform validation failed"
+        end
+        ValidationResult.new(valid: false, error: error)
+      end
+    rescue Net::OpenTimeout, Net::ReadTimeout => e
+      Rails.logger.warn "[PlatformClient] Timeout validating key: #{e.message}"
+      ValidationResult.new(valid: false, error: "Platform timeout")
+    rescue StandardError => e
+      Rails.logger.error "[PlatformClient] Error validating key: #{e.message}"
+      ValidationResult.new(valid: false, error: "Platform error")
+    end
+
+    # Find or create a local project from Platform validation
+    # Handles key regeneration by updating the api_key if it changed
+    # @param result [ValidationResult] Successful validation result
+    # @param api_key [String] The API key used for validation
+    # @return [Project] Local project record
+    def find_or_create_project(result, api_key)
+      return nil unless result.valid?
+
+      project = Project.find_by(platform_project_id: result.project_id)
+
+      if project
+        # Sync: Update key if regenerated in Platform
+        if project.api_key != api_key
+          project.update!(api_key: api_key, ingest_key: api_key)
+          Rails.logger.info "[PlatformClient] Synced regenerated key for project #{project.name}"
+        end
+        return project
+      end
+
+      # Create new project
+      Project.create!(
+        platform_project_id: result.project_id,
+        name: result.project_slug || "Project #{result.project_id}",
+        api_key: api_key,
+        ingest_key: api_key,
+        environment: result.environment || "production"
+      )
+    rescue ActiveRecord::RecordNotUnique
+      # Race condition - another request created it, retry lookup
+      Project.find_by(platform_project_id: result.project_id)
+    end
+
+    # Track usage metrics (for billing)
     def track_usage(project_id:, product:, metric:, count:)
       return unless platform_configured?
 
@@ -47,37 +107,16 @@ class PlatformClient
 
     private
 
-    def connection
-      @connection ||= Faraday.new(platform_url) do |f|
-        f.headers["Content-Type"] = "application/json"
-        f.adapter Faraday.default_adapter
-      end
-    end
-
-    def platform_url
-      ENV["BRAINZLAB_PLATFORM_URL"] || "http://localhost:2999"
-    end
-
-    def service_key
-      ENV["SERVICE_KEY"] || "dev_service_key"
+    def execute_request(uri, request)
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = uri.scheme == "https"
+      http.open_timeout = TIMEOUT
+      http.read_timeout = TIMEOUT
+      http.request(request)
     end
 
     def platform_configured?
-      ENV["BRAINZLAB_PLATFORM_URL"].present?
-    end
-
-    def invalid_result(error)
-      { valid: false, error: error }
-    end
-
-    def development_fallback_result
-      {
-        valid: true,
-        project_id: SecureRandom.uuid,
-        organization_id: SecureRandom.uuid,
-        features: { vault: true },
-        limits: { secrets: -1 }
-      }
+      ENV["PLATFORM_URL"].present?
     end
   end
 end
