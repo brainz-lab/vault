@@ -1,4 +1,5 @@
-class SsoController < ApplicationController
+class SsoController < ActionController::Base
+  include ActionController::Cookies
   # GET /sso/callback
   # Handle SSO callback from Platform
   def callback
