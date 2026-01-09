@@ -2,6 +2,18 @@ require_relative "boot"
 
 require "rails/all"
 
+# Patch for phlex-rails 2.3.1 compatibility with Rails 8.1+
+# Pre-define Phlex::Rails::Streaming with ActiveSupport::Concern BEFORE phlex-rails loads
+# See: https://github.com/phlex-ruby/phlex-rails/issues/323
+module Phlex
+  module Rails
+    module Streaming
+      extend ActiveSupport::Concern
+      include ActionController::Live
+    end
+  end
+end
+
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
