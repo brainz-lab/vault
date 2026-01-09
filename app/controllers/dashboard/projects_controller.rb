@@ -8,12 +8,8 @@ module Dashboard
     def index
       # In development or standalone mode, show all projects
       # Use scalar subqueries to load all counts in a single query (avoids N+1)
-      base_scope = if Rails.env.development? || standalone_mode?
-        Project.all
-      else
-        Project.where(organization_id: current_user[:organization_id])
-               .or(Project.where(organization_id: nil))
-      end
+      # Note: In production, show all projects for now (multi-tenancy filtering TBD)
+      base_scope = Project.all
 
       @projects = base_scope
         .select("projects.*")
@@ -37,8 +33,6 @@ module Dashboard
 
     def create
       @project = Project.new(project_params)
-      # Only set organization_id in production
-      @project.organization_id = current_user[:organization_id] if @project.respond_to?(:organization_id=)
 
       if @project.save
         # Note: default environments are created by model callback
