@@ -38,12 +38,8 @@ Rails.application.configure do
   config.cache_store = :solid_cache_store
 
   # Replace the default in-process and non-durable queuing backend for Active Job.
-  if ENV["DISABLE_SOLID_QUEUE"]
-    config.active_job.queue_adapter = :async
-  else
-    config.active_job.queue_adapter = :solid_queue
-    config.solid_queue.connects_to = { database: { writing: :queue } }
-  end
+  config.active_job.queue_adapter = :solid_queue
+  config.solid_queue.connects_to = { database: { writing: :queue } }
 
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "vault.brainzlab.ai" }
