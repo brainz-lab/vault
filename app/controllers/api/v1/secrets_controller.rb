@@ -7,7 +7,7 @@ module Api
 
       # GET /api/v1/secrets
       def index
-        secrets = current_project.secrets.active
+        secrets = current_project.secrets.active.includes(:versions)
 
         # Filter by folder if provided
         if params[:folder].present?
@@ -21,11 +21,13 @@ module Api
           secrets = secrets.with_tag(tag_key, tag_value)
         end
 
-        log_access(action: "list_secrets", details: { count: secrets.count })
+        # Load all secrets to avoid multiple count queries
+        secrets_list = secrets.to_a
+        log_access(action: "list_secrets", details: { count: secrets_list.size })
 
         render json: {
-          secrets: secrets.map { |s| secret_summary(s) },
-          total: secrets.count
+          secrets: secrets_list.map { |s| secret_summary(s) },
+          total: secrets_list.size
         }
       end
 
@@ -128,6 +130,7 @@ module Api
       # GET /api/v1/secrets/:key/versions
       def versions
         versions = @secret.versions
+                          .includes(:secret_environment)
                           .order(version: :desc)
                           .limit(params[:limit] || 20)
 
@@ -197,7 +200,7 @@ module Api
           key: secret.key,
           path: secret.path,
           description: secret.description,
-          has_value: secret.versions.exists?,
+          has_value: secret.has_versions?,
           version: secret.current_version_number,
           tags: secret.tags,
           updated_at: secret.updated_at

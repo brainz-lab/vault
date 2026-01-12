@@ -59,11 +59,11 @@ module Api
         {
           id: log.id,
           action: log.action,
-          secret_key: log.secret&.key,
+          secret_key: log.secret_key,
           actor_type: log.actor_type,
           actor_name: log.actor_name,
           ip_address: log.ip_address,
-          details: log.details,
+          details: log.metadata,
           created_at: log.created_at
         }
       end

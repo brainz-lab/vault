@@ -1,5 +1,5 @@
 class SecretVersion < ApplicationRecord
-  belongs_to :secret
+  belongs_to :secret, counter_cache: :versions_count
   belongs_to :secret_environment
 
   validates :version, presence: true, numericality: { greater_than: 0 }

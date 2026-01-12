@@ -52,7 +52,15 @@ class AuditLog < ApplicationRecord
     end
   end
 
+  # Extract secret key from resource_path (no query needed)
+  # Path format: /folder/SECRET_KEY or /SECRET_KEY
+  def secret_key
+    return nil unless resource_type == "secret" && resource_path.present?
+    resource_path.split("/").last
+  end
+
   # Fetch associated secret (if resource_type is secret)
+  # WARNING: This triggers a query - prefer secret_key for display
   def secret
     return nil unless resource_type == "secret" && resource_id.present?
     @secret ||= project.secrets.find_by(id: resource_id)

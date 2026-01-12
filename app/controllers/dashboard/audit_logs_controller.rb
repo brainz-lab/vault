@@ -48,7 +48,7 @@ module Dashboard
           csv << [
             log.created_at.iso8601,
             log.action,
-            log.secret&.key,
+            log.secret_key,
             log.actor_name,
             log.ip_address,
             log.metadata.to_json

@@ -16,6 +16,11 @@ class Secret < ApplicationRecord
   scope :in_folder, ->(folder) { where(secret_folder: folder) }
   scope :with_tag, ->(key, value) { where("tags->>? = ?", key, value) }
 
+  # Use counter cache to avoid N+1 queries
+  def has_versions?
+    versions_count > 0
+  end
+
   def current_version(environment)
     # Use preloaded versions if available (avoids N+1), otherwise query
     if versions.loaded?

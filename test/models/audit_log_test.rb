@@ -237,6 +237,54 @@ class AuditLogTest < ActiveSupport::TestCase
     assert_nil log.secret
   end
 
+  test "secret_key extracts key from resource_path" do
+    log = AuditLog.new(
+      project: projects(:acme),
+      action: "read",
+      resource_type: "secret",
+      resource_path: "/folder/DATABASE_URL",
+      actor_type: "user"
+    )
+
+    assert_equal "DATABASE_URL", log.secret_key
+  end
+
+  test "secret_key works with paths without folder" do
+    log = AuditLog.new(
+      project: projects(:acme),
+      action: "read",
+      resource_type: "secret",
+      resource_path: "/API_KEY",
+      actor_type: "user"
+    )
+
+    assert_equal "API_KEY", log.secret_key
+  end
+
+  test "secret_key returns nil for non-secret resource_type" do
+    log = AuditLog.new(
+      project: projects(:acme),
+      action: "create",
+      resource_type: "token",
+      resource_path: "/some/path",
+      actor_type: "user"
+    )
+
+    assert_nil log.secret_key
+  end
+
+  test "secret_key returns nil when resource_path is blank" do
+    log = AuditLog.new(
+      project: projects(:acme),
+      action: "read",
+      resource_type: "secret",
+      resource_path: nil,
+      actor_type: "user"
+    )
+
+    assert_nil log.secret_key
+  end
+
   # ===========================================
   # Immutability (tested by stubbing Rails.env to simulate production)
   # In test environment, immutability is bypassed for fixture cleanup
