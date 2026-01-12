@@ -5,9 +5,7 @@ if [ -z "$SECRET_KEY_BASE" ]; then
   export SECRET_KEY_BASE=$(ruby -rsecurerandom -e 'puts SecureRandom.hex(64)')
 fi
 
-# If running the rails server then create or migrate existing database
-if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
-  ./bin/rails db:prepare
-fi
+# Note: Database migrations are handled by the PRE_DEPLOY migrate job
+# No need to run db:prepare here
 
 exec "${@}"
