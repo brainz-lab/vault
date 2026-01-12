@@ -6,6 +6,10 @@ class PlatformClient
   PLATFORM_URL = ENV.fetch("PLATFORM_URL", "https://platform.brainzlab.ai")
   TIMEOUT = 5
 
+  # Cache durations
+  VALID_KEY_CACHE_TTL = 5.minutes
+  INVALID_KEY_CACHE_TTL = 30.seconds  # Short TTL for invalid keys to allow quick retry after fix
+
   class ValidationResult
     attr_reader :valid, :project_id, :project_slug, :organization_id,
                 :organization_slug, :environment, :plan, :scopes, :error
@@ -28,12 +32,28 @@ class PlatformClient
   end
 
   class << self
-    # Validate an API key against Platform
+    # Validate an API key against Platform (cached)
     # @param key [String] The API key to validate (sk_live_xxx or sk_test_xxx)
     # @return [ValidationResult] Result with project info if valid
     def validate_key(key)
       return ValidationResult.new(valid: false, error: "Key required") if key.blank?
 
+      # Check cache first
+      cache_key = "platform_key_validation:#{Digest::SHA256.hexdigest(key)}"
+      cached = Rails.cache.read(cache_key)
+      return cached if cached.present?
+
+      result = validate_key_uncached(key)
+
+      # Cache the result (shorter TTL for invalid keys)
+      ttl = result.valid? ? VALID_KEY_CACHE_TTL : INVALID_KEY_CACHE_TTL
+      Rails.cache.write(cache_key, result, expires_in: ttl)
+
+      result
+    end
+
+    # Validate without caching (for internal use)
+    def validate_key_uncached(key)
       uri = URI.parse("#{PLATFORM_URL}/api/v1/keys/validate")
       request = Net::HTTP::Post.new(uri)
       request["Content-Type"] = "application/json"
