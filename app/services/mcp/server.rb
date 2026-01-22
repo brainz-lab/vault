@@ -8,7 +8,12 @@ module Mcp
       "vault_list_environments" => Tools::ListEnvironments,
       "vault_get_history" => Tools::GetHistory,
       "vault_export" => Tools::Export,
-      "vault_import" => Tools::Import
+      "vault_import" => Tools::Import,
+      # Credential and OTP tools
+      "vault_get_credential" => Tools::GetCredential,
+      "vault_set_credential" => Tools::SetCredential,
+      "vault_generate_otp" => Tools::GenerateOtp,
+      "vault_verify_otp" => Tools::VerifyOtp
     }.freeze
 
     def initialize(project:, environment: nil)

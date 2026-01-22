@@ -59,11 +59,14 @@ gem "faraday", "~> 2.0"
 gem "rack-cors"
 
 # BrainzLab SDK
-gem "brainzlab", "~> 0.1.1"
+gem "brainzlab", "~> 0.1.11"
 
 # BrainzLab UI - Unified design system with Phlex components
 gem "brainzlab-ui", "~> 0.1.0"
 gem "phlex-rails", "~> 2.0"
+
+# OTP (TOTP/HOTP) generation and verification
+gem "rotp", "~> 6.3"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

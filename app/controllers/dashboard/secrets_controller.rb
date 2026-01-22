@@ -3,7 +3,7 @@ module Dashboard
     before_action :require_project!
     before_action :load_environments, only: [ :index ]
     before_action :set_environment
-    before_action :set_secret, only: [ :show, :edit, :update, :destroy, :history, :rollback ]
+    before_action :set_secret, only: [ :show, :edit, :update, :destroy, :history, :rollback, :generate_otp ]
 
     def index
       # Build secrets query with filters
@@ -17,6 +17,11 @@ module Dashboard
 
       if params[:search].present?
         secrets_scope = secrets_scope.where("key ILIKE ?", "%#{params[:search]}%")
+      end
+
+      # Filter by secret type
+      if params[:type].present?
+        secrets_scope = secrets_scope.where(secret_type: params[:type])
       end
 
       # Eager load secrets with versions AND their secret_environments to avoid N+1
@@ -50,10 +55,38 @@ module Dashboard
 
       ActiveRecord::Base.transaction do
         @secret.attributes = secret_params.except(:value)
-        @secret.save!
 
-        if params[:secret][:value].present?
-          @secret.set_value(@environment, params[:secret][:value], user: nil, note: "Created via dashboard")
+        # Handle credential with OTP
+        if @secret.otp_enabled? && params[:secret][:otp_secret].present?
+          @secret.set_credential_with_otp(
+            @environment,
+            username: @secret.username,
+            password: params[:secret][:value],
+            otp_secret: params[:secret][:otp_secret],
+            otp_type: @secret.secret_type == "hotp" ? "hotp" : "totp",
+            otp_algorithm: @secret.otp_algorithm || "sha1",
+            otp_digits: @secret.otp_digits || 6,
+            otp_period: @secret.otp_period || 30,
+            otp_issuer: @secret.otp_issuer,
+            user: nil,
+            note: "Created via dashboard"
+          )
+        elsif @secret.credential?
+          @secret.save!
+          if params[:secret][:value].present?
+            @secret.set_credential(
+              @environment,
+              username: @secret.username,
+              password: params[:secret][:value],
+              user: nil,
+              note: "Created via dashboard"
+            )
+          end
+        else
+          @secret.save!
+          if params[:secret][:value].present?
+            @secret.set_value(@environment, params[:secret][:value], user: nil, note: "Created via dashboard")
+          end
         end
       end
 
@@ -71,7 +104,30 @@ module Dashboard
       ActiveRecord::Base.transaction do
         @secret.update!(secret_params.except(:value))
 
-        if params[:secret][:value].present?
+        # Handle credential with OTP
+        if @secret.otp_enabled? && params[:secret][:otp_secret].present?
+          @secret.set_credential_with_otp(
+            @environment,
+            username: @secret.username,
+            password: params[:secret][:value],
+            otp_secret: params[:secret][:otp_secret],
+            otp_type: @secret.secret_type == "hotp" ? "hotp" : "totp",
+            otp_algorithm: @secret.otp_algorithm || "sha1",
+            otp_digits: @secret.otp_digits || 6,
+            otp_period: @secret.otp_period || 30,
+            otp_issuer: @secret.otp_issuer,
+            user: nil,
+            note: params[:secret][:note]
+          )
+        elsif @secret.credential? && params[:secret][:value].present?
+          @secret.set_credential(
+            @environment,
+            username: @secret.username,
+            password: params[:secret][:value],
+            user: nil,
+            note: params[:secret][:note]
+          )
+        elsif params[:secret][:value].present?
           @secret.set_value(@environment, params[:secret][:value], user: nil, note: params[:secret][:note])
         end
       end
@@ -112,6 +168,25 @@ module Dashboard
       redirect_to dashboard_project_secret_path(@current_project, @secret), notice: "Rolled back to version #{version_number}"
     end
 
+    def generate_otp
+      unless @secret.otp_enabled?
+        return render json: { error: "Secret does not support OTP" }, status: :unprocessable_entity
+      end
+
+      otp_result = @secret.generate_otp(@environment)
+
+      log_action("generate_otp", details: { otp_type: @secret.secret_type })
+
+      render json: {
+        code: otp_result[:code],
+        expires_at: otp_result[:expires_at]&.iso8601,
+        remaining_seconds: otp_result[:remaining_seconds],
+        counter: otp_result[:counter]
+      }
+    rescue ArgumentError => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+
     private
 
     def load_environments
@@ -138,7 +213,11 @@ module Dashboard
     end
 
     def secret_params
-      params.require(:secret).permit(:key, :description, :secret_folder_id, :rotation_interval_days, tags: {})
+      params.require(:secret).permit(
+        :key, :description, :secret_folder_id, :rotation_interval_days,
+        :secret_type, :username, :otp_algorithm, :otp_digits, :otp_period, :otp_issuer,
+        tags: {}
+      )
     end
 
     def log_action(action, details: {})

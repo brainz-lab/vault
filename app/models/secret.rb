@@ -1,4 +1,9 @@
 class Secret < ApplicationRecord
+  # Secret types supported by Vault
+  SECRET_TYPES = %w[string json file certificate credential totp hotp].freeze
+  OTP_TYPES = %w[credential totp hotp].freeze
+  OTP_ALGORITHMS = %w[sha1 sha256 sha512].freeze
+
   belongs_to :project
   belongs_to :secret_folder, optional: true
 
@@ -9,12 +14,27 @@ class Secret < ApplicationRecord
     message: "must be uppercase with underscores (e.g., DATABASE_URL)"
   }
   validates :path, presence: true, uniqueness: { scope: :project_id }
+  validates :secret_type, inclusion: { in: SECRET_TYPES }
+  validates :otp_algorithm, inclusion: { in: OTP_ALGORITHMS }, allow_nil: true
+  validates :otp_digits, inclusion: { in: 6..8 }, allow_nil: true
+  validates :otp_period, numericality: { greater_than: 0, less_than_or_equal_to: 120 }, allow_nil: true
 
   before_validation :set_path
 
   scope :active, -> { where(archived: false) }
   scope :in_folder, ->(folder) { where(secret_folder: folder) }
   scope :with_tag, ->(key, value) { where("tags->>? = ?", key, value) }
+  scope :credentials, -> { where(secret_type: %w[credential totp hotp]) }
+
+  # Checks if this secret supports OTP
+  def otp_enabled?
+    OTP_TYPES.include?(secret_type)
+  end
+
+  # Checks if this secret is a credential type (has username/password)
+  def credential?
+    secret_type == "credential"
+  end
 
   # Use counter cache to avoid N+1 queries
   def has_versions?
@@ -121,6 +141,145 @@ class Secret < ApplicationRecord
       actor_id: user,
       actor_name: user || "system"
     )
+  end
+
+  # Set credential with username and password (without OTP)
+  def set_credential(environment, username:, password:, user: nil, note: nil)
+    update!(secret_type: "credential", username: username) unless credential?
+
+    set_value(environment, password, user: user, note: note)
+  end
+
+  # Set credential with username, password, and OTP secret
+  def set_credential_with_otp(environment, username:, password:, otp_secret:, otp_type: "totp", otp_algorithm: "sha1", otp_digits: 6, otp_period: 30, otp_issuer: nil, user: nil, note: nil)
+    # Update secret metadata for OTP
+    update!(
+      secret_type: otp_type == "hotp" ? "hotp" : "credential",
+      username: username,
+      otp_algorithm: otp_algorithm,
+      otp_digits: otp_digits,
+      otp_period: otp_period,
+      otp_issuer: otp_issuer
+    )
+
+    ActiveRecord::Base.transaction do
+      # Mark previous version as not current
+      versions.where(secret_environment: environment, current: true)
+              .update_all(current: false)
+
+      # Create new version
+      version_number = versions.where(secret_environment: environment).maximum(:version).to_i + 1
+
+      # Encrypt password
+      encrypted_password = Encryption::Encryptor.encrypt(password, project_id: project_id)
+
+      # Encrypt OTP secret
+      encrypted_otp = Encryption::Encryptor.encrypt(otp_secret, project_id: project_id)
+
+      versions.create!(
+        secret_environment: environment,
+        version: version_number,
+        current: true,
+        encrypted_value: encrypted_password.ciphertext,
+        encryption_iv: encrypted_password.iv,
+        encryption_key_id: encrypted_password.key_id,
+        value_length: password.length,
+        value_hash: Digest::SHA256.hexdigest(password),
+        encrypted_otp_secret: encrypted_otp.ciphertext,
+        otp_secret_iv: encrypted_otp.iv,
+        otp_secret_key_id: encrypted_otp.key_id,
+        created_by: user,
+        change_note: note
+      )
+    end
+  end
+
+  # Get full credential including OTP code if available
+  def get_credential(environment, include_otp: false)
+    version = current_version(environment)
+    return nil unless version
+
+    result = {
+      username: username,
+      password: version.decrypt
+    }
+
+    if include_otp && otp_enabled? && version.has_otp_secret?
+      result[:otp] = generate_otp(environment)
+    end
+
+    result
+  end
+
+  # Generate OTP code for TOTP/HOTP secrets
+  def generate_otp(environment)
+    raise ArgumentError, "Secret does not support OTP" unless otp_enabled?
+
+    version = current_version(environment)
+    raise ArgumentError, "No OTP secret configured" unless version&.has_otp_secret?
+
+    otp_secret = version.decrypt_otp_secret
+
+    if secret_type == "hotp"
+      # HOTP - counter-based
+      Otp::Generator.generate_hotp(
+        otp_secret,
+        counter: version.hotp_counter,
+        digits: otp_digits || 6,
+        algorithm: otp_algorithm || "sha1"
+      )
+    else
+      # TOTP - time-based (default for credential type)
+      Otp::Generator.generate_totp(
+        otp_secret,
+        digits: otp_digits || 6,
+        period: otp_period || 30,
+        algorithm: otp_algorithm || "sha1"
+      )
+    end
+  end
+
+  # Verify an OTP code
+  def verify_otp(environment, code)
+    raise ArgumentError, "Secret does not support OTP" unless otp_enabled?
+
+    version = current_version(environment)
+    raise ArgumentError, "No OTP secret configured" unless version&.has_otp_secret?
+
+    otp_secret = version.decrypt_otp_secret
+
+    if secret_type == "hotp"
+      result = Otp::Verifier.verify_hotp(
+        otp_secret,
+        code,
+        counter: version.hotp_counter,
+        digits: otp_digits || 6,
+        algorithm: otp_algorithm || "sha1"
+      )
+
+      # Update counter if valid
+      if result[:valid]
+        version.update!(hotp_counter: result[:new_counter])
+      end
+
+      result
+    else
+      Otp::Verifier.verify_totp(
+        otp_secret,
+        code,
+        digits: otp_digits || 6,
+        period: otp_period || 30,
+        algorithm: otp_algorithm || "sha1"
+      )
+    end
+  end
+
+  # Increment HOTP counter after use (for HOTP only)
+  def increment_hotp_counter!(environment)
+    return unless secret_type == "hotp"
+
+    version = current_version(environment)
+    version&.increment!(:hotp_counter)
   end
 
   private

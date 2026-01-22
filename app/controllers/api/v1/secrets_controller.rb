@@ -2,8 +2,8 @@ module Api
   module V1
     class SecretsController < BaseController
       # Note: write/admin permission checks are done inline in actions
-      before_action :require_environment!, only: [ :show, :create, :update, :rollback ]
-      before_action :set_secret, only: [ :show, :update, :destroy, :versions, :rollback ]
+      before_action :require_environment!, only: [ :show, :create, :update, :rollback, :credential, :generate_otp, :verify_otp ]
+      before_action :set_secret, only: [ :show, :update, :destroy, :versions, :rollback, :credential, :generate_otp, :verify_otp ]
 
       # GET /api/v1/secrets
       def index
@@ -183,6 +183,124 @@ module Api
           rolled_back_to: version_number,
           new_version: @secret.current_version_number
         }
+      end
+
+      # GET /api/v1/secrets/:key/credential
+      def credential
+        unless @secret.otp_enabled? || @secret.credential?
+          return render json: { error: "Secret is not a credential type" }, status: :unprocessable_entity
+        end
+
+        include_otp = ActiveModel::Type::Boolean.new.cast(params[:include_otp]) != false
+        credential = @secret.get_credential(current_environment, include_otp: include_otp)
+
+        unless credential
+          return render json: { error: "No credential found for environment" }, status: :not_found
+        end
+
+        log_access(
+          action: "read_credential",
+          secret: @secret,
+          details: {
+            environment: current_environment.slug,
+            include_otp: include_otp,
+            has_otp: credential[:otp].present?
+          }
+        )
+
+        response = {
+          key: @secret.key,
+          username: credential[:username],
+          password: credential[:password],
+          environment: current_environment.slug
+        }
+
+        if credential[:otp]
+          response[:otp] = {
+            code: credential[:otp][:code],
+            expires_at: credential[:otp][:expires_at]&.iso8601,
+            remaining_seconds: credential[:otp][:remaining_seconds]
+          }
+        end
+
+        render json: response
+      end
+
+      # POST /api/v1/secrets/:key/otp/generate
+      def generate_otp
+        unless @secret.otp_enabled?
+          return render json: { error: "Secret does not support OTP" }, status: :unprocessable_entity
+        end
+
+        otp_result = @secret.generate_otp(current_environment)
+
+        log_access(
+          action: "generate_otp",
+          secret: @secret,
+          details: {
+            environment: current_environment.slug,
+            otp_type: @secret.secret_type
+          }
+        )
+
+        response = {
+          key: @secret.key,
+          code: otp_result[:code],
+          environment: current_environment.slug
+        }
+
+        if otp_result[:expires_at]
+          response[:expires_at] = otp_result[:expires_at].iso8601
+          response[:remaining_seconds] = otp_result[:remaining_seconds]
+        end
+
+        if otp_result[:counter]
+          response[:counter] = otp_result[:counter]
+        end
+
+        render json: response
+      rescue ArgumentError => e
+        render json: { error: e.message }, status: :unprocessable_entity
+      end
+
+      # POST /api/v1/secrets/:key/otp/verify
+      def verify_otp
+        unless @secret.otp_enabled?
+          return render json: { error: "Secret does not support OTP" }, status: :unprocessable_entity
+        end
+
+        code = params[:code]
+        return render json: { error: "code is required" }, status: :bad_request unless code.present?
+
+        result = @secret.verify_otp(current_environment, code)
+
+        log_access(
+          action: "verify_otp",
+          secret: @secret,
+          details: {
+            environment: current_environment.slug,
+            valid: result[:valid],
+            otp_type: @secret.secret_type
+          }
+        )
+
+        response = {
+          key: @secret.key,
+          valid: result[:valid],
+          environment: current_environment.slug
+        }
+
+        if result[:valid] && result[:drift]
+          response[:drift] = result[:drift]
+        end
+
+        if result[:valid] && result[:new_counter]
+          response[:new_counter] = result[:new_counter]
+        end
+
+        render json: response
+      rescue ArgumentError => e
+        render json: { error: e.message }, status: :unprocessable_entity
       end
 
       private

@@ -7,6 +7,9 @@ Rails.application.routes.draw do
         member do
           get :versions
           post :rollback
+          get :credential
+          post "otp/generate", to: "secrets#generate_otp"
+          post "otp/verify", to: "secrets#verify_otp"
         end
       end
 
@@ -87,6 +90,7 @@ Rails.application.routes.draw do
         member do
           get :history
           post :rollback
+          post :generate_otp
         end
       end
 
