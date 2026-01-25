@@ -4,6 +4,7 @@ module Dashboard
     # This prevents duplicate Project.find queries (N+1 optimization)
     skip_before_action :set_current_project, only: [ :index, :new, :create, :show, :edit, :update, :destroy, :setup, :mcp_setup ]
     before_action :set_project, only: [ :show, :edit, :update, :destroy, :setup, :mcp_setup ]
+    before_action :redirect_to_platform_in_production, only: [ :new, :create ]
 
     def index
       # In development or standalone mode, show all projects
@@ -85,6 +86,13 @@ module Dashboard
 
     def project_params
       params.require(:project).permit(:name, :platform_project_id)
+    end
+
+    def redirect_to_platform_in_production
+      return unless Rails.env.production?
+
+      platform_url = ENV.fetch("BRAINZLAB_PLATFORM_EXTERNAL_URL", "https://platform.brainzlab.ai")
+      redirect_to dashboard_projects_path, alert: "Projects are managed in Platform. Visit #{platform_url} to create new projects."
     end
   end
 end

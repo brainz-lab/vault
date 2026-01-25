@@ -15,6 +15,9 @@ class Project < ApplicationRecord
   before_create :generate_keys
   after_create :create_default_environments
 
+  scope :active, -> { where(archived_at: nil) }
+  scope :archived, -> { where.not(archived_at: nil) }
+
   # Find or create project for Platform integration
   def self.find_or_create_for_platform!(platform_project_id:, name: nil, environment: "production")
     find_or_create_by!(platform_project_id: platform_project_id) do |p|
