@@ -68,6 +68,11 @@ gem "phlex-rails", "~> 2.0"
 # OTP (TOTP/HOTP) generation and verification
 gem "rotp", "~> 6.3"
 
+# SSH key management
+gem "net-ssh", "~> 7.3"
+gem "ed25519", "~> 1.3"
+gem "bcrypt_pbkdf", "~> 1.1"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
