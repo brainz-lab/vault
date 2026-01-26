@@ -7,6 +7,11 @@ class Project < ApplicationRecord
   has_many :audit_logs, dependent: :destroy
   has_many :encryption_keys, dependent: :destroy
 
+  # SSH management
+  has_many :ssh_client_keys, dependent: :destroy
+  has_many :ssh_server_keys, dependent: :destroy
+  has_many :ssh_connections, dependent: :destroy
+
   validates :platform_project_id, presence: true, uniqueness: true
   validates :api_key, uniqueness: true, allow_nil: true
   validates :ingest_key, uniqueness: true, allow_nil: true

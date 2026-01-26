@@ -1,0 +1,66 @@
+# SSH connections test fixtures
+# Using explicit UUIDs for all foreign key references
+
+production_server:
+  id: 550e8400-e29b-41d4-a716-446655440300
+  project: acme
+  ssh_client_key_id: 550e8400-e29b-41d4-a716-446655440100
+  name: prod-server
+  host: prod.example.com
+  port: 22
+  username: deploy
+  description: "Production server connection"
+  options:
+    ServerAliveInterval: 60
+    ForwardAgent: yes
+  metadata: {}
+  archived: false
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+staging_server:
+  id: 550e8400-e29b-41d4-a716-446655440301
+  project: acme
+  ssh_client_key_id: 550e8400-e29b-41d4-a716-446655440100
+  name: staging-server
+  host: staging.example.com
+  port: 22
+  username: deploy
+  description: "Staging server connection"
+  options: {}
+  metadata: {}
+  archived: false
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+bastion_server:
+  id: 550e8400-e29b-41d4-a716-446655440302
+  project: acme
+  ssh_client_key_id: 550e8400-e29b-41d4-a716-446655440101
+  name: bastion
+  host: bastion.example.com
+  port: 22
+  username: admin
+  description: "Bastion/Jump host"
+  options: {}
+  metadata: {}
+  archived: false
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+internal_server:
+  id: 550e8400-e29b-41d4-a716-446655440303
+  project: acme
+  ssh_client_key_id: 550e8400-e29b-41d4-a716-446655440100
+  jump_connection_id: 550e8400-e29b-41d4-a716-446655440302
+  name: internal-db
+  host: 10.0.0.5
+  port: 22
+  username: dbadmin
+  description: "Internal database server via bastion"
+  options:
+    LocalForward: "5432:localhost:5432"
+  metadata: {}
+  archived: false
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>

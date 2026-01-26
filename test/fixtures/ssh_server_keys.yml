@@ -1,0 +1,48 @@
+# SSH server keys test fixtures
+
+github_key:
+  id: 550e8400-e29b-41d4-a716-446655440200
+  project: acme
+  hostname: github.com
+  port: 22
+  key_type: ssh-ed25519
+  public_key: "AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
+  fingerprint: "SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU"
+  trusted: true
+  verified_at: <%= Time.current %>
+  comment: "GitHub SSH key"
+  metadata: {}
+  archived: false
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+gitlab_key:
+  id: 550e8400-e29b-41d4-a716-446655440201
+  project: acme
+  hostname: gitlab.com
+  port: 22
+  key_type: ssh-rsa
+  public_key: "AAAAB3NzaC1yc2EAAAADAQABAAABAQCtest"
+  fingerprint: "SHA256:gitlabfp123"
+  trusted: true
+  verified_at: <%= 1.week.ago %>
+  comment: "GitLab SSH key"
+  metadata: {}
+  archived: false
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+untrusted_key:
+  id: 550e8400-e29b-41d4-a716-446655440202
+  project: acme
+  hostname: unknown-server.example.com
+  port: 2222
+  key_type: ssh-ed25519
+  public_key: "AAAAC3NzaC1lZDI1NTE5AAAAIuntrusted"
+  fingerprint: "SHA256:untrustedfp"
+  trusted: false
+  comment: "Untrusted server"
+  metadata: {}
+  archived: false
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>

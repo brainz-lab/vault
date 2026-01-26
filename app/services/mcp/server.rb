@@ -13,7 +13,23 @@ module Mcp
       "vault_get_credential" => Tools::GetCredential,
       "vault_set_credential" => Tools::SetCredential,
       "vault_generate_otp" => Tools::GenerateOtp,
-      "vault_verify_otp" => Tools::VerifyOtp
+      "vault_verify_otp" => Tools::VerifyOtp,
+      # SSH Client Keys tools
+      "vault_ssh_list_client_keys" => Tools::SshListClientKeys,
+      "vault_ssh_get_client_key" => Tools::SshGetClientKey,
+      "vault_ssh_set_client_key" => Tools::SshSetClientKey,
+      "vault_ssh_delete_client_key" => Tools::SshDeleteClientKey,
+      "vault_ssh_generate_key" => Tools::SshGenerateKey,
+      # SSH Server Keys tools
+      "vault_ssh_list_server_keys" => Tools::SshListServerKeys,
+      "vault_ssh_get_server_key" => Tools::SshGetServerKey,
+      "vault_ssh_set_server_key" => Tools::SshSetServerKey,
+      "vault_ssh_delete_server_key" => Tools::SshDeleteServerKey,
+      # SSH Connections tools
+      "vault_ssh_list_connections" => Tools::SshListConnections,
+      "vault_ssh_get_connection" => Tools::SshGetConnection,
+      "vault_ssh_set_connection" => Tools::SshSetConnection,
+      "vault_ssh_delete_connection" => Tools::SshDeleteConnection
     }.freeze
 
     def initialize(project:, environment: nil)

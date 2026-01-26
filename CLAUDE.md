@@ -62,6 +62,9 @@ Secrets management for API keys, credentials, and environment variables with enc
 - **EncryptionKey**: Per-project encryption keys (encrypted with master key)
 - **ProviderKey**: Encrypted API keys for LLM providers
 - **Project**: Multi-tenant project isolation
+- **SshClientKey**: Encrypted SSH private keys (identity keys)
+- **SshServerKey**: Known host public keys for verification
+- **SshConnection**: SSH connection profiles with key references
 
 ## Security Features
 
@@ -84,6 +87,8 @@ Secrets management for API keys, credentials, and environment variables with enc
 - **SecretResolver**: Environment-based secret resolution (`app/services/secret_resolver.rb`)
 - **Otp::Generator**: TOTP/HOTP code generation (`app/services/otp/generator.rb`)
 - **Otp::Verifier**: OTP verification (`app/services/otp/verifier.rb`)
+- **Ssh::KeyGenerator**: Generate RSA/Ed25519 SSH key pairs (`app/services/ssh/key_generator.rb`)
+- **Ssh::KeyImporter**: Import and validate existing SSH keys (`app/services/ssh/key_importer.rb`)
 
 ## MCP Tools
 
@@ -101,6 +106,19 @@ Secrets management for API keys, credentials, and environment variables with enc
 | `vault_set_credential` | Set credential with optional OTP |
 | `vault_generate_otp` | Generate OTP code for TOTP/HOTP secrets |
 | `vault_verify_otp` | Verify an OTP code |
+| `vault_ssh_list_client_keys` | List SSH identity keys |
+| `vault_ssh_get_client_key` | Get SSH private key (decrypted) |
+| `vault_ssh_set_client_key` | Import existing SSH key |
+| `vault_ssh_delete_client_key` | Archive/delete SSH key |
+| `vault_ssh_generate_key` | Generate new RSA/Ed25519 key pair |
+| `vault_ssh_list_server_keys` | List known host keys |
+| `vault_ssh_get_server_key` | Get server public key |
+| `vault_ssh_set_server_key` | Add/update server key |
+| `vault_ssh_delete_server_key` | Archive server key |
+| `vault_ssh_list_connections` | List SSH connection profiles |
+| `vault_ssh_get_connection` | Get connection with resolved key |
+| `vault_ssh_set_connection` | Create/update connection |
+| `vault_ssh_delete_connection` | Archive connection |
 
 MCP Endpoint: `POST /mcp/rpc` or `POST /mcp/tools/:name`
 
@@ -155,4 +173,45 @@ bin/rails server -p 3000
 ```bash
 cd /Users/afmp/brainz/brainzlab/vault
 bin/rails test
+```
+
+## SSH Key Management
+
+Vault provides SSH key and connection management via MCP tools (no dashboard UI):
+
+### Client Keys (Identity Keys)
+Store SSH private/public key pairs encrypted at rest:
+- **Key Types**: `rsa-2048`, `rsa-4096`, `ed25519`
+- **Features**: Key generation, import, passphrase support
+- **Encryption**: Private keys encrypted with AES-256-GCM
+
+### Server Keys (Known Hosts)
+Store trusted server public keys:
+- **Key Types**: `ssh-rsa`, `ssh-ed25519`, `ecdsa-sha2-*`
+- **Features**: Fingerprint verification, trust management
+
+### Connection Profiles
+Store SSH connection configurations:
+- **Fields**: host, port, username, client key reference
+- **Features**: Jump host support (ProxyJump), custom SSH options
+- **Output**: SSH config format generation
+
+### Example Usage (MCP)
+```bash
+# Generate a new Ed25519 key
+curl -X POST http://localhost:4006/mcp/tools/vault_ssh_generate_key \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"params": {"name": "deploy-key", "key_type": "ed25519"}}'
+
+# Create a connection profile
+curl -X POST http://localhost:4006/mcp/tools/vault_ssh_set_connection \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"params": {"name": "prod-server", "host": "prod.example.com", "username": "deploy", "client_key_name": "deploy-key"}}'
+
+# Get connection with decrypted key
+curl -X POST http://localhost:4006/mcp/tools/vault_ssh_get_connection \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"params": {"name": "prod-server"}}'
 ```

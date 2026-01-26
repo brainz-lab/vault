@@ -1,0 +1,57 @@
+# SSH client keys test fixtures
+# Note: These use placeholder values for encrypted fields
+
+deploy_key:
+  id: 550e8400-e29b-41d4-a716-446655440100
+  project: acme
+  name: deploy-key
+  key_type: ed25519
+  fingerprint: "SHA256:abc123def456"
+  key_bits: 256
+  public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGVqF1n7FqLv1K test@vault"
+  encrypted_private_key: <%= Base64.decode64("dGVzdGtleWRhdGE=") %>
+  private_key_iv: <%= Base64.decode64("aXZ0ZXN0") %>
+  private_key_key_id: "test-key-id"
+  comment: "Deployment key"
+  metadata: {}
+  archived: false
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+backup_key:
+  id: 550e8400-e29b-41d4-a716-446655440101
+  project: acme
+  name: backup-key
+  key_type: rsa-4096
+  fingerprint: "SHA256:xyz789abc123"
+  key_bits: 4096
+  public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtest backup@vault"
+  encrypted_private_key: <%= Base64.decode64("dGVzdGtleWRhdGE=") %>
+  private_key_iv: <%= Base64.decode64("aXZ0ZXN0") %>
+  private_key_key_id: "test-key-id"
+  encrypted_passphrase: <%= Base64.decode64("cGFzc3dvcmQ=") %>
+  passphrase_iv: <%= Base64.decode64("cGFzc2l2") %>
+  passphrase_key_id: "test-key-id"
+  comment: "Backup key with passphrase"
+  metadata: {}
+  archived: false
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+archived_key:
+  id: 550e8400-e29b-41d4-a716-446655440102
+  project: acme
+  name: old-key
+  key_type: rsa-2048
+  fingerprint: "SHA256:old123"
+  key_bits: 2048
+  public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDold old@vault"
+  encrypted_private_key: <%= Base64.decode64("dGVzdGtleWRhdGE=") %>
+  private_key_iv: <%= Base64.decode64("aXZ0ZXN0") %>
+  private_key_key_id: "test-key-id"
+  comment: "Archived old key"
+  metadata: {}
+  archived: true
+  archived_at: <%= 1.day.ago %>
+  created_at: <%= 1.month.ago %>
+  updated_at: <%= 1.day.ago %>
