@@ -1,0 +1,292 @@
+<% content_for :title, "SSH Keys" %>
+
+<div class="mx-auto max-w-4xl">
+  <div class="mb-8">
+    <h1 class="section-header">SSH Keys</h1>
+    <p class="section-subheader">Manage SSH keys and connection profiles via MCP tools</p>
+  </div>
+
+  <div class="space-y-6">
+    <!-- Client Keys (Identity Keys) -->
+    <div class="card p-6">
+      <div class="flex items-center mb-4">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
+          <svg class="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h2 class="text-lg font-semibold text-stone-900">Client Keys</h2>
+          <p class="text-sm text-stone-500">SSH identity keys (private/public key pairs)</p>
+        </div>
+        <span class="ml-auto badge-orange"><%= @client_keys.count %></span>
+      </div>
+
+      <% if @client_keys.any? %>
+        <div class="overflow-hidden rounded-lg border border-stone-200">
+          <table class="min-w-full divide-y divide-stone-200">
+            <thead class="bg-stone-50">
+              <tr>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Name</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Type</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Fingerprint</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Passphrase</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-stone-200">
+              <% @client_keys.each do |key| %>
+                <tr>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-stone-900"><%= key.name %></td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-stone-500">
+                    <span class="badge-gray font-mono text-xs"><%= key.key_type %></span>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-stone-500 font-mono text-xs"><%= key.fingerprint.truncate(30) %></td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-stone-500">
+                    <% if key.has_passphrase? %>
+                      <span class="badge-green text-xs">Yes</span>
+                    <% else %>
+                      <span class="badge-gray text-xs">No</span>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="text-center py-8 text-stone-500">
+          <svg class="mx-auto h-12 w-12 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+          </svg>
+          <p class="mt-2 text-sm">No client keys stored</p>
+          <p class="text-xs text-stone-400 mt-1">Use <code class="bg-stone-100 px-1.5 py-0.5 rounded">vault_ssh_generate_key</code> or <code class="bg-stone-100 px-1.5 py-0.5 rounded">vault_ssh_set_client_key</code> to add keys</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Server Keys (Known Hosts) -->
+    <div class="card p-6">
+      <div class="flex items-center mb-4">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100">
+          <svg class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h2 class="text-lg font-semibold text-stone-900">Server Keys</h2>
+          <p class="text-sm text-stone-500">Known host public keys for verification</p>
+        </div>
+        <span class="ml-auto badge-green"><%= @server_keys.count %></span>
+      </div>
+
+      <% if @server_keys.any? %>
+        <div class="overflow-hidden rounded-lg border border-stone-200">
+          <table class="min-w-full divide-y divide-stone-200">
+            <thead class="bg-stone-50">
+              <tr>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Host</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Type</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Fingerprint</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Trusted</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-stone-200">
+              <% @server_keys.each do |key| %>
+                <tr>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-stone-900">
+                    <%= key.hostname %><span class="text-stone-400">:<%= key.port %></span>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-stone-500">
+                    <span class="badge-gray font-mono text-xs"><%= key.key_type %></span>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-stone-500 font-mono text-xs"><%= key.fingerprint.truncate(30) %></td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-stone-500">
+                    <% if key.trusted %>
+                      <span class="badge-green text-xs">Trusted</span>
+                    <% else %>
+                      <span class="badge-yellow text-xs">Unverified</span>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="text-center py-8 text-stone-500">
+          <svg class="mx-auto h-12 w-12 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
+          </svg>
+          <p class="mt-2 text-sm">No server keys stored</p>
+          <p class="text-xs text-stone-400 mt-1">Use <code class="bg-stone-100 px-1.5 py-0.5 rounded">vault_ssh_set_server_key</code> to add known hosts</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Connection Profiles -->
+    <div class="card p-6">
+      <div class="flex items-center mb-4">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-100">
+          <svg class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h2 class="text-lg font-semibold text-stone-900">Connections</h2>
+          <p class="text-sm text-stone-500">SSH connection profiles with key references</p>
+        </div>
+        <span class="ml-auto badge-blue"><%= @connections.count %></span>
+      </div>
+
+      <% if @connections.any? %>
+        <div class="overflow-hidden rounded-lg border border-stone-200">
+          <table class="min-w-full divide-y divide-stone-200">
+            <thead class="bg-stone-50">
+              <tr>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Name</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Host</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">User</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Key</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Jump</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-stone-200">
+              <% @connections.each do |conn| %>
+                <tr>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-stone-900"><%= conn.name %></td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-stone-500">
+                    <%= conn.host %><span class="text-stone-400">:<%= conn.port %></span>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-stone-500"><%= conn.username %></td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-stone-500">
+                    <% if conn.ssh_client_key %>
+                      <span class="badge-orange text-xs"><%= conn.ssh_client_key.name %></span>
+                    <% else %>
+                      <span class="badge-gray text-xs">None</span>
+                    <% end %>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-stone-500">
+                    <% if conn.jump_connection %>
+                      <span class="badge-blue text-xs"><%= conn.jump_connection.name %></span>
+                    <% else %>
+                      <span class="text-stone-400">-</span>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="text-center py-8 text-stone-500">
+          <svg class="mx-auto h-12 w-12 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+          </svg>
+          <p class="mt-2 text-sm">No connection profiles stored</p>
+          <p class="text-xs text-stone-400 mt-1">Use <code class="bg-stone-100 px-1.5 py-0.5 rounded">vault_ssh_set_connection</code> to add connections</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- MCP Tools Reference -->
+    <div class="card p-6">
+      <div class="flex items-center mb-4">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100">
+          <svg class="h-5 w-5 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h2 class="text-lg font-semibold text-stone-900">SSH MCP Tools</h2>
+          <p class="text-sm text-stone-500">Available tools for SSH management via MCP</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Client Key Tools -->
+        <div>
+          <h3 class="text-xs font-semibold text-stone-700 uppercase tracking-wider mb-3">Client Keys</h3>
+          <ul class="space-y-2">
+            <li class="flex items-start">
+              <code class="badge-orange font-mono text-xs mr-2 flex-shrink-0">vault_ssh_list_client_keys</code>
+              <span class="text-xs text-stone-500">List identity keys</span>
+            </li>
+            <li class="flex items-start">
+              <code class="badge-orange font-mono text-xs mr-2 flex-shrink-0">vault_ssh_get_client_key</code>
+              <span class="text-xs text-stone-500">Get private key</span>
+            </li>
+            <li class="flex items-start">
+              <code class="badge-orange font-mono text-xs mr-2 flex-shrink-0">vault_ssh_set_client_key</code>
+              <span class="text-xs text-stone-500">Import existing key</span>
+            </li>
+            <li class="flex items-start">
+              <code class="badge-orange font-mono text-xs mr-2 flex-shrink-0">vault_ssh_generate_key</code>
+              <span class="text-xs text-stone-500">Generate new key pair</span>
+            </li>
+            <li class="flex items-start">
+              <code class="badge-orange font-mono text-xs mr-2 flex-shrink-0">vault_ssh_delete_client_key</code>
+              <span class="text-xs text-stone-500">Archive key</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Server Key Tools -->
+        <div>
+          <h3 class="text-xs font-semibold text-stone-700 uppercase tracking-wider mb-3">Server Keys</h3>
+          <ul class="space-y-2">
+            <li class="flex items-start">
+              <code class="badge-green font-mono text-xs mr-2 flex-shrink-0">vault_ssh_list_server_keys</code>
+              <span class="text-xs text-stone-500">List known hosts</span>
+            </li>
+            <li class="flex items-start">
+              <code class="badge-green font-mono text-xs mr-2 flex-shrink-0">vault_ssh_get_server_key</code>
+              <span class="text-xs text-stone-500">Get server public key</span>
+            </li>
+            <li class="flex items-start">
+              <code class="badge-green font-mono text-xs mr-2 flex-shrink-0">vault_ssh_set_server_key</code>
+              <span class="text-xs text-stone-500">Add/update server key</span>
+            </li>
+            <li class="flex items-start">
+              <code class="badge-green font-mono text-xs mr-2 flex-shrink-0">vault_ssh_delete_server_key</code>
+              <span class="text-xs text-stone-500">Archive server key</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Connection Tools -->
+        <div>
+          <h3 class="text-xs font-semibold text-stone-700 uppercase tracking-wider mb-3">Connections</h3>
+          <ul class="space-y-2">
+            <li class="flex items-start">
+              <code class="badge-blue font-mono text-xs mr-2 flex-shrink-0">vault_ssh_list_connections</code>
+              <span class="text-xs text-stone-500">List connection profiles</span>
+            </li>
+            <li class="flex items-start">
+              <code class="badge-blue font-mono text-xs mr-2 flex-shrink-0">vault_ssh_get_connection</code>
+              <span class="text-xs text-stone-500">Get connection with key</span>
+            </li>
+            <li class="flex items-start">
+              <code class="badge-blue font-mono text-xs mr-2 flex-shrink-0">vault_ssh_set_connection</code>
+              <span class="text-xs text-stone-500">Create/update connection</span>
+            </li>
+            <li class="flex items-start">
+              <code class="badge-blue font-mono text-xs mr-2 flex-shrink-0">vault_ssh_delete_connection</code>
+              <span class="text-xs text-stone-500">Archive connection</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Export Tool -->
+        <div>
+          <h3 class="text-xs font-semibold text-stone-700 uppercase tracking-wider mb-3">Export</h3>
+          <ul class="space-y-2">
+            <li class="flex items-start">
+              <code class="badge-violet font-mono text-xs mr-2 flex-shrink-0">vault_ssh_export_config</code>
+              <span class="text-xs text-stone-500">Export SSH config / known_hosts</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

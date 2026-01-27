@@ -29,7 +29,9 @@ module Mcp
       "vault_ssh_list_connections" => Tools::SshListConnections,
       "vault_ssh_get_connection" => Tools::SshGetConnection,
       "vault_ssh_set_connection" => Tools::SshSetConnection,
-      "vault_ssh_delete_connection" => Tools::SshDeleteConnection
+      "vault_ssh_delete_connection" => Tools::SshDeleteConnection,
+      # SSH Export tool
+      "vault_ssh_export_config" => Tools::SshExportConfig
     }.freeze
 
     def initialize(project:, environment: nil)

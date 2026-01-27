@@ -2,8 +2,8 @@ module Dashboard
   class ProjectsController < BaseController
     # Skip set_current_project for actions that load their own project via set_project
     # This prevents duplicate Project.find queries (N+1 optimization)
-    skip_before_action :set_current_project, only: [ :index, :new, :create, :show, :edit, :update, :destroy, :setup, :mcp_setup ]
-    before_action :set_project, only: [ :show, :edit, :update, :destroy, :setup, :mcp_setup ]
+    skip_before_action :set_current_project, only: [ :index, :new, :create, :show, :edit, :update, :destroy, :setup, :mcp_setup, :ssh_keys ]
+    before_action :set_project, only: [ :show, :edit, :update, :destroy, :setup, :mcp_setup, :ssh_keys ]
     before_action :redirect_to_platform_in_production, only: [ :new, :create ]
 
     def index
@@ -74,6 +74,12 @@ module Dashboard
         @token.save!
         @raw_token = @token.plain_token  # Access the token set by before_validation callback
       end
+    end
+
+    def ssh_keys
+      @client_keys = @project.ssh_client_keys.active.order(:name)
+      @server_keys = @project.ssh_server_keys.active.order(:hostname)
+      @connections = @project.ssh_connections.active.includes(:ssh_client_key, :jump_connection).order(:name)
     end
 
     private
