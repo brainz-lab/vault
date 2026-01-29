@@ -5,10 +5,26 @@ export default class extends Controller {
 
   connect() {
     console.log("SecretRevealController connected", this.element)
+    console.log("Targets found:", {
+      hidden: this.hasHiddenTarget,
+      value: this.hasValueTarget,
+      button: this.hasButtonTarget
+    })
   }
 
-  toggle() {
+  toggle(event) {
+    event.preventDefault()
     console.log("toggle called")
+    
+    if (!this.hasHiddenTarget || !this.hasValueTarget || !this.hasButtonTarget) {
+      console.error("Missing targets:", {
+        hidden: this.hasHiddenTarget,
+        value: this.hasValueTarget,
+        button: this.hasButtonTarget
+      })
+      return
+    }
+    
     this.hiddenTarget.classList.toggle("hidden")
     this.valueTarget.classList.toggle("hidden")
 
