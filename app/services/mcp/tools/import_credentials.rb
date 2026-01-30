@@ -18,7 +18,7 @@ module Mcp
                 notes: { type: "string", description: "Optional notes" },
                 otp_auth: { type: "string", description: "OTPAuth URL (otpauth://totp/...)" }
               },
-              required: %w[username password]
+              required: %w[ username password ]
             }
           },
           csv: {
