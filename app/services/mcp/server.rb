@@ -12,6 +12,7 @@ module Mcp
       # Credential and OTP tools
       "vault_get_credential" => Tools::GetCredential,
       "vault_set_credential" => Tools::SetCredential,
+      "vault_import_credentials" => Tools::ImportCredentials,
       "vault_generate_otp" => Tools::GenerateOtp,
       "vault_verify_otp" => Tools::VerifyOtp,
       # SSH Client Keys tools

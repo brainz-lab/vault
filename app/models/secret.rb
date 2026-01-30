@@ -20,6 +20,46 @@ class Secret < ApplicationRecord
   validates :otp_period, numericality: { greater_than: 0, less_than_or_equal_to: 120 }, allow_nil: true
 
   before_validation :set_path
+  before_validation :normalize_key
+
+  # Convert a URL or domain to a valid secret key
+  # Examples:
+  #   "https://hey.com" => "HEY_COM"
+  #   "app.github.com" => "APP_GITHUB_COM"
+  #   "my-service" => "MY_SERVICE"
+  def self.normalize_key(input)
+    return input if input.blank?
+
+    # If already valid uppercase key, return as-is
+    return input if input.match?(/\A[A-Z][A-Z0-9_]*\z/)
+
+    # Extract domain from URL if present
+    key = input.to_s.dup
+
+    # Remove protocol
+    key.gsub!(%r{^https?://}, "")
+    # Remove path, query, fragment
+    key.gsub!(%r{[/?#].*$}, "")
+    # Remove port
+    key.gsub!(/:[\d]+$/, "")
+    # Remove www. prefix
+    key.gsub!(/^www\./, "")
+
+    # Replace dots and hyphens with underscores
+    key.gsub!(/[.\-]/, "_")
+    # Remove any other non-alphanumeric characters
+    key.gsub!(/[^A-Za-z0-9_]/, "")
+    # Convert to uppercase
+    key.upcase!
+    # Ensure starts with letter
+    key = "X#{key}" unless key.match?(/\A[A-Z]/)
+    # Collapse multiple underscores
+    key.gsub!(/_+/, "_")
+    # Remove trailing underscore
+    key.gsub!(/_+$/, "")
+
+    key
+  end
 
   scope :active, -> { where(archived: false) }
   scope :in_folder, ->(folder) { where(secret_folder: folder) }
@@ -287,5 +327,14 @@ class Secret < ApplicationRecord
   def set_path
     folder_path = secret_folder&.path || ""
     self.path = "#{folder_path}/#{key}".gsub(/^\/+/, "/")
+  end
+
+  def normalize_key
+    # Only auto-normalize if key doesn't match the required format
+    # This allows users to set explicit keys but also accepts URLs/domains
+    return if key.blank?
+    return if key.match?(/\A[A-Z][A-Z0-9_]*\z/)
+
+    self.key = self.class.normalize_key(key)
   end
 end

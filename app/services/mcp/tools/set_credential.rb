@@ -7,7 +7,11 @@ module Mcp
         properties: {
           key: {
             type: "string",
-            description: "The key/name of the credential secret"
+            description: "The key/name of the credential secret. Can be a URL (e.g., 'hey.com') which will be normalized to uppercase (HEY_COM)"
+          },
+          url: {
+            type: "string",
+            description: "Optional URL to store with the credential (useful when key is normalized from URL)"
           },
           username: {
             type: "string",
@@ -60,16 +64,27 @@ module Mcp
       }.freeze
 
       def call(params)
-        key = params[:key]
+        raw_key = params[:key]
         username = params[:username]
         password = params[:password]
 
-        return error("key is required") unless key.present?
+        return error("key is required") unless raw_key.present?
         return error("username is required") unless username.present?
         return error("password is required") unless password.present?
 
+        # Normalize key (e.g., "hey.com" -> "HEY_COM")
+        key = Secret.normalize_key(raw_key)
+
         secret = project.secrets.find_or_initialize_by(key: key)
         was_new = secret.new_record?
+
+        # Store URL if provided or if key was a URL
+        if params[:url].present?
+          secret.url = params[:url]
+        elsif raw_key != key && raw_key.include?(".")
+          # Key was normalized from a URL/domain, store original
+          secret.url = raw_key.start_with?("http") ? raw_key : "https://#{raw_key}"
+        end
 
         if params[:description].present?
           secret.description = params[:description]
