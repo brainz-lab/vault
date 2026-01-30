@@ -55,6 +55,10 @@ module Mcp
             type: "string",
             description: "Optional description of the credential"
           },
+          notes: {
+            type: "string",
+            description: "Optional notes (e.g., recovery codes, security questions)"
+          },
           note: {
             type: "string",
             description: "Optional note for this version"
@@ -88,6 +92,10 @@ module Mcp
 
         if params[:description].present?
           secret.description = params[:description]
+        end
+
+        if params[:notes].present?
+          secret.notes = params[:notes]
         end
 
         ActiveRecord::Base.transaction do

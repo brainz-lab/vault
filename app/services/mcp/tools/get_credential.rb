@@ -51,6 +51,8 @@ module Mcp
           environment: environment.slug
         }
 
+        response[:notes] = secret.notes if secret.notes.present?
+
         if credential[:otp]
           response[:otp] = {
             code: credential[:otp][:code],

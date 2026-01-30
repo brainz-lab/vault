@@ -128,7 +128,8 @@ module Mcp
 
         # Store original URL
         secret.url = cred[:url] if cred[:url].present?
-        secret.description = cred[:title].presence || cred[:notes].presence
+        secret.description = cred[:title].presence
+        secret.notes = cred[:notes] if cred[:notes].present?
 
         # Parse OTPAuth URL if present
         otp_params = parse_otp_auth(cred[:otp_auth])
