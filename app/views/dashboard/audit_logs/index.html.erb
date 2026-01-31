@@ -52,17 +52,17 @@
       <table class="table">
         <thead>
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Timestamp</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Action</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Secret</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Actor</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">IP Address</th>
+            <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Timestamp</th>
+            <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Action</th>
+            <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Secret</th>
+            <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Actor</th>
+            <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">IP Address</th>
           </tr>
         </thead>
-        <tbody class="divide-y" style="border-color: var(--color-cream-100);">
+        <tbody class="divide-y border-light">
           <% @logs.each do |log| %>
-            <tr class="transition-colors hover:bg-stone-50">
-              <td class="whitespace-nowrap px-6 py-4 text-sm" style="color: var(--color-ink-500);">
+            <tr class="table-row-hover transition-colors">
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-muted">
                 <%= log.created_at.strftime("%b %d, %H:%M:%S") %>
               </td>
               <td class="whitespace-nowrap px-6 py-4">
@@ -70,18 +70,18 @@
                   <%= log.action.humanize %>
                 </span>
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm" style="color: var(--color-ink-900);">
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-primary">
                 <% if log.secret %>
-                  <%= link_to dashboard_project_secret_path(@current_project, log.secret), class: "font-medium transition-colors hover:text-orange-600", style: "color: var(--color-primary-500);" do %>
+                  <%= link_to dashboard_project_secret_path(@current_project, log.secret), class: "font-medium transition-colors link-primary" do %>
                     <%= log.secret.key %>
                   <% end %>
                 <% else %>
-                  <span style="color: var(--color-ink-400);">-</span>
+                  <span class="text-faint">-</span>
                 <% end %>
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm" style="color: var(--color-ink-500);">
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-muted">
                 <div class="flex items-center">
-                  <div class="flex h-7 w-7 items-center justify-center rounded-full mr-2" style="background: <%= log.actor_type == 'user' ? 'linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%)' : 'linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%)' %>;">
+                  <div class="flex h-7 w-7 items-center justify-center rounded-full mr-2 <%= log.actor_type == 'user' ? 'icon-bg-sky' : 'icon-bg-violet' %>">
                     <svg class="h-3.5 w-3.5 <%= log.actor_type == 'user' ? 'text-sky-600' : 'text-violet-600' %>" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                       <% if log.actor_type == "user" %>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
@@ -93,7 +93,7 @@
                   <%= log.actor_name %>
                 </div>
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm font-mono" style="color: var(--color-ink-400);">
+              <td class="whitespace-nowrap px-6 py-4 text-sm font-mono text-faint">
                 <%= log.ip_address || "-" %>
               </td>
             </tr>
@@ -105,7 +105,7 @@
     <%# Pagination %>
     <% if @logs.respond_to?(:total_pages) && @logs.total_pages > 1 %>
       <div class="mt-6 flex items-center justify-between">
-        <div class="text-sm" style="color: var(--color-ink-500);">
+        <div class="text-sm text-muted">
           Showing <%= @logs.offset_value + 1 %> to <%= [@logs.offset_value + @logs.limit_value, @logs.total_count].min %> of <%= @logs.total_count %> entries
         </div>
         <nav class="flex gap-2">
@@ -132,8 +132,8 @@
     <!-- Empty State -->
     <div class="card">
       <div class="empty-state py-16">
-        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style="background: linear-gradient(135deg, var(--color-cream-100) 0%, var(--color-cream-200) 100%);">
-          <svg class="w-8 h-8" style="color: var(--color-ink-400);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 icon-bg-neutral">
+          <svg class="w-8 h-8 text-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
           </svg>
         </div>

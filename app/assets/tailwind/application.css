@@ -2,4 +2,7 @@
 @import "tailwindcss";
 @import "/brainzlab-ui/app/assets/stylesheets/brainzlab_ui/base.css";
 
+/* Vault-specific dark mode styles */
+@import "../stylesheets/dark_mode.css";
+
 /* Project-specific overrides below */

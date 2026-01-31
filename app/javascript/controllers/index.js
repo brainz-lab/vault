@@ -8,6 +8,7 @@ import ClipboardController from "controllers/clipboard_controller"
 import SearchController from "controllers/search_controller"
 import OtpDisplayController from "controllers/otp_display_controller"
 import SecretTypeController from "controllers/secret_type_controller"
+import DarkModeController from "controllers/dark_mode_controller"
 
 application.register("dropdown", DropdownController)
 application.register("flash", FlashController)
@@ -16,3 +17,4 @@ application.register("clipboard", ClipboardController)
 application.register("search", SearchController)
 application.register("otp-display", OtpDisplayController)
 application.register("secret-type", SecretTypeController)
+application.register("dark-mode", DarkModeController)
