@@ -1,4 +1,8 @@
 /* BrainzLab Unified Design System */
+@import "tailwindcss";
 @import "brainzlab_ui/base";
+
+/* Vault Dashboard Dark Mode Support */
+@import "./dark_mode.css";
 
 /* Vault-specific overrides below */
