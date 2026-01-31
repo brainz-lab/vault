@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full no-transitions">
+<html lang="en" class="h-full no-transitions" data-controller="dark-mode">
 <head>
   <title>Vault - <%= content_for(:title) || "Secrets Management" %></title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -16,18 +16,15 @@
   <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
   <%= javascript_importmap_tags %>
 
-  <%# Prevent flash of wrong theme - apply dark mode before render if stored %>
+  <%# Prevent flash of wrong theme on page load %>
   <script>
     (function() {
-      const stored = localStorage.getItem('vault-dark-mode');
-      if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      const savedTheme = localStorage.getItem('brainzlab-theme');
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
         document.documentElement.classList.add('dark');
-        document.documentElement.classList.remove('light');
-        const meta = document.querySelector('meta[name="theme-color"]');
-        if (meta) meta.setAttribute('content', '#121212');
       } else {
         document.documentElement.classList.add('light');
-        document.documentElement.classList.remove('dark');
       }
     })();
   </script>
@@ -43,7 +40,7 @@
     </script>
   <% end %>
 </head>
-<body class="h-full antialiased bg-content" data-controller="dark-mode">
+<body class="h-full antialiased bg-content">
   <div class="flex h-full">
     <!-- Sidebar -->
     <aside class="sidebar w-64 flex flex-col bg-sidebar border-r border-default">
