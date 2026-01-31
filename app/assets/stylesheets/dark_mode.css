@@ -1,0 +1,512 @@
+/* ============================================
+   VAULT - DARK MODE STYLES
+   ============================================
+   Extends brainzlab-ui dark mode with Vault-specific overrides
+
+   Dark Mode Tokens (from brainzlab-ui):
+   - Dark bg: #121212
+   - Dark surface: #1e1e1e
+   - Dark surface light: #2a2a2a
+   - Dark text: #e8e1d7
+   - Dark text muted: #a0a0a0
+   - Dark border: #333333
+
+   Usage:
+   1. Add .dark class to <html> element
+   2. Toggle via DarkModeController (Stimulus)
+*/
+
+/* ----------------------------------------
+   VAULT-SPECIFIC CSS VARIABLES
+   ---------------------------------------- */
+:root {
+  /* Light mode Vault brand colors */
+  --color-vault: #EA580C;
+  --color-vault-dark: #C2410C;
+  --color-vault-light: #FB923C;
+  --color-vault-bg: rgba(234, 88, 12, 0.1);
+  --color-vault-bg-gradient: linear-gradient(135deg, var(--color-vault-bg) 0%, var(--color-cream-200) 100%);
+
+  /* Sidebar colors */
+  --sidebar-bg: #fff;
+  --sidebar-border: var(--color-cream-200);
+  --sidebar-text: var(--color-ink-700);
+  --sidebar-text-muted: var(--color-ink-400);
+
+  /* Content colors */
+  --content-bg: var(--color-cream-50);
+  --surface-bg: #fff;
+  --surface-hover: var(--color-cream-50);
+
+  /* Text colors */
+  --text-primary: var(--color-ink-900);
+  --text-secondary: var(--color-ink-700);
+  --text-muted: var(--color-ink-500);
+  --text-faint: var(--color-ink-400);
+
+  /* Border colors */
+  --border-default: var(--color-cream-200);
+  --border-light: var(--color-cream-100);
+
+  /* Table header */
+  --table-header-bg: var(--color-cream-50);
+  --table-header-text: var(--color-ink-500);
+  --table-row-hover: var(--color-cream-50);
+
+  /* Icon backgrounds */
+  --icon-bg-vault: var(--color-vault-bg-gradient);
+  --icon-bg-success: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%);
+  --icon-bg-info: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
+  --icon-bg-warning: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+  --icon-bg-purple: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%);
+  --icon-bg-error: rgba(239, 68, 68, 0.1);
+  --icon-bg-neutral: var(--color-cream-100);
+  --icon-bg-emerald: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+  --icon-bg-sky: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%);
+  --icon-bg-violet: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%);
+}
+
+/* ----------------------------------------
+   DARK MODE VARIABLES
+   ---------------------------------------- */
+.dark {
+  /* Vault brand colors for dark mode */
+  --color-vault: #FB923C;
+  --color-vault-dark: #EA580C;
+  --color-vault-light: #FDBA74;
+  --color-vault-bg: rgba(251, 146, 60, 0.15);
+  --color-vault-bg-gradient: linear-gradient(135deg, var(--color-vault-bg) 0%, var(--color-dark-surface-light) 100%);
+
+  /* Sidebar colors */
+  --sidebar-bg: var(--color-dark-surface);
+  --sidebar-border: var(--color-dark-border);
+  --sidebar-text: var(--color-dark-text);
+  --sidebar-text-muted: var(--color-dark-text-muted);
+
+  /* Content colors */
+  --content-bg: var(--color-dark-bg);
+  --surface-bg: var(--color-dark-surface);
+  --surface-hover: var(--color-dark-surface-light);
+
+  /* Text colors */
+  --text-primary: var(--color-dark-text);
+  --text-secondary: var(--color-dark-text);
+  --text-muted: var(--color-dark-text-muted);
+  --text-faint: var(--color-dark-text-muted);
+
+  /* Border colors */
+  --border-default: var(--color-dark-border);
+  --border-light: var(--color-dark-surface-light);
+
+  /* Table header */
+  --table-header-bg: var(--color-dark-surface);
+  --table-header-text: var(--color-dark-text-muted);
+  --table-row-hover: var(--color-dark-surface-light);
+
+  /* Icon backgrounds - darker variants */
+  --icon-bg-vault: linear-gradient(135deg, rgba(251, 146, 60, 0.2) 0%, var(--color-dark-surface-light) 100%);
+  --icon-bg-success: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
+  --icon-bg-info: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%);
+  --icon-bg-warning: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.1) 100%);
+  --icon-bg-purple: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%);
+  --icon-bg-error: rgba(239, 68, 68, 0.2);
+  --icon-bg-neutral: var(--color-dark-surface-light);
+  --icon-bg-emerald: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+  --icon-bg-sky: linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(14, 165, 233, 0.1) 100%);
+  --icon-bg-violet: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%);
+}
+
+/* ----------------------------------------
+   SIDEBAR DARK MODE
+   ---------------------------------------- */
+.dark .sidebar {
+  background: var(--sidebar-bg);
+  border-color: var(--sidebar-border);
+}
+
+.dark .sidebar-header {
+  border-color: var(--sidebar-border);
+}
+
+.dark .sidebar-brand {
+  color: var(--sidebar-text);
+}
+
+.dark .sidebar-nav-item {
+  color: var(--sidebar-text-muted);
+}
+
+.dark .sidebar-nav-item:hover {
+  background: var(--color-dark-surface-light);
+  color: var(--sidebar-text);
+}
+
+.dark .sidebar-nav-item.active {
+  background: rgba(251, 146, 60, 0.15);
+  color: var(--color-vault);
+}
+
+.dark .sidebar-section-label {
+  color: var(--sidebar-text-muted);
+}
+
+.dark .sidebar-divider {
+  background: var(--sidebar-border);
+}
+
+.dark .sidebar-user-info {
+  border-color: var(--sidebar-border);
+}
+
+.dark .sidebar-user-name {
+  color: var(--sidebar-text);
+}
+
+.dark .sidebar-user-email {
+  color: var(--sidebar-text-muted);
+}
+
+/* ----------------------------------------
+   MAIN CONTENT DARK MODE
+   ---------------------------------------- */
+.dark .main-content {
+  background: var(--content-bg);
+}
+
+/* ----------------------------------------
+   UTILITY CLASSES FOR DARK MODE
+   ---------------------------------------- */
+
+/* Text colors */
+.text-vault {
+  color: var(--color-vault);
+}
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-faint {
+  color: var(--text-faint);
+}
+
+/* Background colors */
+.bg-surface {
+  background: var(--surface-bg);
+}
+
+.bg-content {
+  background: var(--content-bg);
+}
+
+.bg-sidebar {
+  background: var(--sidebar-bg);
+}
+
+/* Icon backgrounds */
+.icon-bg-vault {
+  background: var(--icon-bg-vault);
+}
+
+.icon-bg-success {
+  background: var(--icon-bg-success);
+}
+
+.icon-bg-info {
+  background: var(--icon-bg-info);
+}
+
+.icon-bg-warning {
+  background: var(--icon-bg-warning);
+}
+
+.icon-bg-purple {
+  background: var(--icon-bg-purple);
+}
+
+.icon-bg-error {
+  background: var(--icon-bg-error);
+}
+
+.icon-bg-neutral {
+  background: var(--icon-bg-neutral);
+}
+
+.icon-bg-emerald {
+  background: var(--icon-bg-emerald);
+}
+
+.icon-bg-sky {
+  background: var(--icon-bg-sky);
+}
+
+.icon-bg-violet {
+  background: var(--icon-bg-violet);
+}
+
+/* Border colors */
+.border-default {
+  border-color: var(--border-default);
+}
+
+.border-light {
+  border-color: var(--border-light);
+}
+
+/* Semantic text colors that adapt to dark mode */
+.text-info-500 {
+  color: var(--color-info-500);
+}
+
+.text-success-500 {
+  color: var(--color-success-500);
+}
+
+.text-error-500 {
+  color: var(--color-error-500);
+}
+
+.text-warning-500 {
+  color: var(--color-warning-500);
+}
+
+.text-purple-500 {
+  color: #8B5CF6;
+}
+
+.dark .text-info-500 {
+  color: var(--color-info-400);
+}
+
+.dark .text-success-500 {
+  color: var(--color-success-400);
+}
+
+.dark .text-error-500 {
+  color: var(--color-error-400);
+}
+
+.dark .text-warning-500 {
+  color: var(--color-warning-400);
+}
+
+.dark .text-purple-500 {
+  color: #A78BFA;
+}
+
+/* Vault brand background */
+.bg-vault {
+  background: var(--color-vault);
+}
+
+/* ----------------------------------------
+   TABLE HEADER STYLES (removes inline styles)
+   ---------------------------------------- */
+.table-header {
+  color: var(--table-header-text);
+  background: var(--table-header-bg);
+}
+
+.table-row-hover:hover {
+  background: var(--table-row-hover);
+}
+
+/* ----------------------------------------
+   FORM LABEL
+   ---------------------------------------- */
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.375rem;
+}
+
+/* ----------------------------------------
+   PROJECT SELECTOR DARK MODE
+   ---------------------------------------- */
+.dark .project-selector {
+  background: rgba(251, 146, 60, 0.1);
+  color: var(--sidebar-text);
+}
+
+.dark .project-initial {
+  background: rgba(251, 146, 60, 0.2);
+  color: var(--color-vault);
+}
+
+/* ----------------------------------------
+   DROPDOWN DARK MODE
+   ---------------------------------------- */
+.dark .dropdown-menu {
+  background: var(--surface-bg);
+  border-color: var(--border-default);
+}
+
+.dark .dropdown-item {
+  color: var(--text-muted);
+}
+
+.dark .dropdown-item:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.dark .dropdown-item.active {
+  background: rgba(251, 146, 60, 0.1);
+}
+
+/* ----------------------------------------
+   LINK STYLES
+   ---------------------------------------- */
+.link-primary {
+  color: var(--color-primary-500);
+  transition: color 0.2s ease;
+}
+
+.link-primary:hover {
+  color: var(--color-primary-600);
+}
+
+.dark .link-primary {
+  color: var(--color-primary-400);
+}
+
+.dark .link-primary:hover {
+  color: var(--color-primary-300);
+}
+
+/* ----------------------------------------
+   DARK MODE TOGGLE BUTTON
+   ---------------------------------------- */
+.dark-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: 0.75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dark-mode-toggle:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.dark-mode-toggle:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+.dark-mode-toggle svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  transition: transform 0.3s ease;
+}
+
+.dark-mode-toggle:hover svg {
+  transform: rotate(15deg);
+}
+
+/* Sun icon (shown in dark mode) */
+.dark-mode-toggle .icon-sun {
+  display: none;
+}
+
+.dark .dark-mode-toggle .icon-sun {
+  display: block;
+}
+
+/* Moon icon (shown in light mode) */
+.dark-mode-toggle .icon-moon {
+  display: block;
+}
+
+.dark .dark-mode-toggle .icon-moon {
+  display: none;
+}
+
+/* ----------------------------------------
+   PREFERS-COLOR-SCHEME SUPPORT
+   ----------------------------------------
+   Auto-detect system preference when no explicit
+   preference is set (no .dark or .light class)
+*/
+@media (prefers-color-scheme: dark) {
+  html:not(.light) body {
+    background-color: var(--color-dark-bg);
+    color: var(--color-dark-text);
+  }
+
+  /* Apply dark variables when system prefers dark and no explicit .light class */
+  html:not(.light):not(.dark) {
+    --color-vault: #FB923C;
+    --color-vault-bg: rgba(251, 146, 60, 0.15);
+    --sidebar-bg: var(--color-dark-surface);
+    --sidebar-border: var(--color-dark-border);
+    --sidebar-text: var(--color-dark-text);
+    --sidebar-text-muted: var(--color-dark-text-muted);
+    --content-bg: var(--color-dark-bg);
+    --surface-bg: var(--color-dark-surface);
+    --surface-hover: var(--color-dark-surface-light);
+    --text-primary: var(--color-dark-text);
+    --text-secondary: var(--color-dark-text);
+    --text-muted: var(--color-dark-text-muted);
+    --text-faint: var(--color-dark-text-muted);
+    --border-default: var(--color-dark-border);
+    --border-light: var(--color-dark-surface-light);
+    --table-header-bg: var(--color-dark-surface);
+    --table-header-text: var(--color-dark-text-muted);
+    --table-row-hover: var(--color-dark-surface-light);
+  }
+}
+
+/* ----------------------------------------
+   SMOOTH TRANSITIONS
+   ---------------------------------------- */
+body,
+.sidebar,
+.main-content,
+.card,
+.btn-primary,
+.btn-secondary,
+.input,
+.table th,
+.table td {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* Disable transitions on initial load to prevent flash */
+html.no-transitions * {
+  transition: none !important;
+}
+
+/* ----------------------------------------
+   PRINT STYLES
+   ---------------------------------------- */
+@media print {
+  .dark-mode-toggle {
+    display: none;
+  }
+
+  .dark body,
+  html.dark body {
+    background-color: white;
+    color: black;
+  }
+}
