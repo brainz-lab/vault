@@ -1,512 +1,500 @@
 /* ============================================
-   VAULT - DARK MODE STYLES
+   DARK MODE STYLES - BrainzLab Standard
    ============================================
-   Extends brainzlab-ui dark mode with Vault-specific overrides
+   Standardized dark mode implementation for all BrainzLab products.
+   Uses `dm-*` prefix for CSS classes and `brainzlab-theme` localStorage key.
 
-   Dark Mode Tokens (from brainzlab-ui):
+   Dark mode tokens from brainzlab-ui:
    - Dark bg: #121212
    - Dark surface: #1e1e1e
    - Dark surface light: #2a2a2a
    - Dark text: #e8e1d7
    - Dark text muted: #a0a0a0
    - Dark border: #333333
-
-   Usage:
-   1. Add .dark class to <html> element
-   2. Toggle via DarkModeController (Stimulus)
 */
 
-/* ----------------------------------------
-   VAULT-SPECIFIC CSS VARIABLES
-   ---------------------------------------- */
+/* ============================================
+   CSS VARIABLES - Light Theme (Default)
+   ============================================ */
 :root {
-  /* Light mode Vault brand colors */
-  --color-vault: #EA580C;
-  --color-vault-dark: #C2410C;
-  --color-vault-light: #FB923C;
-  --color-vault-bg: rgba(234, 88, 12, 0.1);
-  --color-vault-bg-gradient: linear-gradient(135deg, var(--color-vault-bg) 0%, var(--color-cream-200) 100%);
+  /* Core backgrounds */
+  --dm-bg: #FAFAF9;
+  --dm-surface: #FFFFFF;
+  --dm-surface-alt: #F5F5F0;
+  --dm-surface-hover: #F0EFED;
 
-  /* Sidebar colors */
-  --sidebar-bg: #fff;
-  --sidebar-border: var(--color-cream-200);
-  --sidebar-text: var(--color-ink-700);
-  --sidebar-text-muted: var(--color-ink-400);
+  /* Core text */
+  --dm-text: #1a1a1a;
+  --dm-text-secondary: #6B6760;
+  --dm-text-muted: #8B8780;
+  --dm-text-placeholder: #A5A29C;
 
-  /* Content colors */
-  --content-bg: var(--color-cream-50);
-  --surface-bg: #fff;
-  --surface-hover: var(--color-cream-50);
+  /* Core borders */
+  --dm-border: #E8E5E0;
+  --dm-border-light: #F0EFED;
 
-  /* Text colors */
-  --text-primary: var(--color-ink-900);
-  --text-secondary: var(--color-ink-700);
-  --text-muted: var(--color-ink-500);
-  --text-faint: var(--color-ink-400);
+  /* Interactive */
+  --dm-input-bg: #FFFFFF;
+  --dm-input-border: #E8E5E0;
+  --dm-hover-bg: #F5F5F0;
 
-  /* Border colors */
-  --border-default: var(--color-cream-200);
-  --border-light: var(--color-cream-100);
+  /* Code blocks */
+  --dm-code-bg: #1A1A1A;
+  --dm-code-text: #E8E5E0;
 
-  /* Table header */
-  --table-header-bg: var(--color-cream-50);
-  --table-header-text: var(--color-ink-500);
-  --table-row-hover: var(--color-cream-50);
+  /* Shadows */
+  --dm-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --dm-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
+  --dm-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
 
-  /* Icon backgrounds */
-  --icon-bg-vault: var(--color-vault-bg-gradient);
-  --icon-bg-success: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%);
-  --icon-bg-info: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
-  --icon-bg-warning: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
-  --icon-bg-purple: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%);
-  --icon-bg-error: rgba(239, 68, 68, 0.1);
-  --icon-bg-neutral: var(--color-cream-100);
-  --icon-bg-emerald: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
-  --icon-bg-sky: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%);
-  --icon-bg-violet: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%);
+  /* Status colors - Light */
+  --dm-success: #16A34A;
+  --dm-success-bg: #DCFCE7;
+  --dm-success-text: #166534;
+  --dm-success-border: #A7F3D0;
+
+  --dm-warning: #D97706;
+  --dm-warning-bg: #FEF3C7;
+  --dm-warning-text: #92400E;
+  --dm-warning-border: #FDE68A;
+
+  --dm-error: #DC2626;
+  --dm-error-bg: #FEF2F2;
+  --dm-error-text: #991B1B;
+  --dm-error-border: #FECACA;
+
+  --dm-info: #2563EB;
+  --dm-info-bg: #EFF6FF;
+  --dm-info-text: #1E40AF;
+  --dm-info-border: #BFDBFE;
+
+  /* Vault-specific: Brand accent */
+  --dm-vault: #EA580C;
+  --dm-vault-dark: #C2410C;
+  --dm-vault-light: #FB923C;
 }
 
-/* ----------------------------------------
-   DARK MODE VARIABLES
-   ---------------------------------------- */
-.dark {
-  /* Vault brand colors for dark mode */
-  --color-vault: #FB923C;
-  --color-vault-dark: #EA580C;
-  --color-vault-light: #FDBA74;
-  --color-vault-bg: rgba(251, 146, 60, 0.15);
-  --color-vault-bg-gradient: linear-gradient(135deg, var(--color-vault-bg) 0%, var(--color-dark-surface-light) 100%);
+/* ============================================
+   CSS VARIABLES - Dark Theme
+   ============================================ */
+html.dark,
+.dark,
+[data-theme="dark"] {
+  /* Core backgrounds */
+  --dm-bg: #121212;
+  --dm-surface: #1e1e1e;
+  --dm-surface-alt: #2a2a2a;
+  --dm-surface-hover: #333333;
 
-  /* Sidebar colors */
-  --sidebar-bg: var(--color-dark-surface);
-  --sidebar-border: var(--color-dark-border);
-  --sidebar-text: var(--color-dark-text);
-  --sidebar-text-muted: var(--color-dark-text-muted);
+  /* Core text */
+  --dm-text: #e8e1d7;
+  --dm-text-secondary: #a0a0a0;
+  --dm-text-muted: #707070;
+  --dm-text-placeholder: #666666;
 
-  /* Content colors */
-  --content-bg: var(--color-dark-bg);
-  --surface-bg: var(--color-dark-surface);
-  --surface-hover: var(--color-dark-surface-light);
+  /* Core borders */
+  --dm-border: #333333;
+  --dm-border-light: #2a2a2a;
 
-  /* Text colors */
-  --text-primary: var(--color-dark-text);
-  --text-secondary: var(--color-dark-text);
-  --text-muted: var(--color-dark-text-muted);
-  --text-faint: var(--color-dark-text-muted);
+  /* Interactive */
+  --dm-input-bg: #2a2a2a;
+  --dm-input-border: #333333;
+  --dm-hover-bg: #2a2a2a;
 
-  /* Border colors */
-  --border-default: var(--color-dark-border);
-  --border-light: var(--color-dark-surface-light);
+  /* Code blocks */
+  --dm-code-bg: #0d0d0d;
+  --dm-code-text: #e8e1d7;
 
-  /* Table header */
-  --table-header-bg: var(--color-dark-surface);
-  --table-header-text: var(--color-dark-text-muted);
-  --table-row-hover: var(--color-dark-surface-light);
+  /* Shadows */
+  --dm-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --dm-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --dm-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
 
-  /* Icon backgrounds - darker variants */
-  --icon-bg-vault: linear-gradient(135deg, rgba(251, 146, 60, 0.2) 0%, var(--color-dark-surface-light) 100%);
-  --icon-bg-success: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
-  --icon-bg-info: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%);
-  --icon-bg-warning: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.1) 100%);
-  --icon-bg-purple: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%);
-  --icon-bg-error: rgba(239, 68, 68, 0.2);
-  --icon-bg-neutral: var(--color-dark-surface-light);
-  --icon-bg-emerald: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
-  --icon-bg-sky: linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(14, 165, 233, 0.1) 100%);
-  --icon-bg-violet: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%);
+  /* Status colors - Dark */
+  --dm-success: #22C55E;
+  --dm-success-bg: rgba(34, 197, 94, 0.15);
+  --dm-success-text: #86EFAC;
+  --dm-success-border: rgba(34, 197, 94, 0.3);
+
+  --dm-warning: #F59E0B;
+  --dm-warning-bg: rgba(245, 158, 11, 0.15);
+  --dm-warning-text: #FCD34D;
+  --dm-warning-border: rgba(245, 158, 11, 0.3);
+
+  --dm-error: #EF4444;
+  --dm-error-bg: rgba(239, 68, 68, 0.15);
+  --dm-error-text: #FCA5A5;
+  --dm-error-border: rgba(239, 68, 68, 0.3);
+
+  --dm-info: #3B82F6;
+  --dm-info-bg: rgba(59, 130, 246, 0.15);
+  --dm-info-text: #93C5FD;
+  --dm-info-border: rgba(59, 130, 246, 0.3);
+
+  /* Vault-specific */
+  --dm-vault: #FB923C;
+  --dm-vault-dark: #EA580C;
+  --dm-vault-light: #FDBA74;
 }
 
-/* ----------------------------------------
-   SIDEBAR DARK MODE
-   ---------------------------------------- */
-.dark .sidebar {
-  background: var(--sidebar-bg);
-  border-color: var(--sidebar-border);
+/* ============================================
+   System Preference Support
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  html:not(.light):not([data-theme="light"]) {
+    /* Core backgrounds */
+    --dm-bg: #121212;
+    --dm-surface: #1e1e1e;
+    --dm-surface-alt: #2a2a2a;
+    --dm-surface-hover: #333333;
+
+    /* Core text */
+    --dm-text: #e8e1d7;
+    --dm-text-secondary: #a0a0a0;
+    --dm-text-muted: #707070;
+    --dm-text-placeholder: #666666;
+
+    /* Core borders */
+    --dm-border: #333333;
+    --dm-border-light: #2a2a2a;
+
+    /* Interactive */
+    --dm-input-bg: #2a2a2a;
+    --dm-input-border: #333333;
+    --dm-hover-bg: #2a2a2a;
+
+    /* Code blocks */
+    --dm-code-bg: #0d0d0d;
+    --dm-code-text: #e8e1d7;
+
+    /* Shadows */
+    --dm-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --dm-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --dm-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+
+    /* Status colors */
+    --dm-success: #22C55E;
+    --dm-success-bg: rgba(34, 197, 94, 0.15);
+    --dm-success-text: #86EFAC;
+    --dm-success-border: rgba(34, 197, 94, 0.3);
+
+    --dm-warning: #F59E0B;
+    --dm-warning-bg: rgba(245, 158, 11, 0.15);
+    --dm-warning-text: #FCD34D;
+    --dm-warning-border: rgba(245, 158, 11, 0.3);
+
+    --dm-error: #EF4444;
+    --dm-error-bg: rgba(239, 68, 68, 0.15);
+    --dm-error-text: #FCA5A5;
+    --dm-error-border: rgba(239, 68, 68, 0.3);
+
+    --dm-info: #3B82F6;
+    --dm-info-bg: rgba(59, 130, 246, 0.15);
+    --dm-info-text: #93C5FD;
+    --dm-info-border: rgba(59, 130, 246, 0.3);
+
+    /* Vault brand */
+    --dm-vault: #FB923C;
+    --dm-vault-dark: #EA580C;
+    --dm-vault-light: #FDBA74;
+  }
 }
 
-.dark .sidebar-header {
-  border-color: var(--sidebar-border);
+/* ============================================
+   STANDARDIZED UTILITY CLASSES (dm-* prefix)
+   ============================================ */
+
+/* Background utilities */
+.dm-bg {
+  background-color: var(--dm-bg);
 }
 
-.dark .sidebar-brand {
-  color: var(--sidebar-text);
+.dm-surface {
+  background-color: var(--dm-surface);
 }
 
-.dark .sidebar-nav-item {
-  color: var(--sidebar-text-muted);
+.dm-surface-alt {
+  background-color: var(--dm-surface-alt);
 }
 
-.dark .sidebar-nav-item:hover {
-  background: var(--color-dark-surface-light);
-  color: var(--sidebar-text);
+.dm-surface-hover:hover {
+  background-color: var(--dm-surface-hover);
 }
 
-.dark .sidebar-nav-item.active {
-  background: rgba(251, 146, 60, 0.15);
-  color: var(--color-vault);
+/* Text utilities */
+.dm-text {
+  color: var(--dm-text);
 }
 
-.dark .sidebar-section-label {
-  color: var(--sidebar-text-muted);
+.dm-text-secondary {
+  color: var(--dm-text-secondary);
 }
 
-.dark .sidebar-divider {
-  background: var(--sidebar-border);
+.dm-text-muted {
+  color: var(--dm-text-muted);
 }
 
-.dark .sidebar-user-info {
-  border-color: var(--sidebar-border);
+.dm-text-placeholder {
+  color: var(--dm-text-placeholder);
 }
 
-.dark .sidebar-user-name {
-  color: var(--sidebar-text);
+/* Border utilities */
+.dm-border {
+  border-color: var(--dm-border);
 }
 
-.dark .sidebar-user-email {
-  color: var(--sidebar-text-muted);
+.dm-border-light {
+  border-color: var(--dm-border-light);
 }
 
-/* ----------------------------------------
-   MAIN CONTENT DARK MODE
-   ---------------------------------------- */
-.dark .main-content {
-  background: var(--content-bg);
+/* Card component */
+.dm-card {
+  background-color: var(--dm-surface);
+  border: 1px solid var(--dm-border);
+  box-shadow: var(--dm-shadow-sm);
 }
 
-/* ----------------------------------------
-   UTILITY CLASSES FOR DARK MODE
-   ---------------------------------------- */
-
-/* Text colors */
-.text-vault {
-  color: var(--color-vault);
+/* Input component */
+.dm-input {
+  background-color: var(--dm-input-bg);
+  border: 1px solid var(--dm-input-border);
+  color: var(--dm-text);
 }
 
-.text-primary {
-  color: var(--text-primary);
+.dm-input:focus {
+  border-color: var(--dm-vault);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.2);
 }
 
-.text-secondary {
-  color: var(--text-secondary);
+.dm-input::placeholder {
+  color: var(--dm-text-placeholder);
 }
 
-.text-muted {
-  color: var(--text-muted);
+/* Button components */
+.dm-btn-primary {
+  background-color: var(--dm-text);
+  color: var(--dm-bg);
 }
 
-.text-faint {
-  color: var(--text-faint);
+.dm-btn-primary:hover {
+  opacity: 0.9;
 }
 
-/* Background colors */
-.bg-surface {
-  background: var(--surface-bg);
+.dm-btn-secondary {
+  background-color: var(--dm-surface-alt);
+  border: 1px solid var(--dm-border);
+  color: var(--dm-text-secondary);
 }
 
-.bg-content {
-  background: var(--content-bg);
+.dm-btn-secondary:hover {
+  background-color: var(--dm-surface-hover);
 }
 
-.bg-sidebar {
-  background: var(--sidebar-bg);
+/* Table components */
+.dm-table-header {
+  background-color: var(--dm-surface-alt);
+  color: var(--dm-text-muted);
+  border-bottom: 1px solid var(--dm-border);
 }
 
-/* Icon backgrounds */
-.icon-bg-vault {
-  background: var(--icon-bg-vault);
+.dm-table-row {
+  border-bottom: 1px solid var(--dm-border-light);
 }
 
-.icon-bg-success {
-  background: var(--icon-bg-success);
+.dm-table-row:hover {
+  background-color: var(--dm-hover-bg);
 }
 
-.icon-bg-info {
-  background: var(--icon-bg-info);
+/* Code block */
+.dm-code {
+  background-color: var(--dm-code-bg);
+  color: var(--dm-code-text);
 }
 
-.icon-bg-warning {
-  background: var(--icon-bg-warning);
+/* Sidebar */
+.dm-sidebar {
+  background-color: var(--dm-surface);
+  border-right: 1px solid var(--dm-border);
 }
 
-.icon-bg-purple {
-  background: var(--icon-bg-purple);
+/* Status alerts */
+.dm-alert-success {
+  background-color: var(--dm-success-bg);
+  color: var(--dm-success-text);
+  border: 1px solid var(--dm-success-border);
 }
 
-.icon-bg-error {
-  background: var(--icon-bg-error);
+.dm-alert-warning {
+  background-color: var(--dm-warning-bg);
+  color: var(--dm-warning-text);
+  border: 1px solid var(--dm-warning-border);
 }
 
-.icon-bg-neutral {
-  background: var(--icon-bg-neutral);
+.dm-alert-error {
+  background-color: var(--dm-error-bg);
+  color: var(--dm-error-text);
+  border: 1px solid var(--dm-error-border);
 }
 
-.icon-bg-emerald {
-  background: var(--icon-bg-emerald);
+.dm-alert-info {
+  background-color: var(--dm-info-bg);
+  color: var(--dm-info-text);
+  border: 1px solid var(--dm-info-border);
 }
 
-.icon-bg-sky {
-  background: var(--icon-bg-sky);
+/* Badges */
+.dm-badge-success {
+  background-color: var(--dm-success-bg);
+  color: var(--dm-success-text);
 }
 
-.icon-bg-violet {
-  background: var(--icon-bg-violet);
+.dm-badge-warning {
+  background-color: var(--dm-warning-bg);
+  color: var(--dm-warning-text);
 }
 
-/* Border colors */
-.border-default {
-  border-color: var(--border-default);
+.dm-badge-error {
+  background-color: var(--dm-error-bg);
+  color: var(--dm-error-text);
 }
 
-.border-light {
-  border-color: var(--border-light);
+.dm-badge-info {
+  background-color: var(--dm-info-bg);
+  color: var(--dm-info-text);
 }
 
-/* Semantic text colors that adapt to dark mode */
-.text-info-500 {
-  color: var(--color-info-500);
+.dm-badge-neutral {
+  background-color: var(--dm-surface-alt);
+  color: var(--dm-text-muted);
 }
 
-.text-success-500 {
-  color: var(--color-success-500);
-}
-
-.text-error-500 {
-  color: var(--color-error-500);
-}
-
-.text-warning-500 {
-  color: var(--color-warning-500);
-}
-
-.text-purple-500 {
-  color: #8B5CF6;
-}
-
-.dark .text-info-500 {
-  color: var(--color-info-400);
-}
-
-.dark .text-success-500 {
-  color: var(--color-success-400);
-}
-
-.dark .text-error-500 {
-  color: var(--color-error-400);
-}
-
-.dark .text-warning-500 {
-  color: var(--color-warning-400);
-}
-
-.dark .text-purple-500 {
-  color: #A78BFA;
-}
-
-/* Vault brand background */
-.bg-vault {
-  background: var(--color-vault);
-}
-
-/* ----------------------------------------
-   TABLE HEADER STYLES (removes inline styles)
-   ---------------------------------------- */
-.table-header {
-  color: var(--table-header-text);
-  background: var(--table-header-bg);
-}
-
-.table-row-hover:hover {
-  background: var(--table-row-hover);
-}
-
-/* ----------------------------------------
-   FORM LABEL
-   ---------------------------------------- */
-.form-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: 0.375rem;
-}
-
-/* ----------------------------------------
-   PROJECT SELECTOR DARK MODE
-   ---------------------------------------- */
-.dark .project-selector {
-  background: rgba(251, 146, 60, 0.1);
-  color: var(--sidebar-text);
-}
-
-.dark .project-initial {
-  background: rgba(251, 146, 60, 0.2);
-  color: var(--color-vault);
-}
-
-/* ----------------------------------------
-   DROPDOWN DARK MODE
-   ---------------------------------------- */
-.dark .dropdown-menu {
-  background: var(--surface-bg);
-  border-color: var(--border-default);
-}
-
-.dark .dropdown-item {
-  color: var(--text-muted);
-}
-
-.dark .dropdown-item:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
-}
-
-.dark .dropdown-item.active {
-  background: rgba(251, 146, 60, 0.1);
-}
-
-/* ----------------------------------------
-   LINK STYLES
-   ---------------------------------------- */
-.link-primary {
-  color: var(--color-primary-500);
-  transition: color 0.2s ease;
-}
-
-.link-primary:hover {
-  color: var(--color-primary-600);
-}
-
-.dark .link-primary {
-  color: var(--color-primary-400);
-}
-
-.dark .link-primary:hover {
-  color: var(--color-primary-300);
-}
-
-/* ----------------------------------------
-   DARK MODE TOGGLE BUTTON
-   ---------------------------------------- */
-.dark-mode-toggle {
+/* ============================================
+   Dark Mode Toggle Button
+   ============================================ */
+.dm-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  padding: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0.375rem;
   background: transparent;
-  border: 1px solid var(--border-default);
-  border-radius: 0.75rem;
-  color: var(--text-muted);
+  border: 1px solid var(--dm-border);
+  border-radius: 0.5rem;
+  color: var(--dm-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.dark-mode-toggle:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
-  border-color: var(--text-muted);
+.dm-toggle:hover {
+  background-color: var(--dm-hover-bg);
+  color: var(--dm-text);
 }
 
-.dark-mode-toggle:focus-visible {
-  outline: 2px solid var(--color-primary-500);
+.dm-toggle:focus-visible {
+  outline: 2px solid var(--dm-vault);
   outline-offset: 2px;
 }
 
-.dark-mode-toggle svg {
-  width: 1.125rem;
-  height: 1.125rem;
+.dm-toggle svg {
+  width: 1rem;
+  height: 1rem;
   transition: transform 0.3s ease;
 }
 
-.dark-mode-toggle:hover svg {
+.dm-toggle:hover svg {
   transform: rotate(15deg);
 }
 
-/* Sun icon (shown in dark mode) */
-.dark-mode-toggle .icon-sun {
+/* Sun/Moon icon visibility */
+.dm-toggle .icon-sun {
   display: none;
 }
 
-.dark .dark-mode-toggle .icon-sun {
+.dm-toggle .icon-moon {
   display: block;
 }
 
-/* Moon icon (shown in light mode) */
-.dark-mode-toggle .icon-moon {
+html.dark .dm-toggle .icon-sun,
+[data-theme="dark"] .dm-toggle .icon-sun {
   display: block;
 }
 
-.dark .dark-mode-toggle .icon-moon {
+html.dark .dm-toggle .icon-moon,
+[data-theme="dark"] .dm-toggle .icon-moon {
   display: none;
 }
 
-/* ----------------------------------------
-   PREFERS-COLOR-SCHEME SUPPORT
-   ----------------------------------------
-   Auto-detect system preference when no explicit
-   preference is set (no .dark or .light class)
-*/
 @media (prefers-color-scheme: dark) {
-  html:not(.light) body {
-    background-color: var(--color-dark-bg);
-    color: var(--color-dark-text);
+  html:not(.light):not([data-theme="light"]) .dm-toggle .icon-sun {
+    display: block;
   }
-
-  /* Apply dark variables when system prefers dark and no explicit .light class */
-  html:not(.light):not(.dark) {
-    --color-vault: #FB923C;
-    --color-vault-bg: rgba(251, 146, 60, 0.15);
-    --sidebar-bg: var(--color-dark-surface);
-    --sidebar-border: var(--color-dark-border);
-    --sidebar-text: var(--color-dark-text);
-    --sidebar-text-muted: var(--color-dark-text-muted);
-    --content-bg: var(--color-dark-bg);
-    --surface-bg: var(--color-dark-surface);
-    --surface-hover: var(--color-dark-surface-light);
-    --text-primary: var(--color-dark-text);
-    --text-secondary: var(--color-dark-text);
-    --text-muted: var(--color-dark-text-muted);
-    --text-faint: var(--color-dark-text-muted);
-    --border-default: var(--color-dark-border);
-    --border-light: var(--color-dark-surface-light);
-    --table-header-bg: var(--color-dark-surface);
-    --table-header-text: var(--color-dark-text-muted);
-    --table-row-hover: var(--color-dark-surface-light);
+  html:not(.light):not([data-theme="light"]) .dm-toggle .icon-moon {
+    display: none;
   }
 }
 
-/* ----------------------------------------
-   SMOOTH TRANSITIONS
-   ---------------------------------------- */
+/* ============================================
+   Scrollbar Dark Mode
+   ============================================ */
+html.dark ::-webkit-scrollbar,
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html.dark ::-webkit-scrollbar-track,
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--dm-surface);
+}
+
+html.dark ::-webkit-scrollbar-thumb,
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--dm-border);
+  border-radius: 4px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover,
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #444444;
+}
+
+/* ============================================
+   Transition Support
+   ============================================ */
 body,
-.sidebar,
-.main-content,
-.card,
-.btn-primary,
-.btn-secondary,
-.input,
-.table th,
-.table td {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+.dm-card,
+.dm-sidebar,
+.dm-input,
+.dm-btn-secondary,
+.dm-table-row {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-/* Disable transitions on initial load to prevent flash */
+/* Disable transitions on initial load */
+html.no-transitions,
 html.no-transitions * {
   transition: none !important;
 }
 
-/* ----------------------------------------
-   PRINT STYLES
-   ---------------------------------------- */
+/* ============================================
+   Print Styles - Force Light Mode
+   ============================================ */
 @media print {
-  .dark-mode-toggle {
-    display: none;
+  :root,
+  html.dark,
+  [data-theme="dark"] {
+    --dm-bg: #FAFAF9;
+    --dm-surface: #FFFFFF;
+    --dm-surface-alt: #F5F5F0;
+    --dm-text: #1a1a1a;
+    --dm-text-secondary: #6B6760;
+    --dm-text-muted: #8B8780;
+    --dm-border: #E8E5E0;
   }
 
-  .dark body,
-  html.dark body {
-    background-color: white;
-    color: black;
+  .dm-toggle {
+    display: none;
   }
 }
