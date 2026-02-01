@@ -19,12 +19,11 @@
 
   <% if @projects.any? %>
     <!-- Projects List -->
-    <div class="card overflow-hidden">
-      <div class="divide-y border-light">
+    <div class="space-y-1">
         <% @projects.each do |project| %>
           <% cache [project, project.secrets_count, project.environments_count, project.tokens_count] do %>
-          <%= link_to dashboard_project_path(project), class: "group block table-row-hover" do %>
-            <div class="px-6 py-5 flex items-center justify-between transition-colors">
+          <%= link_to dashboard_project_path(project), class: "group block dm-row" do %>
+            <div class="flex items-center justify-between">
               <div class="flex items-center gap-4">
                 <!-- Project Icon -->
                 <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-all icon-bg-vault">
@@ -68,7 +67,6 @@
           <% end %>
           <% end %>
         <% end %>
-      </div>
     </div>
 
   <% else %>
