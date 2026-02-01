@@ -846,6 +846,115 @@ html.dark,
 }
 
 /* ============================================
+   Tailwind Color Overrides for Dark Mode
+   ============================================ */
+
+/* Text colors - Stone shades */
+.dark .text-stone-900 {
+  color: var(--dm-text) !important;
+}
+
+.dark .text-stone-800 {
+  color: var(--dm-text) !important;
+}
+
+.dark .text-stone-700 {
+  color: var(--dm-text-secondary) !important;
+}
+
+.dark .text-stone-600 {
+  color: var(--dm-text-secondary) !important;
+}
+
+.dark .text-stone-500 {
+  color: var(--dm-text-muted) !important;
+}
+
+.dark .text-stone-400 {
+  color: var(--dm-text-muted) !important;
+}
+
+/* Background colors - Stone shades */
+.dark .bg-stone-50 {
+  background-color: var(--dm-surface-alt) !important;
+}
+
+.dark .bg-stone-100 {
+  background-color: var(--dm-surface-hover) !important;
+}
+
+/* Icon backgrounds - Brand colors */
+.dark .bg-orange-100 {
+  background-color: rgba(234, 88, 12, 0.15) !important;
+}
+
+.dark .bg-sky-100 {
+  background-color: rgba(56, 189, 248, 0.15) !important;
+}
+
+.dark .bg-violet-100 {
+  background-color: rgba(139, 92, 246, 0.15) !important;
+}
+
+.dark .bg-emerald-100 {
+  background-color: rgba(52, 211, 153, 0.15) !important;
+}
+
+.dark .bg-amber-100 {
+  background-color: rgba(251, 191, 36, 0.15) !important;
+}
+
+/* Border and divider colors */
+.dark .divide-stone-100 > * + * {
+  border-color: var(--dm-border) !important;
+}
+
+.dark .border-stone-100 {
+  border-color: var(--dm-border) !important;
+}
+
+.dark .border-stone-200 {
+  border-color: var(--dm-border) !important;
+}
+
+/* Inline code styling */
+.dark code.bg-stone-100 {
+  background-color: var(--dm-surface-alt) !important;
+  color: var(--dm-text) !important;
+}
+
+.dark .code-block {
+  background-color: var(--dm-code-bg) !important;
+  color: var(--dm-code-text) !important;
+}
+
+/* Card backgrounds */
+.dark .card {
+  background-color: var(--dm-surface) !important;
+  border-color: var(--dm-border) !important;
+}
+
+/* Alert backgrounds */
+.dark .alert-warning {
+  background-color: var(--dm-warning-bg) !important;
+  border-color: var(--dm-warning-border) !important;
+}
+
+.dark .alert-warning .text-amber-500 {
+  color: var(--dm-warning) !important;
+}
+
+.dark .alert-warning .text-amber-800 {
+  color: var(--dm-warning-text) !important;
+}
+
+/* Badge styling */
+.dark .badge-orange {
+  background-color: rgba(234, 88, 12, 0.15) !important;
+  color: var(--dm-vault) !important;
+}
+
+/* ============================================
    Print Styles - Force Light Mode
    ============================================ */
 @media print {
