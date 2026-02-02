@@ -1,0 +1,51 @@
+# Kamal deployment configuration for Vault
+service: vault
+image: brainz/vault
+
+servers:
+  web:
+    - an-ssh.brainz.computer
+  job:
+    hosts:
+      - an-ssh.brainz.computer
+    cmd: bin/jobs
+
+proxy:
+  ssl: false  # Cloudflare handles TLS termination
+  host: vault.brainzlab.ai
+
+registry:
+  server: registry.digitalocean.com
+  username:
+    - KAMAL_REGISTRY_USERNAME
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+env:
+  secret:
+    - RAILS_MASTER_KEY
+    - DATABASE_URL
+    - SERVICE_KEY
+    - VAULT_MASTER_KEY
+  clear:
+    RAILS_ENV: production
+    RAILS_LOG_TO_STDOUT: "true"
+    RAILS_SERVE_STATIC_FILES: "true"
+    SOLID_QUEUE_IN_PUMA: "false"
+
+aliases:
+  console: app exec --interactive --reuse "bin/rails console"
+  shell: app exec --interactive --reuse "bash"
+  logs: app logs -f
+  dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
+
+volumes:
+  - "vault_storage:/rails/storage"
+
+# asset_path: /rails/public/assets  # Disabled for macOS - requires GNU cp
+
+builder:
+  arch: arm64
+
+ssh:
+  user: afmp

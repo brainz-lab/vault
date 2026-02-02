@@ -73,3 +73,7 @@ coverage/
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+
+# Kamal secrets (contains real credentials)
+.kamal/secrets
+.kamal/secrets.tmp
