@@ -32,6 +32,8 @@ env:
     RAILS_LOG_TO_STDOUT: "true"
     RAILS_SERVE_STATIC_FILES: "true"
     SOLID_QUEUE_IN_PUMA: "false"
+    BRAINZLAB_PLATFORM_URL: https://platform.brainzlab.ai
+    BRAINZLAB_PLATFORM_EXTERNAL_URL: https://platform.brainzlab.ai
 
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
