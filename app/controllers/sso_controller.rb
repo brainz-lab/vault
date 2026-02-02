@@ -1,5 +1,10 @@
 class SsoController < ActionController::Base
   include ActionController::Cookies
+
+  # Disable Turbo Drive for SSO callback to prevent caching issues
+  # This ensures the redirect after authentication works correctly
+  skip_before_action :verify_authenticity_token, raise: false
+
   # GET /sso/callback
   # Handle SSO callback from Platform
   def callback
@@ -26,7 +31,9 @@ class SsoController < ActionController::Base
       # Sync all user's projects from Platform
       sync_projects_from_platform(token)
 
-      redirect_to return_to
+      # Force full page reload to prevent Turbo Drive caching issues after auth
+      response.set_header("Turbo-Visit-Control", "reload")
+      redirect_to return_to, status: :see_other
     else
       redirect_to ENV["BRAINZLAB_PLATFORM_URL"] || "http://platform.localhost:2999/login",
                   allow_other_host: true
