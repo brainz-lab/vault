@@ -31,9 +31,18 @@ class SsoController < ActionController::Base
       # Sync all user's projects from Platform
       sync_projects_from_platform(token)
 
-      # Force full page reload to prevent Turbo Drive caching issues after auth
-      response.set_header("Turbo-Visit-Control", "reload")
-      redirect_to return_to, status: :see_other
+      # Use client-side redirect to completely bypass Turbo Drive
+      # This prevents blank page issues after SSO authentication
+      render html: %{
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta http-equiv="refresh" content="0;url=#{ERB::Util.html_escape(return_to)}">
+          <script>window.location.replace("#{ERB::Util.html_escape(return_to)}");</script>
+        </head>
+        <body>Redirecting...</body>
+        </html>
+      }.html_safe, layout: false
     else
       redirect_to ENV["BRAINZLAB_PLATFORM_URL"] || "http://platform.localhost:2999/login",
                   allow_other_host: true
