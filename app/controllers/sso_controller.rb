@@ -31,6 +31,9 @@ class SsoController < ActionController::Base
       # Sync all user's projects from Platform
       sync_projects_from_platform(token)
 
+      # Ensure at least the current project exists (fallback if full sync failed)
+      ensure_project_exists(result)
+
       # Use client-side redirect to completely bypass Turbo Drive
       # This prevents blank page issues after SSO authentication
       render html: %{
@@ -91,6 +94,21 @@ class SsoController < ActionController::Base
     Rails.logger.info("[SSO] Synced #{projects_data.count} projects from Platform")
   rescue => e
     Rails.logger.error("[SSO] Project sync failed: #{e.message}")
+  end
+
+  # Fallback: ensure at least the current project exists from SSO validation data
+  def ensure_project_exists(user_info)
+    return unless user_info[:project_id].present?
+
+    project = Project.find_or_initialize_by(platform_project_id: user_info[:project_id].to_s)
+    return if project.persisted? # Already exists
+
+    project.name = user_info[:project_slug] || "Project #{user_info[:project_id]}"
+    project.environment = "production"
+    project.save!
+    Rails.logger.info("[SSO] Created project from SSO validation: #{project.name}")
+  rescue => e
+    Rails.logger.error("[SSO] ensure_project_exists failed: #{e.message}")
   end
 
   def fetch_user_projects(sso_token)
