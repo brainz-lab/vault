@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+> **Secrets Reference**: See `../.secrets.md` (gitignored) for master keys, server access, and MCP tokens.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project: Vault by Brainz Lab
@@ -215,3 +217,39 @@ curl -X POST http://localhost:4006/mcp/tools/vault_ssh_get_connection \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"params": {"name": "prod-server"}}'
 ```
+
+## Kamal Production Access
+
+**IMPORTANT**: When using `kamal app exec --reuse`, docker exec doesn't inherit container environment variables. You must pass `SECRET_KEY_BASE` explicitly.
+
+```bash
+# Navigate to this service directory
+cd /Users/afmp/brainz/brainzlab/vault
+
+# Get the master key (used as SECRET_KEY_BASE)
+cat config/master.key
+
+# Run Rails console commands
+kamal app exec -p --reuse -e SECRET_KEY_BASE:<master_key> 'bin/rails runner "<ruby_code>"'
+
+# Example: List projects with token counts (get master key from config/master.key or ../.secrets.md)
+kamal app exec -p --reuse -e SECRET_KEY_BASE:<master_key> \
+  'bin/rails runner "Project.all.each { |p| puts [p.id, p.name, p.access_tokens.active.count].join(\" | \") }"'
+```
+
+### Running Complex Scripts
+
+For multi-line Ruby scripts, create a local file, scp to server, docker cp into container, then run with rails runner. See main brainzlab/CLAUDE.md for full details.
+
+### Other Kamal Commands
+
+```bash
+kamal deploy              # Deploy
+kamal app logs -f         # View logs
+kamal lock release        # Release stuck lock
+kamal secrets print       # Print evaluated secrets
+```
+
+### MCP Access Tokens
+
+MCP access tokens for each project are stored in `../.secrets.md` (gitignored). These tokens have full read/write/delete permissions across all environments (development, staging, production).

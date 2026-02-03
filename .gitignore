@@ -77,3 +77,6 @@ coverage/
 # Kamal secrets (contains real credentials)
 .kamal/secrets
 .kamal/secrets.tmp
+
+# Secrets (NEVER commit)
+.secrets.md
