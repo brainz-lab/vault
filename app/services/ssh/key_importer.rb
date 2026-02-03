@@ -73,8 +73,15 @@ module Ssh
           end
         end
 
-        # Try to detect if it's an Ed25519 key
-        if openssh_key.include?("ssh-ed25519")
+        # Decode the key to detect type from binary content
+        lines = openssh_key.strip.split("\n")
+        lines = lines.reject { |l| l.start_with?("-----") }
+        encoded = lines.join
+        decoded = Base64.decode64(encoded)
+
+        # Check for Ed25519 key type in decoded binary data
+        # The key type "ssh-ed25519" appears as a length-prefixed string in the binary
+        if decoded.include?("ssh-ed25519")
           import_ed25519_openssh(openssh_key)
         else
           # Try as RSA in OpenSSH format

@@ -4,10 +4,15 @@ image: brainz/vault
 
 servers:
   web:
-    - an-ssh.brainz.computer
+    hosts:
+      - an-ssh.brainz.computer
+      - host: ed-ssh.brainz.computer
+        user: edixonhernandez
   job:
     hosts:
       - an-ssh.brainz.computer
+      - host: ed-ssh.brainz.computer
+        user: edixonhernandez
     cmd: bin/jobs
 
 proxy:
