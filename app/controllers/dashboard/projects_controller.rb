@@ -2,8 +2,8 @@ module Dashboard
   class ProjectsController < BaseController
     # Skip set_current_project for actions that load their own project via set_project
     # This prevents duplicate Project.find queries (N+1 optimization)
-    skip_before_action :set_current_project, only: [ :index, :new, :create, :show, :edit, :update, :destroy, :setup, :mcp_setup, :ssh_keys ]
-    before_action :set_project, only: [ :show, :edit, :update, :destroy, :setup, :mcp_setup, :ssh_keys ]
+    skip_before_action :set_current_project, only: [ :index, :new, :create, :show, :edit, :update, :destroy, :setup, :mcp_setup, :regenerate_mcp_token, :ssh_keys ]
+    before_action :set_project, only: [ :show, :edit, :update, :destroy, :setup, :mcp_setup, :regenerate_mcp_token, :ssh_keys ]
     before_action :redirect_to_platform_in_production, only: [ :new, :create ]
 
     def index
@@ -74,6 +74,21 @@ module Dashboard
         @token.save!
         @raw_token = @token.plain_token  # Access the token set by before_validation callback
       end
+    end
+
+    def regenerate_mcp_token
+      # Revoke existing MCP token
+      old_token = @project.access_tokens.active.find_by(name: "MCP Token")
+      old_token&.revoke!
+
+      # Create new token
+      @token = @project.access_tokens.create!(
+        name: "MCP Token",
+        permissions: [ "read", "write" ]
+      )
+      @raw_token = @token.plain_token
+
+      redirect_to mcp_setup_dashboard_project_path(@project), notice: "MCP token regenerated"
     end
 
     def ssh_keys

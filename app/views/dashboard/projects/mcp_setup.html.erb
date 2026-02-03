@@ -8,6 +8,7 @@
 
   <div class="space-y-6">
     <!-- API Key Section -->
+    <% display_key = @raw_token || @project.api_key %>
     <div class="card p-6">
       <div class="flex items-center mb-4">
         <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
@@ -21,13 +22,20 @@
         </div>
       </div>
 
+      <% if @raw_token %>
+        <div class="mb-4 rounded-md bg-amber-50 p-3 border border-amber-200">
+          <p class="text-sm text-amber-800">New token created. Copy it now - it won't be shown again.</p>
+        </div>
+      <% end %>
+
       <div class="flex items-center gap-2">
-        <code class="code-block flex-1 break-all" data-controller="clipboard" data-clipboard-text="<%= @project.api_key %>">
-          <%= @project.api_key %>
+        <code class="code-block flex-1 break-all" data-controller="clipboard" data-clipboard-text="<%= display_key %>">
+          <%= display_key %>
         </code>
         <button type="button" class="btn-secondary" data-action="clipboard#copy">
           Copy
         </button>
+        <%= button_to "Regenerate", regenerate_mcp_token_dashboard_project_path(@project), method: :post, class: "btn-secondary", data: { turbo_confirm: "This will invalidate the current MCP token. Continue?" } %>
       </div>
     </div>
 
@@ -52,7 +60,7 @@
     "vault": {
       "url": "<%= request.base_url %>/mcp/rpc",
       "headers": {
-        "Authorization": "Bearer <%= @project.api_key %>"
+        "Authorization": "Bearer <%= display_key %>"
       }
     }
   }
@@ -79,7 +87,7 @@
         <pre class="code-block"><code>{
   "vault": {
     "url": "<%= request.base_url %>/mcp/rpc",
-    "apiKey": "<%= @project.api_key %>"
+    "apiKey": "<%= display_key %>"
   }
 }</code></pre>
       </div>

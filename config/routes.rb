@@ -84,6 +84,7 @@ Rails.application.routes.draw do
       member do
         get :setup
         get :mcp_setup
+        post :regenerate_mcp_token
         get :ssh_keys
       end
 
