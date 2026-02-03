@@ -79,7 +79,7 @@
     "vault": {
       "url": "<%= request.base_url %>/mcp/rpc",
       "headers": {
-        "Authorization": "Bearer YOUR_TOKEN_HERE"
+        "Authorization": "Bearer <%= @raw_token || 'YOUR_TOKEN_HERE' %>"
       }
     }
   }
@@ -106,7 +106,7 @@
         <pre class="code-block"><code>{
   "vault": {
     "url": "<%= request.base_url %>/mcp/rpc",
-    "apiKey": "YOUR_TOKEN_HERE"
+    "apiKey": "<%= @raw_token || 'YOUR_TOKEN_HERE' %>"
   }
 }</code></pre>
       </div>
