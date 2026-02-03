@@ -7,7 +7,7 @@
   </div>
 
   <div class="space-y-6">
-    <!-- Token Section -->
+    <!-- API Key Section -->
     <div class="card p-6">
       <div class="flex items-center mb-4">
         <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
@@ -16,45 +16,18 @@
           </svg>
         </div>
         <div class="ml-3">
-          <h2 class="text-lg font-semibold text-stone-900">API Token</h2>
-          <p class="text-sm text-stone-500">Use this token to authenticate MCP requests</p>
+          <h2 class="text-lg font-semibold text-stone-900">API Key</h2>
+          <p class="text-sm text-stone-500">Use this key to authenticate MCP requests</p>
         </div>
       </div>
 
-      <div>
-        <% if @raw_token %>
-          <div class="alert-warning mb-4">
-            <div class="flex">
-              <svg class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-              </svg>
-              <div class="ml-3">
-                <p class="text-sm text-amber-800">
-                  <strong>Save this token now!</strong> You won't be able to see it again.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <code class="code-block flex-1 break-all" data-controller="clipboard" data-clipboard-text="<%= @raw_token %>">
-              <%= @raw_token %>
-            </code>
-            <button type="button" class="btn-secondary" data-action="clipboard#copy">
-              Copy
-            </button>
-          </div>
-        <% else %>
-          <div class="flex items-center justify-between p-4 bg-stone-50 rounded-lg">
-            <div>
-              <p class="text-sm font-medium text-stone-900"><%= @token.name %></p>
-              <p class="text-xs text-stone-500">Created <%= time_ago_in_words(@token.created_at) %> ago</p>
-            </div>
-            <%= button_to "Regenerate", regenerate_dashboard_project_access_token_path(@project, @token),
-                method: :post,
-                data: { confirm: "This will invalidate the existing token. Continue?" },
-                class: "btn-secondary" %>
-          </div>
-        <% end %>
+      <div class="flex items-center gap-2">
+        <code class="code-block flex-1 break-all" data-controller="clipboard" data-clipboard-text="<%= @project.api_key %>">
+          <%= @project.api_key %>
+        </code>
+        <button type="button" class="btn-secondary" data-action="clipboard#copy">
+          Copy
+        </button>
       </div>
     </div>
 
@@ -79,7 +52,7 @@
     "vault": {
       "url": "<%= request.base_url %>/mcp/rpc",
       "headers": {
-        "Authorization": "Bearer <%= @raw_token || 'YOUR_TOKEN_HERE' %>"
+        "Authorization": "Bearer <%= @project.api_key %>"
       }
     }
   }
@@ -106,7 +79,7 @@
         <pre class="code-block"><code>{
   "vault": {
     "url": "<%= request.base_url %>/mcp/rpc",
-    "apiKey": "<%= @raw_token || 'YOUR_TOKEN_HERE' %>"
+    "apiKey": "<%= @project.api_key %>"
   }
 }</code></pre>
       </div>

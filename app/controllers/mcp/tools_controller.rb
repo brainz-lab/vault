@@ -35,7 +35,18 @@ module Mcp
     private
 
     def authenticate!
-      @current_token = authenticate_token
+      raw_token = extract_token
+      return render json: { error: "Unauthorized" }, status: :unauthorized unless raw_token
+
+      # Try project API key first (vlt_api_xxx format)
+      if raw_token.start_with?("vlt_api_")
+        @current_project = Project.find_by(api_key: raw_token)
+        return render json: { error: "Unauthorized" }, status: :unauthorized unless @current_project
+        return
+      end
+
+      # Fall back to AccessToken authentication
+      @current_token = authenticate_token(raw_token)
       @current_project = @current_token&.project
 
       unless @current_project
@@ -43,8 +54,7 @@ module Mcp
       end
     end
 
-    def authenticate_token
-      raw_token = extract_token
+    def authenticate_token(raw_token)
       return nil unless raw_token
 
       # Token prefix is the first 8 characters of the raw token
