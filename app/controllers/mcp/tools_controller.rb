@@ -38,8 +38,8 @@ module Mcp
       raw_token = extract_token
       return render json: { error: "Unauthorized" }, status: :unauthorized unless raw_token
 
-      # Try project API key first (vlt_api_xxx format)
-      if raw_token.start_with?("vlt_api_")
+      # Try project API key first (vlt_api_xxx or sk_live_xxx/sk_test_xxx format)
+      if raw_token.start_with?("vlt_api_", "sk_live_", "sk_test_")
         @current_project = Project.find_by(api_key: raw_token)
         return render json: { error: "Unauthorized" }, status: :unauthorized unless @current_project
         return
