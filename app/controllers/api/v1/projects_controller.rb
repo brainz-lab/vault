@@ -1,23 +1,26 @@
+# frozen_string_literal: true
+
 module Api
   module V1
     class ProjectsController < ApplicationController
-      before_action :authenticate_service_or_sdk!
+      before_action :authenticate_master_or_service_key!
 
       # POST /api/v1/projects/provision
-      # Called by SDK to auto-provision a project
+      # Creates a new project or returns existing one, linked to Platform
       def provision
-        platform_project_id = params[:project_id]
-        app_name = params[:app_name]
+        # Accept both platform_project_id and project_id for backwards compatibility
+        platform_project_id = params[:platform_project_id] || params[:project_id]
+        name = params[:name] || params[:app_name]
 
         unless platform_project_id.present?
-          render json: { error: "project_id is required" }, status: :bad_request
+          render json: { error: "platform_project_id is required" }, status: :bad_request
           return
         end
 
         project = Project.find_or_initialize_by(platform_project_id: platform_project_id)
 
         if project.new_record?
-          project.name = app_name || "Project #{platform_project_id.first(8)}"
+          project.name = name || "Project #{platform_project_id.first(8)}"
           project.save!
 
           # Create default environments
@@ -36,10 +39,13 @@ module Api
 
           dev.update!(inherits_from: "staging") if dev && staging
           staging.update!(inherits_from: "production") if staging
+        else
+          # Update name if provided and project already exists
+          project.update!(name: name) if name.present? && project.name != name
         end
 
         render json: {
-          project_id: project.id,
+          id: project.id,
           platform_project_id: project.platform_project_id,
           name: project.name,
           environments: project.secret_environments.pluck(:slug)
@@ -49,7 +55,8 @@ module Api
       # GET /api/v1/projects/lookup
       # Look up a project by platform_project_id
       def lookup
-        platform_project_id = params[:project_id]
+        # Accept both platform_project_id and project_id for backwards compatibility
+        platform_project_id = params[:platform_project_id] || params[:project_id]
 
         project = Project.find_by(platform_project_id: platform_project_id)
 
@@ -59,7 +66,7 @@ module Api
         end
 
         render json: {
-          project_id: project.id,
+          id: project.id,
           platform_project_id: project.platform_project_id,
           name: project.name,
           environments: project.secret_environments.pluck(:slug)
@@ -68,12 +75,21 @@ module Api
 
       private
 
-      def authenticate_service_or_sdk!
+      def authenticate_master_or_service_key!
+        # Accept master key for Platform sync
+        master_key = request.headers["X-Master-Key"]
+        expected_master = ENV["VAULT_MASTER_KEY"]
+
+        if master_key.present? && expected_master.present? &&
+           ActiveSupport::SecurityUtils.secure_compare(master_key, expected_master)
+          return true
+        end
+
         # Accept service key for internal calls
         service_key = request.headers["X-Service-Key"]
-        expected_key = ENV["SERVICE_KEY"] || "dev_service_key"
+        expected_service = ENV["SERVICE_KEY"] || "dev_service_key"
 
-        if service_key.present? && ActiveSupport::SecurityUtils.secure_compare(service_key, expected_key)
+        if service_key.present? && ActiveSupport::SecurityUtils.secure_compare(service_key, expected_service)
           return true
         end
 
@@ -81,11 +97,8 @@ module Api
         api_key = request.headers["X-API-Key"] || request.headers["Authorization"]&.sub(/^Bearer /, "")
 
         if api_key.present?
-          # Validate with Platform
-          result = PlatformClient.validate_key(api_key)
-          if result[:valid]
-            return true
-          end
+          result = PlatformClient.validate_key(api_key) rescue nil
+          return true if result && result[:valid]
         end
 
         render json: { error: "Unauthorized" }, status: :unauthorized
