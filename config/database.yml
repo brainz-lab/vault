@@ -5,12 +5,38 @@ default: &default
   max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
 development:
-  <<: *default
-  url: <%= ENV.fetch("DATABASE_URL", "postgres://postgres:postgres@localhost:5432") %>/vault_development
+  primary:
+    <<: *default
+    url: <%= ENV.fetch("DATABASE_URL", "postgres://postgres:postgres@localhost:5432") %>/vault_development
+  queue:
+    <<: *default
+    url: <%= ENV.fetch("DATABASE_URL", "postgres://postgres:postgres@localhost:5432") %>/vault_development
+    migrations_paths: db/queue_migrate
+  cache:
+    <<: *default
+    url: <%= ENV.fetch("DATABASE_URL", "postgres://postgres:postgres@localhost:5432") %>/vault_development
+    migrations_paths: db/cache_migrate
+  cable:
+    <<: *default
+    url: <%= ENV.fetch("DATABASE_URL", "postgres://postgres:postgres@localhost:5432") %>/vault_development
+    migrations_paths: db/cable_migrate
 
 test:
-  <<: *default
-  url: <%= ENV.fetch("TEST_DATABASE_URL", "postgres://postgres:postgres@db:5432/vault_test") %>
+  primary:
+    <<: *default
+    url: <%= ENV.fetch("TEST_DATABASE_URL", "postgres://postgres:postgres@localhost:5432/vault_test") %>
+  queue:
+    <<: *default
+    url: <%= ENV.fetch("TEST_DATABASE_URL", "postgres://postgres:postgres@localhost:5432/vault_test") %>
+    migrations_paths: db/queue_migrate
+  cache:
+    <<: *default
+    url: <%= ENV.fetch("TEST_DATABASE_URL", "postgres://postgres:postgres@localhost:5432/vault_test") %>
+    migrations_paths: db/cache_migrate
+  cable:
+    <<: *default
+    url: <%= ENV.fetch("TEST_DATABASE_URL", "postgres://postgres:postgres@localhost:5432/vault_test") %>
+    migrations_paths: db/cable_migrate
 
 production:
   primary: &primary_production
