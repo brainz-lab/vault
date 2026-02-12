@@ -8,6 +8,7 @@ Rails.application.configure do
   config.hosts << "vault:3000"
   config.hosts << "vault.localhost"
   config.hosts << /.*\.localhost/
+  config.hosts << ".brainzlab.local"
 
   # Make code changes take effect immediately without server restart.
   config.enable_reloading = true
