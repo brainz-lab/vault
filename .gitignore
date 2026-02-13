@@ -80,3 +80,6 @@ coverage/
 
 # Secrets (NEVER commit)
 .secrets.md
+
+# Gem - use via Gemfile, not symlink
+brainzlab-ui
