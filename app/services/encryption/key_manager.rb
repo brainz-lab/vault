@@ -7,6 +7,10 @@ module Encryption
     end
 
     class << self
+      def master_key_configured?
+        Rails.application.config.vault_master_key.present?
+      end
+
       def current_key(project_id = nil)
         # Get the active key for the project
         key_record = EncryptionKey.where(status: "active")
