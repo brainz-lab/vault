@@ -11,9 +11,12 @@ Rails.application.config.after_initialize do
 
   next unless source.exist?
 
-  # Remove stale symlink (e.g., after gem update)
-  if target.symlink? && !target.exist?
-    FileUtils.rm(target)
+  # Remove stale symlink (e.g., after gem update or path change)
+  if target.symlink?
+    current = File.readlink(target) rescue nil
+    if current != source.to_s
+      FileUtils.rm(target)
+    end
   end
 
   unless target.exist?
