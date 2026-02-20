@@ -62,14 +62,10 @@ gem "rack-cors"
 gem "brainzlab", "~> 0.1.12"
 
 # BrainzLab UI - Unified design system with Phlex components
-if ENV["BUNDLE_DEPLOYMENT"] == "1"
-  gem "fluyenta-ui", "~> 0.1.3"
-elsif File.exist?("/fluyenta-ui")
-  gem "fluyenta-ui", path: "/fluyenta-ui"
-elsif File.exist?(File.expand_path("../fluyenta-ui", __dir__))
+if File.exist?(File.expand_path("../fluyenta-ui", __dir__))
   gem "fluyenta-ui", path: "../fluyenta-ui"
 else
-  gem "fluyenta-ui", "0.1.2", source: "https://rubygems.pkg.github.com/fluyenta"
+  gem "fluyenta-ui", "0.1.3", source: "https://rubygems.pkg.github.com/fluyenta"
 end
 gem "phlex-rails", "~> 2.0"
 

@@ -3,7 +3,7 @@
 # Creates a symlink so Tailwind CSS can resolve brainzlab-ui stylesheets from the gem.
 # The symlink points app/assets/tailwind/brainzlab_ui -> gem's stylesheet directory.
 Rails.application.config.after_initialize do
-  gem_spec = Gem.loaded_specs["brainzlab-ui"]
+  gem_spec = Gem.loaded_specs["fluyenta-ui"]
   next unless gem_spec
 
   source = Pathname.new(gem_spec.full_gem_path).join("app/assets/stylesheets/brainzlab_ui")

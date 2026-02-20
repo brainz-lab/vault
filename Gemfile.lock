@@ -109,10 +109,6 @@ GEM
       concurrent-ruby (~> 1.0)
       logger (~> 1.5)
       sqlite3 (~> 2.0)
-    brainzlab-ui (0.1.1)
-      phlex (~> 2.0)
-      phlex-rails (~> 2.0)
-      rails (>= 7.0)
     brakeman (7.1.2)
       racc
     builder (3.3.0)
@@ -468,6 +464,14 @@ GEM
       nokogiri (~> 1.8)
     zeitwerk (2.7.4)
 
+GEM
+  remote: https://rubygems.pkg.github.com/fluyenta/
+  specs:
+    fluyenta-ui (0.1.2)
+      phlex (~> 2.0)
+      phlex-rails (~> 2.0)
+      rails (>= 7.0)
+
 PLATFORMS
   aarch64-linux
   aarch64-linux-gnu
@@ -486,13 +490,13 @@ DEPENDENCIES
   bcrypt_pbkdf (~> 1.1)
   bootsnap
   brainzlab (~> 0.1.12)
-  brainzlab-ui (~> 0.1.0)
   brakeman
   bundler-audit
   capybara
   debug
   ed25519 (~> 1.3)
   faraday (~> 2.0)
+  fluyenta-ui (= 0.1.2)!
   image_processing (~> 1.2)
   importmap-rails
   jbuilder
