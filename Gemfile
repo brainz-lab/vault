@@ -78,6 +78,9 @@ gem "ed25519", "~> 1.3"
 gem "bcrypt_pbkdf", "~> 1.1"
 
 group :development, :test do
+  gem "rspec-rails"
+  gem "factory_bot_rails"
+
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 
@@ -104,6 +107,13 @@ group :test do
 
   # Test coverage reporting
   gem "simplecov", require: false
+  gem "simplecov-json", require: false
+
+  # Matchers for associations and validations
+  gem "shoulda-matchers"
+
+  # DB cleaning between tests
+  gem "database_cleaner-active_record"
 
   # HTTP request mocking
   gem "webmock"
