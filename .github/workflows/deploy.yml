@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: registry.digitalocean.com
-  IMAGE_NAME: runmyprocess/vault
+  IMAGE_NAME: ${{ secrets.DO_REGISTRY }}/vault
 
 jobs:
   deploy:
