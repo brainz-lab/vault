@@ -40,6 +40,21 @@ Rails.application.routes.draw do
         end
       end
 
+      # Connectors
+      resources :connectors, only: [ :index, :show ] do
+        member { get :actions }
+      end
+      resources :connector_credentials, only: [ :index, :create, :show, :destroy ] do
+        member { post :verify }
+      end
+      resources :connector_connections, only: [ :index, :create, :show, :update, :destroy ] do
+        member do
+          post :test
+          post :execute
+        end
+        collection { get :mcp_tools }
+      end
+
       # Provider keys (API keys for LLMs, etc.)
       resources :provider_keys, only: [ :index, :create, :destroy ] do
         collection do
