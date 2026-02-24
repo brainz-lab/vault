@@ -70,6 +70,9 @@ Rails.application.routes.draw do
       # Project provisioning (internal API for SDK auto-setup)
       post "projects/provision", to: "projects#provision"
       get "projects/lookup", to: "projects#lookup"
+      post "projects/:platform_project_id/archive", to: "projects#archive"
+      post "projects/:platform_project_id/unarchive", to: "projects#unarchive"
+      post "projects/:platform_project_id/purge", to: "projects#purge"
     end
   end
 
