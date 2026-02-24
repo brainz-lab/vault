@@ -32,7 +32,17 @@ module Mcp
       "vault_ssh_set_connection" => Tools::SshSetConnection,
       "vault_ssh_delete_connection" => Tools::SshDeleteConnection,
       # SSH Export tool
-      "vault_ssh_export_config" => Tools::SshExportConfig
+      "vault_ssh_export_config" => Tools::SshExportConfig,
+      # Connector tools
+      "vault_connector_catalog" => Tools::ConnectorCatalog,
+      "vault_connector_detail" => Tools::ConnectorDetail,
+      "vault_connector_connect" => Tools::ConnectorConnect,
+      "vault_connector_disconnect" => Tools::ConnectorDisconnect,
+      "vault_connector_list_connections" => Tools::ConnectorListConnections,
+      "vault_connector_execute" => Tools::ConnectorExecute,
+      "vault_connector_test" => Tools::ConnectorTest,
+      "vault_connector_set_credential" => Tools::ConnectorSetCredential,
+      "vault_connector_list_credentials" => Tools::ConnectorListCredentials
     }.freeze
 
     def initialize(project:, environment: nil)
