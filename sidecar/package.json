@@ -1,0 +1,22 @@
+{
+  "name": "@brainzlab/vault-connector-sidecar",
+  "version": "1.0.0",
+  "description": "Fastify sidecar for executing Activepieces connector packages",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "install-pieces": "node scripts/install-pieces.js"
+  },
+  "dependencies": {
+    "fastify": "^5.2.1",
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0"
+  },
+  "devDependencies": {},
+  "private": true,
+  "license": "UNLICENSED"
+}
