@@ -11,7 +11,8 @@ module DashboardHelper
     provider_keys: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>',
     settings: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>',
     mcp: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>',
-    ssh_keys: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>'
+    ssh_keys: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>',
+    connectors: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>'
   }.freeze
 
   def icon(name)
@@ -77,6 +78,61 @@ module DashboardHelper
       "bg-amber-100 text-amber-700"
     else
       "bg-stone-100 text-stone-700"
+    end
+  end
+
+  def connector_category_class(category)
+    case category.to_s.downcase
+    when "communication" then "bg-blue-100 text-blue-700"
+    when "crm" then "bg-purple-100 text-purple-700"
+    when "database", "data" then "bg-amber-100 text-amber-700"
+    when "email" then "bg-pink-100 text-pink-700"
+    when "file_storage", "storage", "content_and_files" then "bg-cyan-100 text-cyan-700"
+    when "webhook", "automation" then "bg-orange-100 text-orange-700"
+    when "project_management", "productivity" then "bg-indigo-100 text-indigo-700"
+    when "marketing" then "bg-rose-100 text-rose-700"
+    when "developer" then "bg-emerald-100 text-emerald-700"
+    when "analytics", "business_intelligence" then "bg-teal-100 text-teal-700"
+    when "ecommerce" then "bg-yellow-100 text-yellow-700"
+    when "finance", "accounting", "payment_processing" then "bg-lime-100 text-lime-700"
+    when "social" then "bg-fuchsia-100 text-fuchsia-700"
+    when "ai", "universal_ai" then "bg-violet-100 text-violet-700"
+    when "sales" then "bg-red-100 text-red-700"
+    when "support" then "bg-sky-100 text-sky-700"
+    when "forms_and_surveys" then "bg-pink-100 text-pink-700"
+    when "human_resources" then "bg-blue-100 text-blue-700"
+    when "flow_control", "core" then "bg-gray-100 text-gray-700"
+    when "api" then "bg-emerald-100 text-emerald-700"
+    when "file" then "bg-cyan-100 text-cyan-700"
+    else "bg-stone-100 text-stone-700"
+    end
+  end
+
+  def connection_status_class(status)
+    case status
+    when "connected" then "badge-success"
+    when "disconnected" then "badge-warning"
+    when "error" then "badge-error"
+    else "badge-neutral"
+    end
+  end
+
+  def connector_type_class(type)
+    case type
+    when "activepieces" then "bg-violet-100 text-violet-700"
+    when "native" then "bg-emerald-100 text-emerald-700"
+    when "airbyte" then "bg-sky-100 text-sky-700"
+    else "bg-stone-100 text-stone-700"
+    end
+  end
+
+  def credential_status_class(status)
+    case status
+    when "active" then "badge-success"
+    when "expired" then "badge-warning"
+    when "error" then "badge-error"
+    when "revoked" then "badge-neutral"
+    else "badge-neutral"
     end
   end
 end

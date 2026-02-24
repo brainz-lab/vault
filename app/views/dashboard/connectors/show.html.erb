@@ -1,0 +1,217 @@
+<% content_for :title, @connector.display_name %>
+
+<div class="max-w-6xl">
+  <!-- Header -->
+  <div class="sm:flex sm:items-center sm:justify-between mb-8">
+    <div class="flex items-center">
+      <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50">
+        <% if @connector.logo_url.present? %>
+          <img src="<%= @connector.logo_url %>" alt="<%= @connector.display_name %>" class="w-7 h-7 rounded">
+        <% else %>
+          <svg class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+          </svg>
+        <% end %>
+      </div>
+      <div class="ml-4">
+        <div class="flex items-center gap-2">
+          <h1 class="section-header"><%= @connector.display_name %></h1>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= connector_type_class(@connector.connector_type) %>">
+            <%= @connector.connector_type.titleize %>
+          </span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= connector_category_class(@connector.category) %>">
+            <%= @connector.category.titleize %>
+          </span>
+        </div>
+        <p class="section-subheader"><%= @connector.description || "No description" %></p>
+      </div>
+    </div>
+    <div class="mt-4 sm:mt-0 flex gap-3">
+      <%= link_to dashboard_project_connectors_path(@current_project), class: "btn-secondary" do %>
+        <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        Back
+      <% end %>
+      <% if @connector.requires_auth? %>
+        <%= link_to new_dashboard_project_connector_credential_path(@current_project, connector_id: @connector.id), class: "btn-primary" do %>
+          <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          Add Credentials
+        <% end %>
+      <% else %>
+        <%= link_to new_dashboard_project_connector_connection_path(@current_project, connector_id: @connector.id), class: "btn-primary" do %>
+          <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          Connect
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid gap-8 lg:grid-cols-3">
+    <!-- Main Content -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Auth Requirements -->
+      <% if @connector.requires_auth? %>
+        <div class="card">
+          <div class="card-body">
+            <h2 class="text-lg font-semibold mb-4" style="color: var(--color-ink-900);">Authentication</h2>
+            <div class="flex items-center gap-3 mb-3">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-stone-100 text-stone-700">
+                <svg class="w-3.5 h-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                <%= @connector.auth_type.gsub("_", " ") %>
+              </span>
+            </div>
+            <p class="text-sm text-muted">
+              <% case @connector.auth_type %>
+              <% when "SECRET_TEXT" %>
+                This connector requires an API key or token.
+              <% when "BASIC" %>
+                This connector requires a username and password.
+              <% when "CUSTOM_AUTH" %>
+                This connector requires custom authentication fields.
+              <% when "OAUTH2" %>
+                This connector uses OAuth2 for authentication.
+              <% end %>
+            </p>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Available Actions -->
+      <div class="card overflow-hidden">
+        <div class="px-6 py-4 flex justify-between items-center" style="background: var(--color-cream-50); border-bottom: 1px solid var(--color-cream-200);">
+          <h2 class="text-lg font-semibold" style="color: var(--color-ink-900);">Available Actions</h2>
+          <span class="badge badge-neutral"><%= (@connector.actions || []).length %> actions</span>
+        </div>
+        <% if (@connector.actions || []).any? %>
+          <ul class="divide-y" style="border-color: var(--color-cream-100);">
+            <% (@connector.actions || []).each do |action| %>
+              <li class="px-6 py-4">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h3 class="text-sm font-semibold text-primary"><%= action["displayName"] || action["name"] %></h3>
+                    <p class="text-xs font-mono text-faint mt-0.5"><%= action["name"] %></p>
+                    <% if action["description"].present? %>
+                      <p class="text-sm text-muted mt-1"><%= action["description"] %></p>
+                    <% end %>
+                  </div>
+                  <% if action["props"].present? %>
+                    <span class="badge badge-info text-xs"><%= action["props"].is_a?(Hash) ? action["props"].keys.length : 0 %> params</span>
+                  <% end %>
+                </div>
+                <% if action["props"].is_a?(Hash) && action["props"].any? %>
+                  <div class="mt-3 pl-4 border-l-2" style="border-color: var(--color-cream-200);">
+                    <% action["props"].each do |prop_name, prop_config| %>
+                      <div class="py-1">
+                        <span class="text-xs font-mono font-medium text-primary"><%= prop_name %></span>
+                        <% if prop_config.is_a?(Hash) %>
+                          <span class="text-xs text-faint ml-2"><%= prop_config["type"] || "string" %></span>
+                          <% if prop_config["required"] %>
+                            <span class="text-xs text-red-500 ml-1">*</span>
+                          <% end %>
+                          <% if prop_config["description"].present? %>
+                            <p class="text-xs text-muted"><%= prop_config["description"] %></p>
+                          <% end %>
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <div class="px-6 py-10 text-center text-sm text-muted">No actions defined for this connector</div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <!-- Existing Connections -->
+      <div class="card">
+        <div class="card-body">
+          <h2 class="text-lg font-semibold mb-4" style="color: var(--color-ink-900);">Connections</h2>
+          <% if @connections.any? %>
+            <div class="space-y-3">
+              <% @connections.each do |conn| %>
+                <%= link_to dashboard_project_connector_connection_path(@current_project, conn), class: "block p-3 rounded-xl transition hover:bg-stone-50" do %>
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-primary"><%= conn.name || "Connection" %></span>
+                    <span class="<%= connection_status_class(conn.status) %> text-xs"><%= conn.status.titleize %></span>
+                  </div>
+                  <% if conn.last_executed_at %>
+                    <p class="text-xs text-faint mt-1">Last used <%= time_ago_in_words(conn.last_executed_at) %> ago</p>
+                  <% end %>
+                <% end %>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-sm text-muted">No active connections</p>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Stored Credentials -->
+      <div class="card">
+        <div class="card-body">
+          <h2 class="text-lg font-semibold mb-4" style="color: var(--color-ink-900);">Credentials</h2>
+          <% if @credentials.any? %>
+            <div class="space-y-3">
+              <% @credentials.each do |cred| %>
+                <div class="p-3 rounded-xl" style="background: var(--color-cream-50);">
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-primary"><%= cred.name %></span>
+                    <span class="<%= credential_status_class(cred.status) %> text-xs"><%= cred.status.titleize %></span>
+                  </div>
+                  <p class="text-xs text-faint mt-1"><%= cred.auth_type.gsub("_", " ") %></p>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-sm text-muted">No stored credentials</p>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Details -->
+      <div class="card">
+        <div class="card-body">
+          <h2 class="text-lg font-semibold mb-4" style="color: var(--color-ink-900);">Details</h2>
+          <dl class="space-y-4">
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Piece Name</dt>
+              <dd class="mt-1 text-sm font-mono" style="color: var(--color-ink-900);"><%= @connector.piece_name %></dd>
+            </div>
+            <% if @connector.version.present? %>
+              <div>
+                <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Version</dt>
+                <dd class="mt-1 text-sm" style="color: var(--color-ink-900);"><%= @connector.version %></dd>
+              </div>
+            <% end %>
+            <% if @connector.package_name.present? %>
+              <div>
+                <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Package</dt>
+                <dd class="mt-1 text-sm font-mono" style="color: var(--color-ink-900);"><%= @connector.package_name %></dd>
+              </div>
+            <% end %>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Status</dt>
+              <dd class="mt-1">
+                <span class="badge <%= @connector.enabled? ? 'badge-success' : 'badge-neutral' %>">
+                  <%= @connector.enabled? ? 'Enabled' : 'Disabled' %>
+                </span>
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

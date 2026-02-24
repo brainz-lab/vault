@@ -1,0 +1,239 @@
+<% content_for :title, @connection.name || @connector.display_name %>
+
+<div class="max-w-6xl" data-controller="connector-execute">
+  <!-- Header -->
+  <div class="sm:flex sm:items-center sm:justify-between mb-8">
+    <div class="flex items-center">
+      <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50">
+        <% if @connector.logo_url.present? %>
+          <img src="<%= @connector.logo_url %>" alt="<%= @connector.display_name %>" class="w-7 h-7 rounded">
+        <% else %>
+          <svg class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+          </svg>
+        <% end %>
+      </div>
+      <div class="ml-4">
+        <div class="flex items-center gap-2">
+          <h1 class="section-header"><%= @connection.name || @connector.display_name %></h1>
+          <span class="<%= connection_status_class(@connection.status) %>"><%= @connection.status.titleize %></span>
+        </div>
+        <p class="section-subheader"><%= @connector.display_name %> &mdash; <%= @connector.category.titleize %></p>
+      </div>
+    </div>
+    <div class="mt-4 sm:mt-0 flex gap-3">
+      <%= link_to dashboard_project_connector_connections_path(@current_project), class: "btn-secondary" do %>
+        <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        Back
+      <% end %>
+      <% if @connection.connected? %>
+        <%= button_to test_dashboard_project_connector_connection_path(@current_project, @connection),
+            method: :post,
+            class: "btn-secondary" do %>
+          <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Test
+        <% end %>
+      <% end %>
+      <%= button_to dashboard_project_connector_connection_path(@current_project, @connection),
+          method: :delete,
+          data: { confirm: "Disconnect from #{@connector.display_name}?" },
+          class: "btn-danger" do %>
+        Disconnect
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid gap-8 lg:grid-cols-3">
+    <!-- Main Content -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Execute Action -->
+      <% if @connection.connected? && @actions.any? %>
+        <div class="card">
+          <div class="card-body">
+            <h2 class="text-lg font-semibold mb-4" style="color: var(--color-ink-900);">Execute Action</h2>
+
+            <%= form_with url: execute_dashboard_project_connector_connection_path(@current_project, @connection), method: :post, class: "space-y-4", data: { connector_execute_target: "form" } do |f| %>
+              <!-- Action Selection -->
+              <div>
+                <label class="label">Action</label>
+                <select name="action_name" class="input" data-connector-execute-target="actionSelect" data-action="change->connector-execute#actionChanged">
+                  <option value="">Select an action...</option>
+                  <% @actions.each do |action| %>
+                    <option value="<%= action["name"] %>" data-props="<%= (action["props"] || {}).to_json %>">
+                      <%= action["displayName"] || action["name"] %>
+                    </option>
+                  <% end %>
+                </select>
+              </div>
+
+              <!-- Dynamic Input Fields -->
+              <div data-connector-execute-target="inputFields" class="space-y-4"></div>
+
+              <div class="pt-2">
+                <%= f.submit "Execute", class: "btn-primary cursor-pointer w-full justify-center", data: { connector_execute_target: "submitBtn" } %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Execution Result -->
+      <% if defined?(@result) && @result %>
+        <div class="card border-emerald-200">
+          <div class="card-body">
+            <div class="flex items-center gap-2 mb-4">
+              <svg class="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              <h3 class="text-lg font-semibold text-emerald-700">Execution Successful</h3>
+              <% if @result[:duration_ms] %>
+                <span class="badge badge-neutral text-xs"><%= @result[:duration_ms] %>ms</span>
+              <% end %>
+            </div>
+            <pre class="p-4 rounded-xl text-sm font-mono overflow-x-auto" style="background: var(--color-ink-900); color: var(--color-cream-100);"><%= JSON.pretty_generate(@result[:output]) rescue @result[:output].to_s %></pre>
+          </div>
+        </div>
+      <% end %>
+
+      <% if defined?(@error) && @error %>
+        <div class="card border-red-200">
+          <div class="card-body">
+            <div class="flex items-center gap-2 mb-3">
+              <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+              <h3 class="text-lg font-semibold text-red-700">Execution Failed</h3>
+            </div>
+            <p class="text-sm text-red-600"><%= @error %></p>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Recent Executions -->
+      <div class="card overflow-hidden">
+        <div class="px-6 py-4 flex justify-between items-center" style="background: var(--color-cream-50); border-bottom: 1px solid var(--color-cream-200);">
+          <h2 class="text-lg font-semibold" style="color: var(--color-ink-900);">Recent Executions</h2>
+          <span class="badge badge-neutral"><%= @recent_executions.length %></span>
+        </div>
+        <% if @recent_executions.any? %>
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Action</th>
+                <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Status</th>
+                <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Duration</th>
+                <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Source</th>
+                <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Time</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y border-light">
+              <% @recent_executions.each do |execution| %>
+                <tr class="table-row-hover transition-colors">
+                  <td class="whitespace-nowrap px-6 py-3 text-sm font-mono text-primary"><%= execution.action_name %></td>
+                  <td class="whitespace-nowrap px-6 py-3">
+                    <% case execution.status %>
+                    <% when "success" %>
+                      <span class="badge badge-success">Success</span>
+                    <% when "error" %>
+                      <span class="badge badge-error">Error</span>
+                    <% when "timeout" %>
+                      <span class="badge badge-warning">Timeout</span>
+                    <% end %>
+                  </td>
+                  <td class="whitespace-nowrap px-6 py-3 text-sm text-muted">
+                    <%= execution.duration_ms ? "#{execution.duration_ms}ms" : "-" %>
+                  </td>
+                  <td class="whitespace-nowrap px-6 py-3 text-sm text-faint">
+                    <%= execution.caller_service || "unknown" %>
+                  </td>
+                  <td class="whitespace-nowrap px-6 py-3 text-sm text-muted">
+                    <%= time_ago_in_words(execution.created_at) %> ago
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <div class="px-6 py-10 text-center text-sm text-muted">No executions yet</div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <!-- Connection Info -->
+      <div class="card">
+        <div class="card-body">
+          <h2 class="text-lg font-semibold mb-4" style="color: var(--color-ink-900);">Connection Details</h2>
+          <dl class="space-y-4">
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Connector</dt>
+              <dd class="mt-1">
+                <%= link_to dashboard_project_connector_path(@current_project, @connector), class: "text-sm font-medium link-primary" do %>
+                  <%= @connector.display_name %>
+                <% end %>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Type</dt>
+              <dd class="mt-1">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= connector_type_class(@connector.connector_type) %>">
+                  <%= @connector.connector_type.titleize %>
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Credential</dt>
+              <dd class="mt-1 text-sm" style="color: var(--color-ink-900);">
+                <%= @connection.connector_credential&.name || "None" %>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Created</dt>
+              <dd class="mt-1 text-sm" style="color: var(--color-ink-900);"><%= @connection.created_at.strftime("%b %d, %Y") %></dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Total Executions</dt>
+              <dd class="mt-1 text-sm" style="color: var(--color-ink-900);"><%= @connection.execution_count %></dd>
+            </div>
+            <% if @connection.last_executed_at %>
+              <div>
+                <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Last Executed</dt>
+                <dd class="mt-1 text-sm" style="color: var(--color-ink-900);"><%= @connection.last_executed_at.strftime("%b %d, %Y at %H:%M") %></dd>
+              </div>
+            <% end %>
+            <% if @connection.error_message.present? %>
+              <div>
+                <dt class="text-xs font-medium uppercase tracking-wide text-red-500">Last Error</dt>
+                <dd class="mt-1 text-sm text-red-600"><%= @connection.error_message %></dd>
+              </div>
+            <% end %>
+          </dl>
+        </div>
+      </div>
+
+      <!-- Available Actions List -->
+      <div class="card">
+        <div class="card-body">
+          <h2 class="text-lg font-semibold mb-4" style="color: var(--color-ink-900);">Available Actions</h2>
+          <% if @actions.any? %>
+            <div class="space-y-2">
+              <% @actions.each do |action| %>
+                <div class="p-2.5 rounded-lg" style="background: var(--color-cream-50);">
+                  <p class="text-sm font-medium text-primary"><%= action["displayName"] || action["name"] %></p>
+                  <p class="text-xs font-mono text-faint"><%= action["name"] %></p>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-sm text-muted">No actions available</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

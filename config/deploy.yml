@@ -32,6 +32,7 @@ env:
     - CABLE_DATABASE_URL
     - SERVICE_KEY
     - VAULT_MASTER_KEY
+    - CONNECTOR_SIDECAR_SECRET_KEY
   clear:
     RAILS_ENV: production
     RAILS_LOG_TO_STDOUT: "true"
@@ -39,12 +40,29 @@ env:
     SOLID_QUEUE_IN_PUMA: "false"
     BRAINZLAB_PLATFORM_URL: https://platform.brainzlab.ai
     BRAINZLAB_PLATFORM_EXTERNAL_URL: https://platform.brainzlab.ai
+    CONNECTOR_SIDECAR_URL: "http://connector-sidecar:3100"
 
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
   shell: app exec --interactive --reuse "bash"
   logs: app logs -f
   dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
+
+accessories:
+  connector-sidecar:
+    image: brainz/vault-connector-sidecar
+    host: afmp@an-ssh.brainz.computer
+    port: "3100:3100"
+    env:
+      clear:
+        NODE_ENV: production
+        PORT: "3100"
+        MAX_CONCURRENT_EXECUTIONS: "10"
+        EXECUTION_TIMEOUT_MS: "30000"
+      secret:
+        - CONNECTOR_SIDECAR_SECRET_KEY
+    volumes:
+      - "vault_sidecar_pieces:/app/node_modules/@activepieces"
 
 volumes:
   - "vault_storage:/rails/storage"

@@ -12,6 +12,11 @@ class Project < ApplicationRecord
   has_many :ssh_server_keys, dependent: :destroy
   has_many :ssh_connections, dependent: :destroy
 
+  # Connector management
+  has_many :connector_credentials, dependent: :destroy
+  has_many :connector_connections, dependent: :destroy
+  has_many :connector_executions, dependent: :restrict_with_error
+
   validates :platform_project_id, presence: true, uniqueness: true
   validates :api_key, uniqueness: true, allow_nil: true
   validates :ingest_key, uniqueness: true, allow_nil: true

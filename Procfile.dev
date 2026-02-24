@@ -1,2 +1,3 @@
 web: bin/rails server -b 0.0.0.0 -p ${PORT:-4006}
 css: bin/rails tailwindcss:watch
+sidecar: node sidecar/src/server.js
