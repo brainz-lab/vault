@@ -1,0 +1,116 @@
+<% content_for :title, "Connector Connections" %>
+
+<div class="max-w-6xl">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="section-header">Connections</h1>
+      <p class="section-subheader">Manage active connections to third-party services</p>
+    </div>
+    <div class="flex gap-3">
+      <%= link_to dashboard_project_connectors_path(@current_project), class: "btn-secondary" do %>
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        Catalog
+      <% end %>
+      <%= link_to new_dashboard_project_connector_connection_path(@current_project), class: "btn-primary" do %>
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        New Connection
+      <% end %>
+    </div>
+  </div>
+
+  <% if @connections.any? %>
+    <div class="card overflow-hidden">
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Connector</th>
+            <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Status</th>
+            <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Credential</th>
+            <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Last Executed</th>
+            <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Executions</th>
+            <th class="table-header px-6 py-3"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y border-light">
+          <% @connections.each do |connection| %>
+            <tr class="table-row-hover transition-colors <%= connection.disconnected? ? 'opacity-50' : '' %>">
+              <td class="whitespace-nowrap px-6 py-4">
+                <div class="flex items-center">
+                  <div class="flex h-9 w-9 items-center justify-center rounded-lg" class="bg-orange-50">
+                    <% if connection.connector.logo_url.present? %>
+                      <img src="<%= connection.connector.logo_url %>" alt="" class="w-5 h-5 rounded">
+                    <% else %>
+                      <svg class="h-4 w-4" class="text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                      </svg>
+                    <% end %>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm font-medium text-primary">
+                      <%= link_to (connection.name || connection.connector.display_name), dashboard_project_connector_connection_path(@current_project, connection), class: "link-primary" %>
+                    </p>
+                    <p class="text-xs text-faint"><%= connection.connector.display_name %></p>
+                  </div>
+                </div>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4">
+                <span class="<%= connection_status_class(connection.status) %>"><%= connection.status.titleize %></span>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-muted">
+                <%= connection.connector_credential&.name || "None" %>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-muted">
+                <%= connection.last_executed_at ? "#{time_ago_in_words(connection.last_executed_at)} ago" : "Never" %>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-muted">
+                <%= connection.execution_count %>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-right">
+                <% if connection.connected? %>
+                  <%= button_to test_dashboard_project_connector_connection_path(@current_project, connection),
+                      method: :post,
+                      class: "text-sm font-medium transition-colors link-primary" do %>
+                    Test
+                  <% end %>
+                  <%= link_to dashboard_project_connector_connection_path(@current_project, connection),
+                      class: "ml-3 text-sm font-medium transition-colors link-primary" do %>
+                    Execute
+                  <% end %>
+                  <%= button_to dashboard_project_connector_connection_path(@current_project, connection),
+                      method: :delete,
+                      data: { confirm: "Disconnect from #{connection.connector.display_name}?" },
+                      class: "ml-3 text-sm font-medium text-red-600 hover:text-red-500 transition-colors" do %>
+                    Disconnect
+                  <% end %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <!-- Empty State -->
+    <div class="card">
+      <div class="empty-state py-16">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-stone-100">
+          <svg class="w-8 h-8 text-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+          </svg>
+        </div>
+        <h3 class="empty-state-title">No connections yet</h3>
+        <p class="empty-state-description">Connect to a service from the connector catalog.</p>
+        <div class="mt-8">
+          <%= link_to dashboard_project_connectors_path(@current_project), class: "btn-primary" do %>
+            Browse Connectors
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

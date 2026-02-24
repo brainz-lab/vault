@@ -1,11 +1,3 @@
-PATH
-  remote: ../fluyenta-ui
-  specs:
-    fluyenta-ui (0.1.3)
-      phlex (~> 2.0)
-      phlex-rails (~> 2.0)
-      rails (>= 7.0)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -472,6 +464,14 @@ GEM
       nokogiri (~> 1.8)
     zeitwerk (2.7.4)
 
+GEM
+  remote: https://rubygems.pkg.github.com/fluyenta/
+  specs:
+    fluyenta-ui (0.1.3)
+      phlex (~> 2.0)
+      phlex-rails (~> 2.0)
+      rails (>= 7.0)
+
 PLATFORMS
   aarch64-linux
   aarch64-linux-gnu
@@ -496,7 +496,7 @@ DEPENDENCIES
   debug
   ed25519 (~> 1.3)
   faraday (~> 2.0)
-  fluyenta-ui!
+  fluyenta-ui (= 0.1.3)!
   image_processing (~> 1.2)
   importmap-rails
   jbuilder

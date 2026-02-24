@@ -146,31 +146,63 @@ function listPieces() {
 }
 
 /**
- * Serialize a piece object to a JSON-safe representation.
+ * Resolve the actions or triggers from a piece.
+ * Newer Activepieces packages store these as _actions/_triggers with
+ * getter functions on .actions/.triggers that return the actual object.
  */
-function serializePiece(piece) {
-  const actions = [];
-  if (piece.actions && typeof piece.actions === 'object') {
-    for (const [key, action] of Object.entries(piece.actions)) {
-      actions.push({
-        name: action.name || key,
-        displayName: action.displayName || key,
-        description: action.description || '',
-        props: serializeProps(action.props),
-      });
+function resolveActionMap(piece, key) {
+  // Try the private backing field first (_actions / _triggers)
+  const privateKey = `_${key}`;
+  if (piece[privateKey] && typeof piece[privateKey] === 'object' && !Array.isArray(piece[privateKey])) {
+    return piece[privateKey];
+  }
+
+  // If the public key is a function (getter), call it
+  if (typeof piece[key] === 'function') {
+    try {
+      const result = piece[key]();
+      if (result && typeof result === 'object') {
+        return result;
+      }
+    } catch {
+      // ignore
     }
   }
 
+  // If the public key is a plain object with entries
+  if (piece[key] && typeof piece[key] === 'object' && Object.keys(piece[key]).length > 0) {
+    return piece[key];
+  }
+
+  return {};
+}
+
+/**
+ * Serialize a piece object to a JSON-safe representation.
+ */
+function serializePiece(piece) {
+  const actionMap = resolveActionMap(piece, 'actions');
+  const actions = [];
+  for (const [key, action] of Object.entries(actionMap)) {
+    if (!action || typeof action !== 'object') continue;
+    actions.push({
+      name: action.name || key,
+      displayName: action.displayName || key,
+      description: action.description || '',
+      props: serializeProps(action.props),
+    });
+  }
+
+  const triggerMap = resolveActionMap(piece, 'triggers');
   const triggers = [];
-  if (piece.triggers && typeof piece.triggers === 'object') {
-    for (const [key, trigger] of Object.entries(piece.triggers)) {
-      triggers.push({
-        name: trigger.name || key,
-        displayName: trigger.displayName || key,
-        description: trigger.description || '',
-        props: serializeProps(trigger.props),
-      });
-    }
+  for (const [key, trigger] of Object.entries(triggerMap)) {
+    if (!trigger || typeof trigger !== 'object') continue;
+    triggers.push({
+      name: trigger.name || key,
+      displayName: trigger.displayName || key,
+      description: trigger.description || '',
+      props: serializeProps(trigger.props),
+    });
   }
 
   const auth = serializeAuth(piece.auth);
@@ -258,11 +290,19 @@ function cachedCount() {
   return unique.size;
 }
 
+/**
+ * Convenience: resolve the actions map for a piece.
+ */
+function resolveActions(piece) {
+  return resolveActionMap(piece, 'actions');
+}
+
 module.exports = {
   loadPiece,
   listPieces,
   listInstalledPackages,
   serializePiece,
+  resolveActions,
   clearCache,
   cachedCount,
 };

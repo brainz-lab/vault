@@ -1,0 +1,173 @@
+<% content_for :title, "Connectors" %>
+
+<div class="max-w-6xl" data-controller="connector-search">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="section-header">Connectors</h1>
+      <p class="section-subheader">Browse and connect to <%= @total_count %> third-party services</p>
+    </div>
+    <div class="flex gap-3">
+      <%= link_to dashboard_project_connector_credentials_path(@current_project), class: "btn-secondary" do %>
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+        </svg>
+        Credentials
+      <% end %>
+      <%= link_to dashboard_project_connector_connections_path(@current_project), class: "btn-secondary" do %>
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+        </svg>
+        Connections
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card p-5 mb-6">
+    <%= form_with url: dashboard_project_connectors_path(@current_project), method: :get, class: "flex flex-wrap gap-4 items-end", data: { connector_search_target: "form" } do |f| %>
+      <div class="flex-1 min-w-[200px]">
+        <label class="form-label">Search</label>
+        <%= f.text_field :search, value: params[:search], placeholder: "Search connectors...", class: "input", data: { connector_search_target: "search", action: "input->connector-search#filter" } %>
+      </div>
+      <div class="flex-1 min-w-[150px]">
+        <label class="form-label">Category</label>
+        <%= f.select :category,
+            options_for_select([["All Categories", ""]] + Connector::CATEGORIES.sort.map { |c| [c.titleize, c] }, params[:category]),
+            {}, class: "input", data: { action: "change->connector-search#submit" } %>
+      </div>
+      <div class="flex-1 min-w-[150px]">
+        <label class="form-label">Type</label>
+        <%= f.select :connector_type,
+            options_for_select([["All Types", ""]] + Connector::CONNECTOR_TYPES.map { |t| [t.titleize, t] }, params[:connector_type]),
+            {}, class: "input", data: { action: "change->connector-search#submit" } %>
+      </div>
+      <div class="flex gap-2">
+        <%= f.submit "Filter", class: "btn-primary cursor-pointer" %>
+        <%= link_to "Clear", dashboard_project_connectors_path(@current_project), class: "btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @connectors.any? %>
+    <!-- Connector Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-connector-search-target="results">
+      <% @connectors.each do |connector| %>
+        <%= link_to dashboard_project_connector_path(@current_project, connector), class: "card group hover:shadow-md transition-all" do %>
+          <div class="card-body">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-stone-100">
+                  <% if connector.logo_url.present? %>
+                    <img src="<%= connector.logo_url %>" alt="<%= connector.display_name %>" class="w-6 h-6 rounded" loading="lazy">
+                  <% else %>
+                    <svg class="w-5 h-5 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                    </svg>
+                  <% end %>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-primary group-hover:text-orange-600 transition-colors"><%= connector.display_name %></h3>
+                  <p class="text-xs text-faint font-mono"><%= connector.piece_name %></p>
+                </div>
+              </div>
+              <% if @connected_connector_ids.include?(connector.id) %>
+                <span class="badge badge-success text-xs">Connected</span>
+              <% end %>
+            </div>
+
+            <p class="text-sm text-muted line-clamp-2 mb-3"><%= connector.description.present? ? truncate(connector.description, length: 120) : "No description available" %></p>
+
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= connector_category_class(connector.category) %>">
+                <%= connector.category.titleize %>
+              </span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= connector_type_class(connector.connector_type) %>">
+                <%= connector.connector_type.titleize %>
+              </span>
+              <% actions_count = (connector.actions || []).length %>
+              <% if actions_count > 0 %>
+                <span class="text-xs text-muted"><%= actions_count %> actions</span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+    <!-- Pagination -->
+    <% if @total_pages > 1 %>
+      <div class="flex items-center justify-between mt-8">
+        <p class="text-sm text-muted">
+          Showing <%= ((@page - 1) * Dashboard::ConnectorsController::PER_PAGE) + 1 %>&ndash;<%= [(@page * Dashboard::ConnectorsController::PER_PAGE), @total_count].min %> of <%= @total_count %> connectors
+        </p>
+        <nav class="flex items-center gap-1">
+          <% if @page > 1 %>
+            <%= link_to url_for(request.query_parameters.merge(page: @page - 1)),
+                class: "px-3 py-1.5 text-sm font-medium rounded-lg text-muted hover:bg-stone-100 transition-colors" do %>
+              &larr; Prev
+            <% end %>
+          <% end %>
+
+          <% pagination_range = [[@page - 2, 1].max, [@page + 2, @total_pages].min] %>
+          <% if pagination_range[0] > 1 %>
+            <%= link_to url_for(request.query_parameters.merge(page: 1)),
+                class: "px-3 py-1.5 text-sm font-medium rounded-lg text-muted hover:bg-stone-100 transition-colors" do %>
+              1
+            <% end %>
+            <% if pagination_range[0] > 2 %>
+              <span class="px-2 text-muted">&hellip;</span>
+            <% end %>
+          <% end %>
+
+          <% (pagination_range[0]..pagination_range[1]).each do |p| %>
+            <% if p == @page %>
+              <span class="px-3 py-1.5 text-sm font-medium rounded-lg bg-orange-100 text-orange-700"><%= p %></span>
+            <% else %>
+              <%= link_to url_for(request.query_parameters.merge(page: p)),
+                  class: "px-3 py-1.5 text-sm font-medium rounded-lg text-muted hover:bg-stone-100 transition-colors" do %>
+                <%= p %>
+              <% end %>
+            <% end %>
+          <% end %>
+
+          <% if pagination_range[1] < @total_pages %>
+            <% if pagination_range[1] < @total_pages - 1 %>
+              <span class="px-2 text-muted">&hellip;</span>
+            <% end %>
+            <%= link_to url_for(request.query_parameters.merge(page: @total_pages)),
+                class: "px-3 py-1.5 text-sm font-medium rounded-lg text-muted hover:bg-stone-100 transition-colors" do %>
+              <%= @total_pages %>
+            <% end %>
+          <% end %>
+
+          <% if @page < @total_pages %>
+            <%= link_to url_for(request.query_parameters.merge(page: @page + 1)),
+                class: "px-3 py-1.5 text-sm font-medium rounded-lg text-muted hover:bg-stone-100 transition-colors" do %>
+              Next &rarr;
+            <% end %>
+          <% end %>
+        </nav>
+      </div>
+    <% end %>
+  <% else %>
+    <!-- Empty State -->
+    <div class="card">
+      <div class="empty-state py-16">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-stone-100">
+          <svg class="w-8 h-8 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+          </svg>
+        </div>
+        <h3 class="empty-state-title">No connectors found</h3>
+        <p class="empty-state-description">
+          <% if params[:search].present? || params[:category].present? || params[:connector_type].present? %>
+            Try adjusting your filters.
+          <% else %>
+            No connectors are available yet. Run <code>rake connectors:seed_all</code> to populate the catalog.
+          <% end %>
+        </p>
+      </div>
+    </div>
+  <% end %>
+</div>

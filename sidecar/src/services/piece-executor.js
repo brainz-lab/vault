@@ -1,6 +1,6 @@
 'use strict';
 
-const { loadPiece } = require('./piece-loader');
+const { loadPiece, resolveActions } = require('./piece-loader');
 const { withTimeout } = require('../utils/timeout');
 const logger = require('../utils/logger');
 
@@ -81,9 +81,10 @@ async function executePieceAction(pieceName, actionName, input, auth, timeoutMs)
     };
   }
 
-  const action = piece.actions && piece.actions[actionName];
+  const actionMap = resolveActions(piece);
+  const action = actionMap[actionName];
   if (!action) {
-    const available = piece.actions ? Object.keys(piece.actions) : [];
+    const available = Object.keys(actionMap);
     return {
       success: false,
       output: null,

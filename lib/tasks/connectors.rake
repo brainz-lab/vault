@@ -5,6 +5,38 @@ namespace :connectors do
     puts "Native connectors seeded: #{stats[:created]} created, #{stats[:updated]} updated"
   end
 
+  desc "Seed all 630+ Activepieces connectors from cloud API"
+  task seed_activepieces: :environment do
+    puts "Fetching Activepieces catalog..."
+    stats = Connectors::ActivepiecesSeeder.new.seed!
+    puts "Activepieces connectors: #{stats[:created]} created, #{stats[:updated]} updated, #{stats[:errors]} errors (#{stats[:total]} total)"
+  end
+
+  desc "Seed all Airbyte connectors from OSS registry"
+  task seed_airbyte: :environment do
+    puts "Fetching Airbyte registry..."
+    stats = Connectors::AirbyteSeeder.new.seed!
+    puts "Airbyte connectors: #{stats[:created]} created, #{stats[:updated]} updated, #{stats[:errors]} errors (#{stats[:sources]} sources, #{stats[:destinations]} destinations)"
+  end
+
+  desc "Seed ALL connectors (native + activepieces + airbyte)"
+  task seed_all: :environment do
+    puts "=== Seeding Native Connectors ==="
+    native_stats = Connectors::NativeSeeder.new.seed!
+    puts "  Native: #{native_stats[:created]} created, #{native_stats[:updated]} updated"
+
+    puts "\n=== Seeding Activepieces Connectors ==="
+    ap_stats = Connectors::ActivepiecesSeeder.new.seed!
+    puts "  Activepieces: #{ap_stats[:created]} created, #{ap_stats[:updated]} updated, #{ap_stats[:errors]} errors"
+
+    puts "\n=== Seeding Airbyte Connectors ==="
+    ab_stats = Connectors::AirbyteSeeder.new.seed!
+    puts "  Airbyte: #{ab_stats[:created]} created, #{ab_stats[:updated]} updated, #{ab_stats[:errors]} errors"
+
+    total = Connector.count
+    puts "\n=== Done! #{total} total connectors in catalog ==="
+  end
+
   desc "Sync connector catalog from sidecar"
   task sync_catalog: :environment do
     stats = Connectors::CatalogSync.new.sync!
@@ -44,6 +76,7 @@ namespace :connectors do
     total = Connector.count
     native = Connector.native.count
     activepieces = Connector.activepieces.count
+    airbyte = Connector.where(connector_type: "airbyte").count
     installed = Connector.installed.count
     enabled = Connector.enabled.count
 
@@ -51,12 +84,18 @@ namespace :connectors do
     puts "  Total:        #{total}"
     puts "  Native:       #{native}"
     puts "  Activepieces: #{activepieces}"
+    puts "  Airbyte:      #{airbyte}"
     puts "  Installed:    #{installed}"
     puts "  Enabled:      #{enabled}"
 
     puts "\nBy Category:"
     Connector.enabled.group(:category).count.sort_by { |_, v| -v }.each do |cat, count|
-      puts "  #{cat}: #{count}"
+      puts "  #{cat.ljust(25)} #{count}"
+    end
+
+    puts "\nBy Type:"
+    Connector.enabled.group(:connector_type).count.sort_by { |_, v| -v }.each do |type, count|
+      puts "  #{type.ljust(25)} #{count}"
     end
   end
 end

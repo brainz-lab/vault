@@ -32,7 +32,8 @@ module Connectors
 
       raise SidecarUnavailableError, "Sidecar returned HTTP #{response.status}" unless response.success?
 
-      response.body
+      body = response.body
+      body.is_a?(Hash) && body["pieces"] ? body["pieces"] : body
     rescue Faraday::ConnectionFailed, Faraday::TimeoutError => e
       raise SidecarUnavailableError, "Cannot reach sidecar: #{e.message}"
     end
@@ -41,11 +42,10 @@ module Connectors
       connector = Connector.find_or_initialize_by(piece_name: piece["name"])
       was_new = connector.new_record?
 
-      connector.assign_attributes(
+      attrs = {
         display_name: piece["displayName"] || piece["name"].titleize,
         description: piece["description"],
         logo_url: piece["logoUrl"],
-        category: normalize_category(piece["category"]),
         connector_type: "activepieces",
         auth_type: piece.dig("auth", "type"),
         auth_schema: piece["auth"] || {},
@@ -55,7 +55,14 @@ module Connectors
         triggers: normalize_triggers(piece["triggers"]),
         installed: true,
         enabled: true
-      )
+      }
+
+      # Only set category for new records or if sidecar provides one
+      if was_new || piece["category"].present?
+        attrs[:category] = normalize_category(piece["category"])
+      end
+
+      connector.assign_attributes(attrs)
 
       connector.save!
       was_new ? stats[:created] += 1 : stats[:updated] += 1

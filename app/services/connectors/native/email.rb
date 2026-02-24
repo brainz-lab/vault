@@ -80,7 +80,7 @@ module Connectors
         { success: true, to: params[:to], subject: params[:subject] }
       rescue Net::SMTPAuthenticationError => e
         raise Connectors::AuthenticationError, "SMTP authentication failed: #{e.message}"
-      rescue Net::SMTPError, Net::OpenTimeout, Net::ReadTimeout => e
+      rescue Net::SMTPError, Net::OpenTimeout, Net::ReadTimeout, Errno::ECONNREFUSED, Errno::EHOSTUNREACH => e
         raise Connectors::Error, "SMTP error: #{e.message}"
       end
 

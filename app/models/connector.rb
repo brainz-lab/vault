@@ -1,7 +1,7 @@
 class Connector < ApplicationRecord
   CONNECTOR_TYPES = %w[activepieces native airbyte].freeze
-  AUTH_TYPES = %w[SECRET_TEXT BASIC CUSTOM_AUTH OAUTH2 NONE].freeze
-  CATEGORIES = %w[communication crm data marketing productivity project_management sales support developer analytics ecommerce finance storage social automation ai other].freeze
+  AUTH_TYPES = %w[SECRET_TEXT BASIC BASIC_AUTH CUSTOM_AUTH OAUTH2 NONE].freeze
+  CATEGORIES = %w[communication crm data marketing productivity project_management sales support developer analytics ecommerce finance storage social automation ai accounting forms_and_surveys payment_processing human_resources business_intelligence content_and_files flow_control universal_ai core database file api other].freeze
 
   has_many :connector_credentials, dependent: :restrict_with_error
   has_many :connector_connections, dependent: :restrict_with_error

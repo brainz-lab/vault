@@ -1,0 +1,73 @@
+<% content_for :title, "New Connection" %>
+
+<div class="max-w-2xl">
+  <div class="mb-8">
+    <h1 class="section-header">New Connection</h1>
+    <p class="section-subheader">Connect to a third-party service</p>
+  </div>
+
+  <%= form_with url: dashboard_project_connector_connections_path(@current_project), method: :post, class: "space-y-6" do |f| %>
+    <div class="card">
+      <div class="card-body space-y-6">
+        <!-- Connector Selection -->
+        <div>
+          <label class="label">Connector</label>
+          <%= f.select :connector_id,
+              options_for_select(
+                @connectors.map { |c| [c.display_name, c.id] },
+                params[:connector_id]
+              ),
+              { include_blank: "Select a connector..." },
+              class: "input",
+              name: "connector_connection[connector_id]" %>
+        </div>
+
+        <!-- Connection Name -->
+        <div>
+          <label class="label">
+            Connection Name
+            <span class="font-normal" style="color: var(--color-ink-400);">(optional)</span>
+          </label>
+          <%= f.text_field :name, class: "input", placeholder: "e.g. Production Slack", name: "connector_connection[name]" %>
+          <p class="text-xs mt-1.5" style="color: var(--color-ink-400);">A friendly name for this connection. Defaults to connector name.</p>
+        </div>
+
+        <!-- Credential Selection -->
+        <% if @credentials.any? %>
+          <div>
+            <label class="label">
+              Credential
+              <span class="font-normal" style="color: var(--color-ink-400);">(optional)</span>
+            </label>
+            <%= f.select :connector_credential_id,
+                options_for_select(
+                  [["No credential", ""]] + @credentials.map { |c| ["#{c.name} (#{c.connector.display_name})", c.id] }
+                ),
+                {},
+                class: "input",
+                name: "connector_connection[connector_credential_id]" %>
+            <p class="text-xs mt-1.5" style="color: var(--color-ink-400);">Select stored credentials for authentication</p>
+          </div>
+        <% end %>
+
+        <!-- Config JSON -->
+        <div>
+          <label class="label">
+            Configuration
+            <span class="font-normal" style="color: var(--color-ink-400);">(optional JSON)</span>
+          </label>
+          <textarea name="config_json" class="input font-mono text-sm" rows="4" placeholder='{"key": "value"}'></textarea>
+          <p class="text-xs mt-1.5" style="color: var(--color-ink-400);">Optional JSON configuration for this connection</p>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="card-footer flex justify-end gap-3">
+        <%= link_to dashboard_project_connector_connections_path(@current_project), class: "btn-secondary" do %>
+          Cancel
+        <% end %>
+        <%= f.submit "Create Connection", class: "btn-primary cursor-pointer" %>
+      </div>
+    </div>
+  <% end %>
+</div>

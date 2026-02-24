@@ -1,0 +1,95 @@
+<% content_for :title, "New Credential" %>
+
+<div class="max-w-2xl" data-controller="connector-credential-form">
+  <div class="mb-8">
+    <h1 class="section-header">Store Credential</h1>
+    <p class="section-subheader">Securely store authentication credentials for a connector</p>
+  </div>
+
+  <%= form_with url: dashboard_project_connector_credentials_path(@current_project), method: :post, class: "space-y-6" do |f| %>
+    <div class="card">
+      <div class="card-body space-y-6">
+        <!-- Connector Selection -->
+        <div>
+          <label class="label">Connector</label>
+          <%= f.select :connector_id,
+              options_for_select(
+                @connectors.map { |c| ["#{c.display_name} (#{c.auth_type})", c.id, { "data-auth-type" => c.auth_type, "data-auth-schema" => (c.auth_schema || {}).to_json }] },
+                @connector&.id
+              ),
+              { include_blank: "Select a connector..." },
+              class: "input",
+              data: { connector_credential_form_target: "connectorSelect", action: "change->connector-credential-form#connectorChanged" },
+              name: "connector_credential[connector_id]" %>
+        </div>
+
+        <!-- Credential Name -->
+        <div>
+          <label class="label">Credential Name</label>
+          <%= f.text_field :name, class: "input", placeholder: "e.g. Production API Key", name: "connector_credential[name]" %>
+          <p class="text-xs mt-1.5" style="color: var(--color-ink-400);">A friendly name to identify this credential</p>
+        </div>
+
+        <!-- SECRET_TEXT Fields -->
+        <div data-connector-credential-form-target="secretTextFields" class="hidden space-y-4">
+          <div>
+            <label class="label">API Key / Token</label>
+            <input type="password" name="credentials[token]" class="input font-mono" placeholder="Enter your API key or token" autocomplete="off">
+          </div>
+        </div>
+
+        <!-- BASIC Fields -->
+        <div data-connector-credential-form-target="basicFields" class="hidden space-y-4">
+          <div>
+            <label class="label">Username</label>
+            <input type="text" name="credentials[username]" class="input" placeholder="Username" autocomplete="off">
+          </div>
+          <div>
+            <label class="label">Password</label>
+            <input type="password" name="credentials[password]" class="input" placeholder="Password" autocomplete="off">
+          </div>
+        </div>
+
+        <!-- CUSTOM_AUTH Fields -->
+        <div data-connector-credential-form-target="customAuthFields" class="hidden space-y-4">
+          <p class="text-sm text-muted" data-connector-credential-form-target="customAuthDescription">Fill in the required fields below.</p>
+          <div data-connector-credential-form-target="customAuthContainer"></div>
+        </div>
+
+        <!-- OAUTH2 Fields -->
+        <div data-connector-credential-form-target="oauth2Fields" class="hidden space-y-4">
+          <div>
+            <label class="label">Access Token</label>
+            <input type="password" name="credentials[access_token]" class="input font-mono" placeholder="OAuth2 access token" autocomplete="off">
+          </div>
+          <div>
+            <label class="label">
+              Refresh Token
+              <span class="font-normal" style="color: var(--color-ink-400);">(optional)</span>
+            </label>
+            <input type="password" name="credentials[refresh_token]" class="input font-mono" placeholder="OAuth2 refresh token" autocomplete="off">
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="card-footer flex justify-end gap-3">
+        <%= link_to dashboard_project_connector_credentials_path(@current_project), class: "btn-secondary" do %>
+          Cancel
+        <% end %>
+        <%= f.submit "Store Credential", class: "btn-primary cursor-pointer" %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Info Box -->
+  <div class="mt-6 rounded-xl p-4 flex items-start gap-3" style="background: var(--color-cream-100);">
+    <svg class="h-5 w-5 flex-shrink-0 mt-0.5" style="color: var(--color-ink-500);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+    </svg>
+    <div class="text-sm" style="color: var(--color-ink-600);">
+      <p class="font-medium" style="color: var(--color-ink-700);">Encrypted Storage</p>
+      <p class="mt-1">Credentials are encrypted with AES-256-GCM before storage. The plaintext values are never stored or logged.</p>
+    </div>
+  </div>
+</div>

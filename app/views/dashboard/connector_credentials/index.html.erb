@@ -1,0 +1,111 @@
+<% content_for :title, "Connector Credentials" %>
+
+<div class="max-w-6xl">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="section-header">Connector Credentials</h1>
+      <p class="section-subheader">Manage stored authentication credentials for connectors</p>
+    </div>
+    <div class="flex gap-3">
+      <%= link_to dashboard_project_connectors_path(@current_project), class: "btn-secondary" do %>
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        Catalog
+      <% end %>
+      <%= link_to new_dashboard_project_connector_credential_path(@current_project), class: "btn-primary" do %>
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        New Credential
+      <% end %>
+    </div>
+  </div>
+
+  <% if @credentials.any? %>
+    <div class="card overflow-hidden">
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Name</th>
+            <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Connector</th>
+            <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Auth Type</th>
+            <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Status</th>
+            <th class="table-header px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Last Verified</th>
+            <th class="table-header px-6 py-3"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y border-light">
+          <% @credentials.each do |credential| %>
+            <tr class="table-row-hover transition-colors <%= credential.status == 'revoked' ? 'opacity-50' : '' %>">
+              <td class="whitespace-nowrap px-6 py-4">
+                <div class="flex items-center">
+                  <div class="flex h-9 w-9 items-center justify-center rounded-lg icon-bg-vault">
+                    <svg class="h-4 w-4 text-vault" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm font-medium text-primary"><%= credential.name %></p>
+                    <p class="text-xs text-faint">Created <%= time_ago_in_words(credential.created_at) %> ago</p>
+                  </div>
+                </div>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-primary">
+                <%= link_to credential.connector.display_name, dashboard_project_connector_path(@current_project, credential.connector), class: "link-primary font-medium" %>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-stone-100 text-stone-600">
+                  <%= credential.auth_type.gsub("_", " ") %>
+                </span>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4">
+                <span class="<%= credential_status_class(credential.status) %>"><%= credential.status.titleize %></span>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-muted">
+                <%= credential.last_verified_at ? "#{time_ago_in_words(credential.last_verified_at)} ago" : "Never" %>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-right">
+                <% unless credential.status == 'revoked' %>
+                  <%= button_to verify_dashboard_project_connector_credential_path(@current_project, credential),
+                      method: :post,
+                      class: "text-sm font-medium transition-colors link-primary" do %>
+                    Verify
+                  <% end %>
+                  <%= button_to dashboard_project_connector_credential_path(@current_project, credential),
+                      method: :delete,
+                      data: { confirm: "Revoke this credential? Connected services will stop working." },
+                      class: "ml-4 text-sm font-medium text-red-600 hover:text-red-500 transition-colors" do %>
+                    Revoke
+                  <% end %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <!-- Empty State -->
+    <div class="card">
+      <div class="empty-state py-16">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 icon-bg-vault">
+          <svg class="w-8 h-8 text-vault" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+          </svg>
+        </div>
+        <h3 class="empty-state-title">No credentials stored</h3>
+        <p class="empty-state-description">Store credentials to connect to third-party services.</p>
+        <div class="mt-8">
+          <%= link_to new_dashboard_project_connector_credential_path(@current_project), class: "btn-primary" do %>
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            New Credential
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

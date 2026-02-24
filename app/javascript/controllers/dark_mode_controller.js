@@ -32,6 +32,13 @@ export default class extends Controller {
     // Prevent transition flash on initial load
     document.documentElement.classList.add("no-transitions")
 
+    // Listen for system theme changes (set up before initializeTheme which uses this.mediaQuery)
+    if (typeof window.matchMedia === "function") {
+      this.mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+    } else {
+      this.mediaQuery = { matches: false, addEventListener() {}, removeEventListener() {} }
+    }
+
     // Initialize theme based on stored preference or system preference
     this.initializeTheme()
 
@@ -42,8 +49,6 @@ export default class extends Controller {
       })
     })
 
-    // Listen for system theme changes
-    this.mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
     this.boundHandleSystemChange = this.handleSystemChange.bind(this)
     this.mediaQuery.addEventListener("change", this.boundHandleSystemChange)
   }

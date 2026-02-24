@@ -118,6 +118,19 @@ Rails.application.routes.draw do
         end
       end
       resources :audit_logs, only: [ :index, :show ]
+
+      resources :connectors, only: [ :index, :show ] do
+        member { get :actions }
+      end
+      resources :connector_credentials, only: [ :index, :new, :create, :destroy ] do
+        member { post :verify }
+      end
+      resources :connector_connections, only: [ :index, :new, :create, :show, :destroy ] do
+        member do
+          post :test
+          post :execute
+        end
+      end
     end
 
     root to: "projects#index"
