@@ -1,5 +1,3 @@
-require_relative "errors"
-
 module Connectors
   class Executor
     def initialize(project:, caller_service: nil, caller_request_id: nil)
