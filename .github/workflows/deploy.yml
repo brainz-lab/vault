@@ -48,3 +48,17 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DOCTL_ACCESS_TOKEN }}
+
+      - name: Configure kubectl
+        run: doctl kubernetes cluster kubeconfig save ${{ secrets.DOKS_CLUSTER_ID }}
+
+      - name: Restart deployment
+        run: |
+          kubectl rollout restart deployment/vault-web -n default
+          kubectl rollout restart deployment/vault-job -n default
+          kubectl rollout status deployment/vault-web -n default --timeout=5m
