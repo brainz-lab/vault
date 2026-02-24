@@ -1,6 +1,6 @@
 /* BrainzLab Unified Design System */
 @import "tailwindcss";
-@import "./fluyenta_ui/base.css";
+@import "./brainzlab_ui/base.css";
 
 /* Vault-specific dark mode styles */
 @import "../stylesheets/dark_mode.css";

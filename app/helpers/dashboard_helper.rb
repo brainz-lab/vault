@@ -33,11 +33,7 @@ module DashboardHelper
   end
 
   def nav_link_class(path_pattern)
-    if nav_active?(path_pattern)
-      "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition bg-orange-50 text-orange-700"
-    else
-      "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-stone-600 hover:bg-stone-50 hover:text-stone-900"
-    end
+    "dm-nav-link #{nav_active?(path_pattern) ? 'dm-nav-link-active' : ''}"
   end
 
   def action_badge_class(action)
