@@ -11,7 +11,7 @@ module Connectors
       end
 
       def self.logo_url
-        "https://cdn.apollo.io/favicon.png"
+        "/images/connectors/apollo.svg"
       end
 
       def self.actions

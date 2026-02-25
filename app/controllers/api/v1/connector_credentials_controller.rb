@@ -102,7 +102,8 @@ module Api
         params.permit!.to_h.slice("value", "api_key", "token", "username", "password", "secret",
           "access_key_id", "secret_access_key", "host", "port", "database",
           "smtp_host", "smtp_port", "imap_host", "imap_port", "from",
-          "bucket", "region", "base_path", "adapter", "smtp_domain").compact_blank
+          "bucket", "region", "base_path", "adapter", "smtp_domain",
+          "domain", "webhook_token", "auth_method", "access_token", "refresh_token").compact_blank
       end
     end
   end

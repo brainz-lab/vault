@@ -18,7 +18,7 @@ module Connectors
       end
 
       def self.logo_url
-        "https://www.bitrix24.com/favicon.ico"
+        "/images/connectors/bitrix.svg"
       end
 
       def self.actions
