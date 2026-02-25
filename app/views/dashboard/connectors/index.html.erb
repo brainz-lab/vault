@@ -25,7 +25,7 @@
 
   <!-- Filters -->
   <div class="card p-5 mb-6">
-    <%= form_with url: dashboard_project_connectors_path(@current_project), method: :get, class: "flex flex-wrap gap-4 items-end", data: { connector_search_target: "form" } do |f| %>
+    <%= form_with url: dashboard_project_connectors_path(@current_project), method: :get, class: "flex flex-wrap gap-4 items-end", data: { connector_search_target: "form", turbo_frame: "connector-results" } do |f| %>
       <div class="flex-1 min-w-[200px]">
         <label class="form-label">Search</label>
         <%= f.text_field :search, value: params[:search], placeholder: "Search connectors...", class: "input", data: { connector_search_target: "search", action: "input->connector-search#filter" } %>
@@ -49,6 +49,7 @@
     <% end %>
   </div>
 
+  <%= turbo_frame_tag "connector-results", data: { turbo_action: "advance" } do %>
   <% if @connectors.any? %>
     <!-- Connector Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-connector-search-target="results">
@@ -169,5 +170,6 @@
         </p>
       </div>
     </div>
+  <% end %>
   <% end %>
 </div>
