@@ -9,7 +9,7 @@ class SsoController < ActionController::Base
   # Handle SSO callback from Platform
   def callback
     token = params[:token]
-    return_to = params[:return_to] || dashboard_projects_path
+    return_to = params[:return_to]
 
     unless token.present?
       redirect_to ENV["BRAINZLAB_PLATFORM_URL"] || "http://platform.localhost:2999/login",
@@ -33,6 +33,8 @@ class SsoController < ActionController::Base
 
       # Ensure at least the current project exists (fallback if full sync failed)
       ensure_project_exists(result)
+
+      return_to ||= project_redirect_path(result) || dashboard_projects_path
 
       # Use client-side redirect to completely bypass Turbo Drive
       # This prevents blank page issues after SSO authentication
@@ -161,6 +163,13 @@ class SsoController < ActionController::Base
       email: "dev@localhost",
       name: "Developer"
     }
+  end
+
+  def project_redirect_path(result)
+    return nil unless result[:project_id].present?
+    project = Project.find_by(platform_project_id: result[:project_id].to_s)
+    return nil unless project
+    "/dashboard/projects/#{project.id}"
   end
 
   def dashboard_projects_path
