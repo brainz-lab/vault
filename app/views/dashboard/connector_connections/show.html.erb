@@ -54,7 +54,7 @@
       <% if @connection.connected? && @actions.any? %>
         <div class="card">
           <div class="card-body">
-            <h2 class="text-lg font-semibold mb-4" style="color: var(--color-ink-900);">Execute Action</h2>
+            <h2 class="text-lg font-semibold mb-4 dm-text">Execute Action</h2>
 
             <%= form_with url: execute_dashboard_project_connector_connection_path(@current_project, @connection), method: :post, class: "space-y-4", data: { connector_execute_target: "form" } do |f| %>
               <!-- Action Selection -->
@@ -94,7 +94,7 @@
                 <span class="badge badge-neutral text-xs"><%= @result[:duration_ms] %>ms</span>
               <% end %>
             </div>
-            <pre class="p-4 rounded-xl text-sm font-mono overflow-x-auto" style="background: var(--color-ink-900); color: var(--color-cream-100);"><%= JSON.pretty_generate(@result[:output]) rescue @result[:output].to_s %></pre>
+            <pre class="p-4 rounded-xl text-sm font-mono overflow-x-auto bg-zinc-900 text-zinc-100"><%= JSON.pretty_generate(@result[:output]) rescue @result[:output].to_s %></pre>
           </div>
         </div>
       <% end %>
@@ -115,8 +115,8 @@
 
       <!-- Recent Executions -->
       <div class="card overflow-hidden">
-        <div class="px-6 py-4 flex justify-between items-center" style="background: var(--color-cream-50); border-bottom: 1px solid var(--color-cream-200);">
-          <h2 class="text-lg font-semibold" style="color: var(--color-ink-900);">Recent Executions</h2>
+        <div class="px-6 py-4 flex justify-between items-center dm-surface-alt dm-border-secondary" style="border-bottom-width: 1px; border-bottom-style: solid;">
+          <h2 class="text-lg font-semibold dm-text">Recent Executions</h2>
           <span class="badge badge-neutral"><%= @recent_executions.length %></span>
         </div>
         <% if @recent_executions.any? %>
@@ -168,10 +168,10 @@
       <!-- Connection Info -->
       <div class="card">
         <div class="card-body">
-          <h2 class="text-lg font-semibold mb-4" style="color: var(--color-ink-900);">Connection Details</h2>
+          <h2 class="text-lg font-semibold mb-4 dm-text">Connection Details</h2>
           <dl class="space-y-4">
             <div>
-              <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Connector</dt>
+              <dt class="text-xs font-medium uppercase tracking-wide dm-text-secondary">Connector</dt>
               <dd class="mt-1">
                 <%= link_to dashboard_project_connector_path(@current_project, @connector), class: "text-sm font-medium link-primary" do %>
                   <%= @connector.display_name %>
@@ -179,7 +179,7 @@
               </dd>
             </div>
             <div>
-              <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Type</dt>
+              <dt class="text-xs font-medium uppercase tracking-wide dm-text-secondary">Type</dt>
               <dd class="mt-1">
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= connector_type_class(@connector.connector_type) %>">
                   <%= @connector.connector_type.titleize %>
@@ -187,23 +187,23 @@
               </dd>
             </div>
             <div>
-              <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Credential</dt>
-              <dd class="mt-1 text-sm" style="color: var(--color-ink-900);">
+              <dt class="text-xs font-medium uppercase tracking-wide dm-text-secondary">Credential</dt>
+              <dd class="mt-1 text-sm dm-text">
                 <%= @connection.connector_credential&.name || "None" %>
               </dd>
             </div>
             <div>
-              <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Created</dt>
-              <dd class="mt-1 text-sm" style="color: var(--color-ink-900);"><%= @connection.created_at.strftime("%b %d, %Y") %></dd>
+              <dt class="text-xs font-medium uppercase tracking-wide dm-text-secondary">Created</dt>
+              <dd class="mt-1 text-sm dm-text"><%= @connection.created_at.strftime("%b %d, %Y") %></dd>
             </div>
             <div>
-              <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Total Executions</dt>
-              <dd class="mt-1 text-sm" style="color: var(--color-ink-900);"><%= @connection.execution_count %></dd>
+              <dt class="text-xs font-medium uppercase tracking-wide dm-text-secondary">Total Executions</dt>
+              <dd class="mt-1 text-sm dm-text"><%= @connection.execution_count %></dd>
             </div>
             <% if @connection.last_executed_at %>
               <div>
-                <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Last Executed</dt>
-                <dd class="mt-1 text-sm" style="color: var(--color-ink-900);"><%= @connection.last_executed_at.strftime("%b %d, %Y at %H:%M") %></dd>
+                <dt class="text-xs font-medium uppercase tracking-wide dm-text-secondary">Last Executed</dt>
+                <dd class="mt-1 text-sm dm-text"><%= @connection.last_executed_at.strftime("%b %d, %Y at %H:%M") %></dd>
               </div>
             <% end %>
             <% if @connection.error_message.present? %>
@@ -219,11 +219,11 @@
       <!-- Available Actions List -->
       <div class="card">
         <div class="card-body">
-          <h2 class="text-lg font-semibold mb-4" style="color: var(--color-ink-900);">Available Actions</h2>
+          <h2 class="text-lg font-semibold mb-4 dm-text">Available Actions</h2>
           <% if @actions.any? %>
             <div class="space-y-2">
               <% @actions.each do |action| %>
-                <div class="p-2.5 rounded-lg" style="background: var(--color-cream-50);">
+                <div class="p-2.5 rounded-lg dm-surface-alt">
                   <p class="text-sm font-medium text-primary"><%= action["displayName"] || action["name"] %></p>
                   <p class="text-xs font-mono text-faint"><%= action["name"] %></p>
                 </div>

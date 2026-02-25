@@ -20,78 +20,78 @@
       <% end %>
 
       <div>
-        <%= form.label :name, class: "block text-sm font-medium text-stone-700 mb-2" %>
+        <%= form.label :name, class: "block text-sm font-medium dm-text mb-2" %>
         <%= form.text_field :name,
-            class: "w-full rounded-xl px-4 py-3 text-sm border border-stone-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition" %>
+            class: "w-full rounded-xl px-4 py-3 text-sm dm-border-secondary focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition" %>
       </div>
 
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <%= form.label :provider, class: "block text-sm font-medium text-stone-700 mb-2" %>
+          <%= form.label :provider, class: "block text-sm font-medium dm-text mb-2" %>
           <%= form.select :provider,
               ProviderKey::PROVIDERS.map { |p| [p.titleize, p] },
               {},
-              class: "w-full rounded-xl px-4 py-3 text-sm border border-stone-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition cursor-pointer" %>
+              class: "w-full rounded-xl px-4 py-3 text-sm dm-border-secondary focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition cursor-pointer" %>
         </div>
 
         <div>
-          <%= form.label :model_type, "Model Type", class: "block text-sm font-medium text-stone-700 mb-2" %>
+          <%= form.label :model_type, "Model Type", class: "block text-sm font-medium dm-text mb-2" %>
           <%= form.select :model_type,
               ProviderKey::MODEL_TYPES.map { |t| [t.upcase, t] },
               {},
-              class: "w-full rounded-xl px-4 py-3 text-sm border border-stone-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition cursor-pointer" %>
+              class: "w-full rounded-xl px-4 py-3 text-sm dm-border-secondary focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition cursor-pointer" %>
         </div>
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-stone-700 mb-2">Current Key</label>
-        <div class="px-4 py-3 rounded-xl bg-stone-50 font-mono text-sm text-stone-600">
+        <label class="block text-sm font-medium dm-text mb-2">Current Key</label>
+        <div class="px-4 py-3 rounded-xl dm-surface-alt font-mono text-sm dm-text-secondary">
           <%= @provider_key.key_prefix %>...
         </div>
       </div>
 
       <div>
-        <%= form.label :api_key, "New API Key (optional)", class: "block text-sm font-medium text-stone-700 mb-2" %>
+        <%= form.label :api_key, "New API Key (optional)", class: "block text-sm font-medium dm-text mb-2" %>
         <%= form.password_field :api_key,
-            class: "w-full rounded-xl px-4 py-3 text-sm border border-stone-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition font-mono",
+            class: "w-full rounded-xl px-4 py-3 text-sm dm-border-secondary focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition font-mono",
             placeholder: "Leave blank to keep current key",
             autocomplete: "off" %>
-        <p class="mt-1 text-xs text-stone-500">Only enter a new key if you want to replace the existing one</p>
+        <p class="mt-1 text-xs dm-text-secondary">Only enter a new key if you want to replace the existing one</p>
       </div>
 
       <div>
-        <%= form.label :priority, class: "block text-sm font-medium text-stone-700 mb-2" %>
+        <%= form.label :priority, class: "block text-sm font-medium dm-text mb-2" %>
         <%= form.number_field :priority,
-            class: "w-full rounded-xl px-4 py-3 text-sm border border-stone-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition",
+            class: "w-full rounded-xl px-4 py-3 text-sm dm-border-secondary focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition",
             min: 0,
             max: 100 %>
-        <p class="mt-1 text-xs text-stone-500">Higher priority keys are used first (0-100)</p>
+        <p class="mt-1 text-xs dm-text-secondary">Higher priority keys are used first (0-100)</p>
       </div>
 
       <!-- Key Stats -->
-      <div class="rounded-xl p-4 bg-stone-50 border border-stone-100">
-        <h3 class="text-sm font-medium text-stone-700 mb-3">Key Statistics</h3>
+      <div class="rounded-xl p-4 dm-surface-alt dm-border-light">
+        <h3 class="text-sm font-medium dm-text mb-3">Key Statistics</h3>
         <div class="grid grid-cols-3 gap-4 text-center">
           <div>
-            <p class="text-2xl font-semibold text-stone-900"><%= number_with_delimiter(@provider_key.usage_count) %></p>
-            <p class="text-xs text-stone-500">Total Calls</p>
+            <p class="text-2xl font-semibold dm-text"><%= number_with_delimiter(@provider_key.usage_count) %></p>
+            <p class="text-xs dm-text-secondary">Total Calls</p>
           </div>
           <div>
-            <p class="text-2xl font-semibold text-stone-900">
+            <p class="text-2xl font-semibold dm-text">
               <%= @provider_key.last_used_at ? time_ago_in_words(@provider_key.last_used_at) : "Never" %>
             </p>
-            <p class="text-xs text-stone-500">Last Used</p>
+            <p class="text-xs dm-text-secondary">Last Used</p>
           </div>
           <div>
-            <p class="text-2xl font-semibold text-stone-900"><%= @provider_key.global? ? "Global" : "Project" %></p>
-            <p class="text-xs text-stone-500">Scope</p>
+            <p class="text-2xl font-semibold dm-text"><%= @provider_key.global? ? "Global" : "Project" %></p>
+            <p class="text-xs dm-text-secondary">Scope</p>
           </div>
         </div>
       </div>
 
-      <div class="flex items-center justify-end gap-3 pt-4 border-t border-stone-100">
+      <div class="flex items-center justify-end gap-3 pt-4 border-t dm-border-light">
         <%= link_to "Cancel", dashboard_provider_keys_path(project_id: current_project&.id),
-            class: "px-4 py-2.5 text-sm font-medium text-stone-600 hover:text-stone-900 transition" %>
+            class: "px-4 py-2.5 text-sm font-medium dm-text-secondary hover:dm-text transition" %>
         <%= form.submit "Update Key",
             class: "px-6 py-2.5 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-xl transition cursor-pointer" %>
       </div>

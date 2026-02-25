@@ -58,7 +58,7 @@
       <% if @connector.requires_auth? %>
         <div class="card">
           <div class="card-body">
-            <h2 class="text-lg font-semibold mb-4" style="color: var(--color-ink-900);">Authentication</h2>
+            <h2 class="text-lg font-semibold mb-4 dm-text">Authentication</h2>
             <div class="flex items-center gap-3 mb-3">
               <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-stone-100 text-stone-700">
                 <svg class="w-3.5 h-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -85,12 +85,12 @@
 
       <!-- Available Actions -->
       <div class="card overflow-hidden">
-        <div class="px-6 py-4 flex justify-between items-center" style="background: var(--color-cream-50); border-bottom: 1px solid var(--color-cream-200);">
-          <h2 class="text-lg font-semibold" style="color: var(--color-ink-900);">Available Actions</h2>
+        <div class="px-6 py-4 flex justify-between items-center dm-surface-alt dm-border-secondary" style="border-bottom-width: 1px; border-bottom-style: solid;">
+          <h2 class="text-lg font-semibold dm-text">Available Actions</h2>
           <span class="badge badge-neutral"><%= (@connector.actions || []).length %> actions</span>
         </div>
         <% if (@connector.actions || []).any? %>
-          <ul class="divide-y" style="border-color: var(--color-cream-100);">
+          <ul class="divide-y dm-border-light">
             <% (@connector.actions || []).each do |action| %>
               <li class="px-6 py-4">
                 <div class="flex items-start justify-between">
@@ -106,7 +106,7 @@
                   <% end %>
                 </div>
                 <% if action["props"].is_a?(Hash) && action["props"].any? %>
-                  <div class="mt-3 pl-4 border-l-2" style="border-color: var(--color-cream-200);">
+                  <div class="mt-3 pl-4 border-l-2 dm-border-secondary">
                     <% action["props"].each do |prop_name, prop_config| %>
                       <div class="py-1">
                         <span class="text-xs font-mono font-medium text-primary"><%= prop_name %></span>
@@ -137,7 +137,7 @@
       <!-- Existing Connections -->
       <div class="card">
         <div class="card-body">
-          <h2 class="text-lg font-semibold mb-4" style="color: var(--color-ink-900);">Connections</h2>
+          <h2 class="text-lg font-semibold mb-4 dm-text">Connections</h2>
           <% if @connections.any? %>
             <div class="space-y-3">
               <% @connections.each do |conn| %>
@@ -161,11 +161,11 @@
       <!-- Stored Credentials -->
       <div class="card">
         <div class="card-body">
-          <h2 class="text-lg font-semibold mb-4" style="color: var(--color-ink-900);">Credentials</h2>
+          <h2 class="text-lg font-semibold mb-4 dm-text">Credentials</h2>
           <% if @credentials.any? %>
             <div class="space-y-3">
               <% @credentials.each do |cred| %>
-                <div class="p-3 rounded-xl" style="background: var(--color-cream-50);">
+                <div class="p-3 rounded-xl dm-surface-alt">
                   <div class="flex items-center justify-between">
                     <span class="text-sm font-medium text-primary"><%= cred.name %></span>
                     <span class="<%= credential_status_class(cred.status) %> text-xs"><%= cred.status.titleize %></span>
@@ -183,26 +183,26 @@
       <!-- Details -->
       <div class="card">
         <div class="card-body">
-          <h2 class="text-lg font-semibold mb-4" style="color: var(--color-ink-900);">Details</h2>
+          <h2 class="text-lg font-semibold mb-4 dm-text">Details</h2>
           <dl class="space-y-4">
             <div>
-              <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Piece Name</dt>
-              <dd class="mt-1 text-sm font-mono" style="color: var(--color-ink-900);"><%= @connector.piece_name %></dd>
+              <dt class="text-xs font-medium uppercase tracking-wide dm-text-secondary">Piece Name</dt>
+              <dd class="mt-1 text-sm font-mono dm-text"><%= @connector.piece_name %></dd>
             </div>
             <% if @connector.version.present? %>
               <div>
-                <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Version</dt>
-                <dd class="mt-1 text-sm" style="color: var(--color-ink-900);"><%= @connector.version %></dd>
+                <dt class="text-xs font-medium uppercase tracking-wide dm-text-secondary">Version</dt>
+                <dd class="mt-1 text-sm dm-text"><%= @connector.version %></dd>
               </div>
             <% end %>
             <% if @connector.package_name.present? %>
               <div>
-                <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Package</dt>
-                <dd class="mt-1 text-sm font-mono" style="color: var(--color-ink-900);"><%= @connector.package_name %></dd>
+                <dt class="text-xs font-medium uppercase tracking-wide dm-text-secondary">Package</dt>
+                <dd class="mt-1 text-sm font-mono dm-text"><%= @connector.package_name %></dd>
               </div>
             <% end %>
             <div>
-              <dt class="text-xs font-medium uppercase tracking-wide" style="color: var(--color-ink-500);">Status</dt>
+              <dt class="text-xs font-medium uppercase tracking-wide dm-text-secondary">Status</dt>
               <dd class="mt-1">
                 <span class="badge <%= @connector.enabled? ? 'badge-success' : 'badge-neutral' %>">
                   <%= @connector.enabled? ? 'Enabled' : 'Disabled' %>

@@ -26,10 +26,10 @@
         <div>
           <label class="label">
             Connection Name
-            <span class="font-normal" style="color: var(--color-ink-400);">(optional)</span>
+            <span class="font-normal dm-text-muted">(optional)</span>
           </label>
           <%= f.text_field :name, class: "input", placeholder: "e.g. Production Slack", name: "connector_connection[name]" %>
-          <p class="text-xs mt-1.5" style="color: var(--color-ink-400);">A friendly name for this connection. Defaults to connector name.</p>
+          <p class="text-xs mt-1.5 dm-text-muted">A friendly name for this connection. Defaults to connector name.</p>
         </div>
 
         <!-- Credential Selection -->
@@ -37,7 +37,7 @@
           <div>
             <label class="label">
               Credential
-              <span class="font-normal" style="color: var(--color-ink-400);">(optional)</span>
+              <span class="font-normal dm-text-muted">(optional)</span>
             </label>
             <%= f.select :connector_credential_id,
                 options_for_select(
@@ -46,7 +46,7 @@
                 {},
                 class: "input",
                 name: "connector_connection[connector_credential_id]" %>
-            <p class="text-xs mt-1.5" style="color: var(--color-ink-400);">Select stored credentials for authentication</p>
+            <p class="text-xs mt-1.5 dm-text-muted">Select stored credentials for authentication</p>
           </div>
         <% end %>
 
@@ -54,10 +54,10 @@
         <div>
           <label class="label">
             Configuration
-            <span class="font-normal" style="color: var(--color-ink-400);">(optional JSON)</span>
+            <span class="font-normal dm-text-muted">(optional JSON)</span>
           </label>
           <textarea name="config_json" class="input font-mono text-sm" rows="4" placeholder='{"key": "value"}'></textarea>
-          <p class="text-xs mt-1.5" style="color: var(--color-ink-400);">Optional JSON configuration for this connection</p>
+          <p class="text-xs mt-1.5 dm-text-muted">Optional JSON configuration for this connection</p>
         </div>
       </div>
 

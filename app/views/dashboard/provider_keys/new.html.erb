@@ -20,62 +20,62 @@
       <% end %>
 
       <div>
-        <%= form.label :name, class: "block text-sm font-medium text-stone-700 mb-2" %>
+        <%= form.label :name, class: "block text-sm font-medium dm-text mb-2" %>
         <%= form.text_field :name,
-            class: "w-full rounded-xl px-4 py-3 text-sm border border-stone-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition",
+            class: "w-full rounded-xl px-4 py-3 text-sm dm-border-secondary focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition",
             placeholder: "e.g., Production OpenAI Key" %>
       </div>
 
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <%= form.label :provider, class: "block text-sm font-medium text-stone-700 mb-2" %>
+          <%= form.label :provider, class: "block text-sm font-medium dm-text mb-2" %>
           <%= form.select :provider,
               ProviderKey::PROVIDERS.map { |p| [p.titleize, p] },
               {},
-              class: "w-full rounded-xl px-4 py-3 text-sm border border-stone-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition cursor-pointer" %>
+              class: "w-full rounded-xl px-4 py-3 text-sm dm-border-secondary focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition cursor-pointer" %>
         </div>
 
         <div>
-          <%= form.label :model_type, "Model Type", class: "block text-sm font-medium text-stone-700 mb-2" %>
+          <%= form.label :model_type, "Model Type", class: "block text-sm font-medium dm-text mb-2" %>
           <%= form.select :model_type,
               ProviderKey::MODEL_TYPES.map { |t| [t.upcase, t] },
               {},
-              class: "w-full rounded-xl px-4 py-3 text-sm border border-stone-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition cursor-pointer" %>
+              class: "w-full rounded-xl px-4 py-3 text-sm dm-border-secondary focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition cursor-pointer" %>
         </div>
       </div>
 
       <div>
-        <%= form.label :api_key, "API Key", class: "block text-sm font-medium text-stone-700 mb-2" %>
+        <%= form.label :api_key, "API Key", class: "block text-sm font-medium dm-text mb-2" %>
         <%= form.password_field :api_key,
-            class: "w-full rounded-xl px-4 py-3 text-sm border border-stone-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition font-mono",
+            class: "w-full rounded-xl px-4 py-3 text-sm dm-border-secondary focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition font-mono",
             placeholder: "sk-...",
             autocomplete: "off" %>
-        <p class="mt-1 text-xs text-stone-500">The key will be encrypted at rest using AES-256-GCM</p>
+        <p class="mt-1 text-xs dm-text-secondary">The key will be encrypted at rest using AES-256-GCM</p>
       </div>
 
       <div>
-        <%= form.label :priority, class: "block text-sm font-medium text-stone-700 mb-2" %>
+        <%= form.label :priority, class: "block text-sm font-medium dm-text mb-2" %>
         <%= form.number_field :priority,
-            class: "w-full rounded-xl px-4 py-3 text-sm border border-stone-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition",
+            class: "w-full rounded-xl px-4 py-3 text-sm dm-border-secondary focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition",
             value: 0,
             min: 0,
             max: 100 %>
-        <p class="mt-1 text-xs text-stone-500">Higher priority keys are used first (0-100)</p>
+        <p class="mt-1 text-xs dm-text-secondary">Higher priority keys are used first (0-100)</p>
       </div>
 
       <div class="flex items-center gap-3">
         <%= form.check_box :global,
-            class: "w-4 h-4 rounded border-stone-300 text-orange-600 focus:ring-orange-500",
+            class: "w-4 h-4 rounded dm-border-secondary text-orange-600 focus:ring-orange-500",
             checked: @provider_key.global? %>
-        <%= form.label :global, class: "text-sm text-stone-700" do %>
+        <%= form.label :global, class: "text-sm dm-text" do %>
           <span class="font-medium">Global Key</span>
-          <span class="text-stone-500">- Available to all projects</span>
+          <span class="dm-text-secondary">- Available to all projects</span>
         <% end %>
       </div>
 
-      <div class="flex items-center justify-end gap-3 pt-4 border-t border-stone-100">
+      <div class="flex items-center justify-end gap-3 pt-4 border-t dm-border-light">
         <%= link_to "Cancel", dashboard_provider_keys_path(project_id: current_project&.id),
-            class: "px-4 py-2.5 text-sm font-medium text-stone-600 hover:text-stone-900 transition" %>
+            class: "px-4 py-2.5 text-sm font-medium dm-text-secondary hover:dm-text transition" %>
         <%= form.submit "Add Key",
             class: "px-6 py-2.5 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-xl transition cursor-pointer" %>
       </div>

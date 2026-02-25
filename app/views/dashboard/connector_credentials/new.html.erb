@@ -27,7 +27,7 @@
         <div>
           <label class="label">Credential Name</label>
           <%= f.text_field :name, class: "input", placeholder: "e.g. Production API Key", name: "connector_credential[name]" %>
-          <p class="text-xs mt-1.5" style="color: var(--color-ink-400);">A friendly name to identify this credential</p>
+          <p class="text-xs mt-1.5 dm-text-muted">A friendly name to identify this credential</p>
         </div>
 
         <!-- SECRET_TEXT Fields -->
@@ -65,7 +65,7 @@
           <div>
             <label class="label">
               Refresh Token
-              <span class="font-normal" style="color: var(--color-ink-400);">(optional)</span>
+              <span class="font-normal dm-text-muted">(optional)</span>
             </label>
             <input type="password" name="credentials[refresh_token]" class="input font-mono" placeholder="OAuth2 refresh token" autocomplete="off">
           </div>
@@ -83,12 +83,12 @@
   <% end %>
 
   <!-- Info Box -->
-  <div class="mt-6 rounded-xl p-4 flex items-start gap-3" style="background: var(--color-cream-100);">
-    <svg class="h-5 w-5 flex-shrink-0 mt-0.5" style="color: var(--color-ink-500);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+  <div class="mt-6 rounded-xl p-4 flex items-start gap-3 dm-surface-hover">
+    <svg class="h-5 w-5 flex-shrink-0 mt-0.5 dm-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
       <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
     </svg>
-    <div class="text-sm" style="color: var(--color-ink-600);">
-      <p class="font-medium" style="color: var(--color-ink-700);">Encrypted Storage</p>
+    <div class="text-sm dm-text-secondary">
+      <p class="font-medium dm-text">Encrypted Storage</p>
       <p class="mt-1">Credentials are encrypted with AES-256-GCM before storage. The plaintext values are never stored or logged.</p>
     </div>
   </div>

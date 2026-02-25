@@ -75,27 +75,27 @@
     </script>
   <% end %>
 </head>
-<body class="h-full bg-cream-50">
+<body class="h-full dm-body-gradient">
   <div class="flex h-full">
     <!-- Sidebar -->
-    <aside class="w-64 flex flex-col bg-white dark:bg-zinc-900 border-r border-cream-200 relative overflow-hidden flex-shrink-0">
+    <aside class="w-64 flex flex-col dm-sidebar-enhanced relative overflow-hidden flex-shrink-0">
       <!-- Decorative gradient blobs -->
-      <div class="gradient-mesh">
-        <div class="gradient-blob gradient-blob-primary" style="width: 200px; height: 200px; top: -60px; right: -60px;"></div>
-        <div class="gradient-blob gradient-blob-success" style="width: 150px; height: 150px; bottom: 20%; left: -40px;"></div>
+      <div class="dm-gradient-mesh">
+        <div class="dm-gradient-blob dm-gradient-blob-primary" style="width: 200px; height: 200px; top: -60px; right: -60px;"></div>
+        <div class="dm-gradient-blob dm-gradient-blob-secondary" style="width: 150px; height: 150px; bottom: 20%; left: -40px;"></div>
       </div>
 
-      <div class="p-5 border-b border-cream-200 relative z-10 flex items-center justify-between">
+      <div class="p-5 border-b dm-border-secondary relative z-10 flex items-center justify-between">
         <%= link_to dashboard_projects_path, class: "flex flex-col items-end gap-1 group" do %>
           <div class="flex items-center">
             <img src="/fluyenta-logo-light.png" alt="Fluyenta" class="h-12 dark:hidden">
             <img src="/fluyenta-logo-dark.png" alt="Fluyenta" class="h-12 hidden dark:block">
           </div>
-          <span class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded" style="color: var(--color-primary-500); background: color-mix(in srgb, var(--color-primary-500) 12%, transparent);">Vault</span>
+          <span class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded" style="color: var(--dm-brand); background: color-mix(in srgb, var(--dm-brand) 12%, transparent);">Vault</span>
         <% end %>
         <%# Dark Mode Toggle %>
         <button onclick="toggleDarkMode()"
-                class="p-1.5 rounded-lg transition-all text-ink-500 hover:text-ink-900 hover:bg-transparent"
+                class="p-1.5 rounded-lg transition-all dm-text-muted hover:dm-text hover:bg-transparent"
                 data-dark-mode-target="icon"
                 aria-label="Toggle dark mode"
                 title="Toggle dark mode">
@@ -110,13 +110,13 @@
 
       <% if @current_project %>
         <!-- Project Selector -->
-        <div class="px-4 py-3 border-b border-cream-200 relative z-10">
-          <%= link_to dashboard_projects_path, class: "project-selector flex items-center gap-2 px-2 py-1.5 rounded-lg transition text-ink-500" do %>
-            <div class="project-initial w-6 h-6 rounded flex items-center justify-center text-xs font-semibold" style="color: var(--color-primary-500); background: color-mix(in srgb, var(--color-primary-500) 12%, transparent);">
+        <div class="px-4 py-3 border-b dm-border-secondary relative z-10">
+          <%= link_to dashboard_projects_path, class: "project-selector flex items-center gap-2 px-2 py-1.5 rounded-lg transition dm-text-secondary" do %>
+            <div class="project-initial w-6 h-6 rounded flex items-center justify-center text-xs font-semibold" style="color: var(--dm-brand); background: color-mix(in srgb, var(--dm-brand) 12%, transparent);">
               <%= @current_project.name.first.upcase %>
             </div>
             <span class="flex-1 text-sm font-medium truncate"><%= @current_project.name %></span>
-            <svg class="w-4 h-4 text-ink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 dm-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
             </svg>
           <% end %>
@@ -154,7 +154,7 @@
             Connectors
           <% end %>
 
-          <div class="pt-4 mt-4 border-t border-cream-200">
+          <div class="pt-4 mt-4 border-t dm-border-secondary">
             <%= link_to dashboard_provider_keys_path(project_id: @current_project&.id), class: nav_link_class('/provider_keys') do %>
               <%= icon(:provider_keys) %>
               Provider Keys
@@ -178,14 +178,14 @@
         </nav>
       <% else %>
         <nav class="p-4 flex-1 relative z-10">
-          <p class="px-3 text-xs font-medium uppercase tracking-wider mb-3 text-ink-400">Select a project</p>
+          <p class="px-3 text-xs font-medium uppercase tracking-wider mb-3 dm-text-muted">Select a project</p>
         </nav>
       <% end %>
 
       <!-- All Products - Back to Platform -->
       <div class="px-4 pb-2 relative z-10">
         <a href="<%= ENV.fetch('BRAINZLAB_PLATFORM_EXTERNAL_URL', 'https://platform.brainzlab.ai') %>/dashboard<%= "/projects/#{@current_project.platform_project_id}" if @current_project&.persisted? && @current_project.try(:platform_project_id).present? %>"
-           class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium text-ink-500 hover:text-ink-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors hover:bg-cream-100 dark:hover:bg-zinc-800">
+           class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium dm-text-muted hover:dm-text transition-colors dm-surface-hover">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
             <rect x="3" y="3" width="7" height="7" rx="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             <rect x="14" y="3" width="7" height="7" rx="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -198,14 +198,14 @@
 
       <!-- User Menu -->
       <% if defined?(current_user) && current_user && current_user[:email] %>
-        <div class="p-3 border-t border-cream-200 relative z-10">
-          <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-cream-100 dark:hover:bg-zinc-800 transition">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold text-white" style="background: var(--color-primary-500);">
+        <div class="p-3 border-t dm-border-secondary relative z-10">
+          <div class="flex items-center gap-3 px-2 py-2 rounded-xl dm-surface-hover transition">
+            <div class="dm-member-avatar w-8 h-8 text-[12px]">
               <%= current_user[:name]&.first&.upcase || current_user[:email]&.first&.upcase || "?" %>
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-[13px] font-medium truncate text-ink-900 dark:text-zinc-100"><%= current_user[:name] || current_user[:email]&.split('@')&.first || "User" %></p>
-              <p class="text-[11px] truncate text-ink-500 dark:text-zinc-400"><%= current_user[:email] %></p>
+              <p class="text-[13px] font-medium truncate dm-text"><%= current_user[:name] || current_user[:email]&.split('@')&.first || "User" %></p>
+              <p class="text-[11px] truncate dm-text-muted"><%= current_user[:email] %></p>
             </div>
           </div>
         </div>
@@ -215,14 +215,14 @@
     <!-- Main Content -->
     <main class="flex-1 overflow-auto relative">
       <!-- Decorative gradient blobs -->
-      <div class="gradient-mesh">
-        <div class="gradient-blob gradient-blob-primary" style="width: 500px; height: 500px; top: -150px; right: 5%;"></div>
-        <div class="gradient-blob gradient-blob-success" style="width: 400px; height: 400px; bottom: 10%; left: -100px;"></div>
-        <div class="gradient-blob gradient-blob-info" style="width: 300px; height: 300px; top: 40%; right: -80px;"></div>
+      <div class="dm-gradient-mesh">
+        <div class="dm-gradient-blob dm-gradient-blob-primary" style="width: 500px; height: 500px; top: -150px; right: 5%;"></div>
+        <div class="dm-gradient-blob dm-gradient-blob-secondary" style="width: 400px; height: 400px; bottom: 10%; left: -100px;"></div>
+        <div class="dm-gradient-blob dm-gradient-blob-cyan" style="width: 300px; height: 300px; top: 40%; right: -80px;"></div>
       </div>
 
       <% if notice %>
-        <div class="m-8 mb-0 px-4 py-3 rounded-xl text-[13px] font-medium flex items-center gap-3 alert alert-success animate-fade-in-up relative z-10">
+        <div class="m-8 mb-0 px-4 py-3 rounded-xl text-[13px] font-medium flex items-center gap-3 dm-success border dm-fade-in-up relative z-10">
           <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
           </svg>
@@ -230,7 +230,7 @@
         </div>
       <% end %>
       <% if alert %>
-        <div class="m-8 mb-0 px-4 py-3 rounded-xl text-[13px] font-medium flex items-center gap-3 alert alert-error animate-fade-in-up relative z-10">
+        <div class="m-8 mb-0 px-4 py-3 rounded-xl text-[13px] font-medium flex items-center gap-3 dm-error border dm-fade-in-up relative z-10">
           <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
           </svg>

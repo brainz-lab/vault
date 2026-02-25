@@ -21,14 +21,14 @@
 
   <div>
     <span class="form-label">Permissions</span>
-    <div class="mt-2 space-y-3 rounded-lg border border-stone-200 p-4 bg-stone-50">
+    <div class="mt-2 space-y-3 rounded-lg dm-border-secondary p-4 dm-surface-alt">
       <% %w[read write delete].each do |perm| %>
         <label class="flex items-start cursor-pointer group">
           <%= check_box_tag "access_token[permissions][]", perm, (token.permissions || []).include?(perm),
               class: "form-checkbox mt-0.5" %>
           <span class="ml-3">
-            <span class="block text-sm font-medium text-stone-900 group-hover:text-orange-600 transition-colors"><%= perm.capitalize %></span>
-            <span class="block text-xs text-stone-500">
+            <span class="block text-sm font-medium dm-text group-hover:text-orange-600 transition-colors"><%= perm.capitalize %></span>
+            <span class="block text-xs dm-text-secondary">
               <%= case perm
                   when "read" then "Read secret values"
                   when "write" then "Create and update secrets"
@@ -43,7 +43,7 @@
 
   <div>
     <span class="form-label">Environment Access</span>
-    <div class="mt-2 space-y-3 rounded-lg border border-stone-200 p-4 bg-stone-50">
+    <div class="mt-2 space-y-3 rounded-lg dm-border-secondary p-4 dm-surface-alt">
       <% @current_project.secret_environments.order(:position).each do |env| %>
         <label class="flex items-center cursor-pointer group">
           <%= check_box_tag "access_token[environments][]", env.slug, (token.environments || []).include?(env.slug),
@@ -58,7 +58,7 @@
                 <% end %>
               </svg>
             </div>
-            <span class="text-sm text-stone-700 group-hover:text-orange-600 transition-colors"><%= env.name %></span>
+            <span class="text-sm dm-text group-hover:text-orange-600 transition-colors"><%= env.name %></span>
           </div>
         </label>
       <% end %>
@@ -72,7 +72,7 @@
     <p class="form-hint">Leave blank for no expiration</p>
   </div>
 
-  <div class="flex justify-end gap-3 pt-6 border-t border-stone-100">
+  <div class="flex justify-end gap-3 pt-6 border-t dm-border-light">
     <%= link_to "Cancel", dashboard_project_access_tokens_path(@current_project), class: "btn-secondary" %>
     <%= f.submit token.persisted? ? "Update Token" : "Create Token", class: "btn-primary cursor-pointer" %>
   </div>

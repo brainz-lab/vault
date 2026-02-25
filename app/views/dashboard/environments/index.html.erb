@@ -20,14 +20,14 @@
       <table class="table">
         <thead>
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Environment</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Inherits From</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Secrets</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--color-ink-500); background: var(--color-cream-50);">Status</th>
-            <th class="px-6 py-3" style="background: var(--color-cream-50);"><span class="sr-only">Actions</span></th>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--dm-text-secondary); background: var(--dm-bg);">Environment</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--dm-text-secondary); background: var(--dm-bg);">Inherits From</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--dm-text-secondary); background: var(--dm-bg);">Secrets</th>
+            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--dm-text-secondary); background: var(--dm-bg);">Status</th>
+            <th class="px-6 py-3" style="background: var(--dm-bg);"><span class="sr-only">Actions</span></th>
           </tr>
         </thead>
-        <tbody class="divide-y" style="border-color: var(--color-cream-100);">
+        <tbody class="divide-y" style="border-color: var(--dm-border);">
           <% @environments.each do |env| %>
             <tr class="transition-colors hover:bg-stone-50">
               <td class="whitespace-nowrap px-6 py-4">
@@ -42,25 +42,25 @@
                     </svg>
                   </div>
                   <div class="ml-3">
-                    <p class="text-sm font-medium" style="color: var(--color-ink-900);"><%= env.name %></p>
-                    <p class="text-xs font-mono" style="color: var(--color-ink-400);"><%= env.slug %></p>
+                    <p class="text-sm font-medium" style="color: var(--dm-text);"><%= env.name %></p>
+                    <p class="text-xs font-mono" style="color: var(--dm-text-muted);"><%= env.slug %></p>
                   </div>
                 </div>
               </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm" style="color: var(--color-ink-500);">
+              <td class="whitespace-nowrap px-6 py-4 text-sm" style="color: var(--dm-text-secondary);">
                 <% if env.parent_environment.present? %>
                   <div class="flex items-center">
-                    <svg class="h-4 w-4 mr-1.5" style="color: var(--color-ink-400);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <svg class="h-4 w-4 mr-1.5" style="color: var(--dm-text-muted);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
                     </svg>
                     <%= env.parent_environment.name %>
                   </div>
                 <% else %>
-                  <span style="color: var(--color-ink-400);">—</span>
+                  <span style="color: var(--dm-text-muted);">—</span>
                 <% end %>
               </td>
               <td class="whitespace-nowrap px-6 py-4">
-                <%= link_to dashboard_project_secrets_path(@current_project, environment: env.slug), class: "inline-flex items-center text-sm font-medium transition-colors hover:text-orange-600", style: "color: var(--color-ink-700);" do %>
+                <%= link_to dashboard_project_secrets_path(@current_project, environment: env.slug), class: "inline-flex items-center text-sm font-medium transition-colors hover:text-orange-600", style: "color: var(--dm-text);" do %>
                   <span class="badge badge-neutral mr-2"><%= env.distinct_secrets_count %></span>
                   View secrets
                   <svg class="h-3.5 w-3.5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -76,7 +76,7 @@
                 <% end %>
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-right">
-                <%= link_to edit_dashboard_project_environment_path(@current_project, env), class: "text-sm font-medium transition-colors hover:text-orange-600", style: "color: var(--color-primary-500);" do %>
+                <%= link_to edit_dashboard_project_environment_path(@current_project, env), class: "text-sm font-medium transition-colors hover:text-orange-600", style: "color: var(--dm-brand);" do %>
                   Edit
                 <% end %>
                 <% if env.distinct_secrets_count.zero? %>
@@ -95,12 +95,12 @@
     </div>
 
     <!-- Quick Info -->
-    <div class="mt-6 rounded-xl p-4 flex items-start gap-3" style="background: var(--color-cream-100);">
-      <svg class="h-5 w-5 flex-shrink-0 mt-0.5" style="color: var(--color-ink-500);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+    <div class="mt-6 rounded-xl p-4 flex items-start gap-3" style="background: var(--dm-surface-alt);">
+      <svg class="h-5 w-5 flex-shrink-0 mt-0.5" style="color: var(--dm-text-secondary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
       </svg>
-      <div class="text-sm" style="color: var(--color-ink-600);">
-        <p class="font-medium" style="color: var(--color-ink-700);">Environment Inheritance</p>
+      <div class="text-sm" style="color: var(--dm-text-secondary);">
+        <p class="font-medium" style="color: var(--dm-text);">Environment Inheritance</p>
         <p class="mt-1">Environments can inherit secrets from parent environments. When a secret is requested, Vault checks the current environment first, then falls back to parent environments.</p>
       </div>
     </div>
@@ -108,8 +108,8 @@
     <!-- Empty State -->
     <div class="card">
       <div class="empty-state py-16">
-        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style="background: linear-gradient(135deg, var(--color-vault-bg) 0%, var(--color-cream-200) 100%);">
-          <svg class="w-8 h-8" style="color: var(--color-vault);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style="background: linear-gradient(135deg, color-mix(in srgb, var(--dm-brand) 12%, transparent) 0%, var(--dm-border) 100%);">
+          <svg class="w-8 h-8" style="color: var(--dm-brand);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
           </svg>
         </div>
