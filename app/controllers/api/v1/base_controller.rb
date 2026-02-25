@@ -10,18 +10,20 @@ module Api
       protected
 
       def authenticate!
-        # Try token-based auth first
+        # Layer 1: Project-scoped auth (tokens, API keys)
         @current_token = authenticate_token
         @current_project = @current_token&.project
 
-        # Fall back to direct project API key auth (for SDK)
         unless @current_project
           @current_project = authenticate_project_api_key
         end
 
-        unless @current_project
-          render json: { error: "Unauthorized" }, status: :unauthorized
-        end
+        return if @current_project
+
+        # Layer 2: Service-to-service auth (sister services like Nexus, Synapse)
+        return if authenticate_service_key
+
+        render json: { error: "Unauthorized" }, status: :unauthorized
       end
 
       def require_project!
@@ -136,6 +138,13 @@ module Api
         end
 
         nil
+      end
+
+      def authenticate_service_key
+        service_key = request.headers["X-Service-Key"]
+        expected_key = ENV["SERVICE_KEY"] || "dev_service_key"
+
+        service_key.present? && ActiveSupport::SecurityUtils.secure_compare(service_key, expected_key)
       end
 
       def validate_with_platform(key)
