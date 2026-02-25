@@ -37,6 +37,10 @@ module Connectors
         {}
       end
 
+      def self.logo_url
+        nil
+      end
+
       protected
 
       attr_reader :credentials

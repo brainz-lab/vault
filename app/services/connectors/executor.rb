@@ -100,6 +100,7 @@ module Connectors
       when "database" then Connectors::Native::Database
       when "email" then Connectors::Native::Email
       when "file_storage" then Connectors::Native::FileStorage
+      when "apollo" then Connectors::Native::Apollo
       else
         raise Connectors::Error, "Unknown native connector: #{piece_name}"
       end

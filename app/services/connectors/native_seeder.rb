@@ -4,7 +4,8 @@ module Connectors
       Connectors::Native::Webhook,
       Connectors::Native::Database,
       Connectors::Native::Email,
-      Connectors::Native::FileStorage
+      Connectors::Native::FileStorage,
+      Connectors::Native::Apollo
     ].freeze
 
     def seed!
@@ -17,6 +18,7 @@ module Connectors
         connector.assign_attributes(
           display_name: klass.display_name,
           description: klass.description,
+          logo_url: klass.logo_url,
           category: klass.category,
           connector_type: "native",
           auth_type: klass.auth_type,
