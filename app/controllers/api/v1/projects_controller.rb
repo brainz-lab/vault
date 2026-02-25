@@ -73,6 +73,36 @@ module Api
         }
       end
 
+      # POST /api/v1/projects/:platform_project_id/unarchive
+      # Restores a previously archived project
+      def unarchive
+        project = Project.find_by(platform_project_id: params[:platform_project_id])
+        return head :not_found unless project
+
+        project.update!(archived_at: nil)
+        head :ok
+      end
+
+      # POST /api/v1/projects/:platform_project_id/archive
+      # Archives a project (soft delete from Platform)
+      def archive
+        project = Project.find_by(platform_project_id: params[:platform_project_id])
+        return head :not_found unless project
+
+        project.update!(archived_at: Time.current)
+        head :ok
+      end
+
+      # POST /api/v1/projects/:platform_project_id/purge
+      # Permanently deletes a project and all associated data
+      def purge
+        project = Project.find_by(platform_project_id: params[:platform_project_id])
+        return head :not_found unless project
+
+        project.destroy
+        head :ok
+      end
+
       private
 
       def authenticate_master_or_service_key!
