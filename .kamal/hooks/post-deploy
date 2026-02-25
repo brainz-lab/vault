@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# Post-deploy hook: Notify Slack about Kamal deployments
+#
+# Available environment variables:
+# KAMAL_RECORDED_AT, KAMAL_PERFORMER, KAMAL_VERSION
+# KAMAL_HOSTS, KAMAL_ROLES, KAMAL_DESTINATION, KAMAL_RUNTIME
+
+SLACK_WEBHOOK_URL="${SLACK_DEPLOY_WEBHOOK_URL}"
+
+if [ -z "$SLACK_WEBHOOK_URL" ]; then
+  echo "SLACK_DEPLOY_WEBHOOK_URL not set, skipping Slack notification"
+  exit 0
+fi
+
+PERFORMER="${KAMAL_PERFORMER:-unknown}"
+VERSION="${KAMAL_VERSION:-unknown}"
+RUNTIME="${KAMAL_RUNTIME:-?}"
+HOSTS="${KAMAL_HOSTS:-unknown}"
+DESTINATION="${KAMAL_DESTINATION:-production}"
+
+curl -s -X POST "$SLACK_WEBHOOK_URL" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"text\": \"✅ *Vault* deployed via Kamal by ${PERFORMER}\",
+    \"blocks\": [
+      {
+        \"type\": \"header\",
+        \"text\": {
+          \"type\": \"plain_text\",
+          \"text\": \"✅ Vault — Kamal Deploy Succeeded\"
+        }
+      },
+      {
+        \"type\": \"section\",
+        \"fields\": [
+          { \"type\": \"mrkdwn\", \"text\": \"*Deployed by:*\n${PERFORMER}\" },
+          { \"type\": \"mrkdwn\", \"text\": \"*Version:*\n${VERSION}\" },
+          { \"type\": \"mrkdwn\", \"text\": \"*Destination:*\n${DESTINATION}\" },
+          { \"type\": \"mrkdwn\", \"text\": \"*Duration:*\n${RUNTIME}s\" }
+        ]
+      },
+      {
+        \"type\": \"context\",
+        \"elements\": [
+          { \"type\": \"mrkdwn\", \"text\": \"Hosts: ${HOSTS}\" }
+        ]
+      }
+    ]
+  }"
+
+echo "Slack notification sent for $VERSION deployed to $DESTINATION"

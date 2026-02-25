@@ -62,3 +62,67 @@ jobs:
           kubectl rollout restart deployment/vault-web -n default
           kubectl rollout restart deployment/vault-job -n default
           kubectl rollout status deployment/vault-web -n default --timeout=5m
+
+      - name: Notify Slack - Deploy Success
+        if: success()
+        uses: slackapi/slack-github-action@v2.1.0
+        with:
+          webhook: ${{ secrets.SLACK_DEPLOY_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "✅ *Vault* deployed successfully to production",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": { "type": "plain_text", "text": "✅ Vault — Deploy Succeeded" }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    { "type": "mrkdwn", "text": "*Service:*\nvault (web + job)" },
+                    { "type": "mrkdwn", "text": "*Environment:*\nproduction (DOKS)" },
+                    { "type": "mrkdwn", "text": "*Commit:*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|`${{ github.sha }}`>" },
+                    { "type": "mrkdwn", "text": "*Triggered by:*\n${{ github.actor }}" }
+                  ]
+                },
+                {
+                  "type": "context",
+                  "elements": [
+                    { "type": "mrkdwn", "text": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>" }
+                  ]
+                }
+              ]
+            }
+
+      - name: Notify Slack - Deploy Failed
+        if: failure()
+        uses: slackapi/slack-github-action@v2.1.0
+        with:
+          webhook: ${{ secrets.SLACK_DEPLOY_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "🚨 *Vault* deploy FAILED",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": { "type": "plain_text", "text": "🚨 Vault — Deploy Failed" }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    { "type": "mrkdwn", "text": "*Service:*\nvault" },
+                    { "type": "mrkdwn", "text": "*Environment:*\nproduction (DOKS)" },
+                    { "type": "mrkdwn", "text": "*Commit:*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|`${{ github.sha }}`>" },
+                    { "type": "mrkdwn", "text": "*Triggered by:*\n${{ github.actor }}" }
+                  ]
+                },
+                {
+                  "type": "context",
+                  "elements": [
+                    { "type": "mrkdwn", "text": "⚠️ <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Investigate in workflow run>" }
+                  ]
+                }
+              ]
+            }
