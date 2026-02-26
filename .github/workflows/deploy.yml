@@ -54,6 +54,9 @@ jobs:
         with:
           token: ${{ secrets.DOCTL_ACCESS_TOKEN }}
 
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save ${{ secrets.DOKS_CLUSTER_ID }}
 
