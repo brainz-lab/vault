@@ -25,19 +25,13 @@ export default class extends Controller {
 
   // Unified localStorage key for all BrainzLab products
   static values = {
-    storageKey: { type: String, default: "brainzlab-theme" }
+    storageKey: { type: String, default: "brainzlab-theme" },
+    defaultTheme: { type: String, default: "light" }
   }
 
   connect() {
     // Prevent transition flash on initial load
     document.documentElement.classList.add("no-transitions")
-
-    // Listen for system theme changes (set up before initializeTheme which uses this.mediaQuery)
-    if (typeof window.matchMedia === "function") {
-      this.mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
-    } else {
-      this.mediaQuery = { matches: false, addEventListener() {}, removeEventListener() {} }
-    }
 
     // Initialize theme based on stored preference or system preference
     this.initializeTheme()
@@ -49,6 +43,8 @@ export default class extends Controller {
       })
     })
 
+    // Listen for system theme changes
+    this.mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
     this.boundHandleSystemChange = this.handleSystemChange.bind(this)
     this.mediaQuery.addEventListener("change", this.boundHandleSystemChange)
   }
@@ -69,6 +65,9 @@ export default class extends Controller {
       this.applyTheme("dark", false)
     } else if (storedTheme === "light") {
       this.applyTheme("light", false)
+    } else if (this.defaultThemeValue) {
+      // ENV-configured default theme (e.g., light when BRAINZLAB_LOGO_LIGHT_URL is set)
+      this.applyTheme(this.defaultThemeValue, false)
     } else {
       // No stored preference - use system preference
       const prefersDark = this.mediaQuery.matches
