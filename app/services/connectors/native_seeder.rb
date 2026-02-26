@@ -24,6 +24,7 @@ module Connectors
           connector_type: "native",
           auth_type: klass.auth_type,
           auth_schema: klass.auth_schema,
+          setup_guide: klass.respond_to?(:setup_guide) ? klass.setup_guide : {},
           actions: klass.actions,
           triggers: [],
           installed: true,

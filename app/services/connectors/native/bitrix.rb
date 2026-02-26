@@ -21,6 +21,32 @@ module Connectors
         "/images/connectors/bitrix.svg"
       end
 
+      def self.setup_guide
+        {
+          title: "How to configure your Bitrix24 Inbound Webhook",
+          steps: [
+            { title: "Activate your Bitrix24 account", description: "You need an active Bitrix24 plan (even the free plan works). Go to bitrix24.com, sign up or log in, and make sure your account is active. If it's a new account, you may need to manually activate it." },
+            { title: "Go to Developer Resources", description: "In your Bitrix24 portal, navigate to the left sidebar menu and look for 'Developer resources' (Recursos para Desarrolladores). If you don't see it, try logging out and back in." },
+            { title: "Create an Inbound Webhook", description: "Inside Developer Resources, click 'Other' > 'Inbound webhook' (Webhook entrante). This creates a REST API endpoint for external apps to access your Bitrix24 data." },
+            { title: "Set permissions (scopes)", description: "In the webhook configuration, under 'Assign permissions' (Asignar permisos), add the 'CRM (crm)' scope. This is required for contact, deal, lead, and company operations. You can also add 'user' scope for profile access." },
+            { title: "Copy your webhook URL", description: "After saving, Bitrix24 shows a webhook URL like: https://b24-xxxxx.bitrix24.co/rest/1/your-token-here/. You need to split this into two parts for the configuration below." },
+            { title: "Enter credentials", description: "From the webhook URL https://b24-xxxxx.bitrix24.co/rest/1/abc123token/: Domain = b24-xxxxx.bitrix24.co (just the domain, no https://). Webhook Token = 1/abc123token (the path after /rest/)." }
+          ],
+          tips: [
+            "If the webhook option doesn't appear, log out of Bitrix24 completely and log back in",
+            "The free Bitrix24 plan supports webhooks — you don't need a paid plan",
+            "Each webhook has its own permissions. Make sure to add 'CRM' scope for contact/deal operations",
+            "You can create multiple webhooks with different permissions for different integrations",
+            "The webhook token never expires unless you regenerate it manually"
+          ],
+          credential_help: {
+            "domain" => "Your Bitrix24 domain only (e.g. b24-hztli9.bitrix24.co). Do NOT include https:// or any path",
+            "webhook_token" => "The token part from your webhook URL. For https://domain/rest/1/abc123/ the token is: 1/abc123",
+            "auth_method" => "Leave as 'webhook' (default). Only change if using OAuth2 or token-based auth"
+          }
+        }
+      end
+
       def self.actions
         [
           { "name" => "test_connection", "displayName" => "Test Connection", "description" => "Validate credentials against the Bitrix24 API", "props" => {} },
@@ -198,7 +224,10 @@ module Connectors
       def handle_response(response)
         unless response.success?
           error_message = response.body.is_a?(Hash) ? response.body.dig("error_description") || response.body["error"] : nil
-          raise Connectors::AuthenticationError, "Invalid credentials (HTTP #{response.status})" if response.status == 401
+          if response.status == 401
+            hint = error_message&.include?("scope") ? " (webhook may be missing required scope)" : " (check webhook permissions)"
+            raise Connectors::AuthenticationError, "Bitrix24 authorization failed#{hint}: #{error_message || 'HTTP 401'}"
+          end
           raise Connectors::Error, "Bitrix24 API error (HTTP #{response.status}): #{error_message || 'Unknown error'}"
         end
 
@@ -206,7 +235,12 @@ module Connectors
         if body.is_a?(Hash) && body["error"].present?
           error_code = body["error"]
           error_desc = body["error_description"] || error_code
-          raise Connectors::AuthenticationError, "Authentication failed: #{error_desc}" if error_code == "NO_AUTH_FOUND" || error_code == "INVALID_TOKEN"
+          if error_code == "NO_AUTH_FOUND" || error_code == "INVALID_TOKEN"
+            raise Connectors::AuthenticationError, "Authentication failed: #{error_desc}"
+          end
+          if error_code == "insufficient_scope" || error_code == "ACCESS_DENIED"
+            raise Connectors::AuthenticationError, "Missing scope: #{error_desc}. Update your Bitrix24 webhook to include the required permissions (e.g. crm)."
+          end
           raise Connectors::Error, "Bitrix24 API error: #{error_desc}"
         end
 

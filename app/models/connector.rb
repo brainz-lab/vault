@@ -57,6 +57,7 @@ class Connector < ApplicationRecord
       connector_type: connector_type,
       auth_type: auth_type,
       auth_schema: auth_schema,
+      setup_guide: setup_guide,
       actions: action_names,
       installed: installed,
       enabled: enabled

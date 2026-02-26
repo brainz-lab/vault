@@ -14,6 +14,27 @@ module Connectors
         "/images/connectors/apollo.svg"
       end
 
+      def self.setup_guide
+        {
+          title: "How to get your Apollo.io API Key",
+          steps: [
+            { title: "Sign in to Apollo", description: "Go to app.apollo.io and sign in to your account" },
+            { title: "Open Settings", description: "Click on your profile icon in the bottom-left corner and select 'Settings'" },
+            { title: "Navigate to API", description: "In the left sidebar, click on 'Integrations' then 'API Keys'" },
+            { title: "Create API Key", description: "Click 'Create New Key', give it a name (e.g. 'Nexus Integration'), and copy the generated key" },
+            { title: "Configure in Nexus", description: "Paste the API key in the field above and save" }
+          ],
+          tips: [
+            "Apollo offers a free tier with limited credits — enough to test the integration",
+            "The API key gives access to all endpoints. You can manage permissions per key in Apollo settings",
+            "Credits are consumed per enrichment request. Monitor usage in Apollo dashboard"
+          ],
+          credential_help: {
+            "api_key" => "Your Apollo API key starting with 'api_...' — found in Settings > Integrations > API Keys"
+          }
+        }
+      end
+
       def self.actions
         [
           {
