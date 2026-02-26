@@ -88,8 +88,7 @@
       <div class="p-5 border-b dm-border-secondary relative z-10 flex items-center justify-between">
         <%= link_to dashboard_projects_path, class: "flex flex-col items-end gap-1 group" do %>
           <div class="flex items-center">
-            <img src="/fluyenta-logo-light.png" alt="Fluyenta" class="h-12 dark:hidden">
-            <img src="/fluyenta-logo-dark.png" alt="Fluyenta" class="h-12 hidden dark:block">
+            <%= brainzlab_logo_tag %>
           </div>
           <span class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded" style="color: var(--dm-brand); background: color-mix(in srgb, var(--dm-brand) 12%, transparent);">Vault</span>
         <% end %>
