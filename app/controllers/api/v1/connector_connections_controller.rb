@@ -81,7 +81,23 @@ module Api
 
         if credential.present?
           credentials = credential.decrypt_credentials
-          if connector.activepieces?
+
+          if connector.native?
+            # Actually test native connectors by calling their test_connection action
+            runner_class = Connectors::Executor.new(
+              project: current_project,
+              caller_service: "test"
+            )
+            result = runner_class.execute(
+              connection_id: @connection.id,
+              action_name: "test_connection",
+              input: {}
+            )
+
+            @connection.mark_connected!
+            credential.mark_verified!
+            render json: { success: true, status: "connected", details: result[:output] }
+          elsif connector.activepieces?
             sidecar_url = ENV.fetch("CONNECTOR_SIDECAR_URL", "http://localhost:3100")
             sidecar_key = ENV["CONNECTOR_SIDECAR_SECRET_KEY"]
 
@@ -111,6 +127,13 @@ module Api
           @connection.mark_connected!
           render json: { success: true, status: "connected" }
         end
+      rescue Connectors::AuthenticationError => e
+        @connection.mark_error!(e.message)
+        credential&.mark_error!(e.message)
+        render json: { success: false, error: e.message }
+      rescue Connectors::Error => e
+        @connection.mark_error!(e.message)
+        render json: { success: false, error: e.message }
       rescue Faraday::Error => e
         @connection.mark_error!("Sidecar unavailable")
         render json: { success: false, error: "Sidecar unavailable: #{e.message}" }
