@@ -24,10 +24,8 @@ class AccessToken < ApplicationRecord
     return false unless active? && !revoked?
     return false if expired?
 
-    # Check environment access
-    if environments.any?
-      return false unless environments.include?(environment.slug)
-    end
+    # Check environment access (deny by default - token must have explicit environment access)
+    return false unless environments.any? && environments.include?(environment.slug)
 
     # Check path access
     if paths.any?
