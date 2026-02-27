@@ -45,7 +45,7 @@ module Api
         require_permission!("read")
 
         secret = current_project.secrets.find_by!(key: params[:key])
-        logs = secret.audit_logs.order(created_at: :desc).limit(100)
+        logs = current_project.audit_logs.for_secret(secret).order(created_at: :desc).limit(100)
 
         render json: {
           secret: secret.key,

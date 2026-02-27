@@ -61,6 +61,35 @@ module Api
         true
       end
 
+      def require_token_access!(secret = nil, permission: "read")
+        # When using project API key auth (no token), grant all access
+        return true if current_token.nil?
+
+        # Check environment scope (deny by default - token must have explicit environment access)
+        if current_environment
+          unless current_token.environments.any? && current_token.environments.include?(current_environment.slug)
+            render json: { error: "Forbidden: token does not have access to #{current_environment.slug} environment" }, status: :forbidden
+            return false
+          end
+        end
+
+        # Check path scope (only if a secret is provided)
+        if secret && current_token.paths.any?
+          unless current_token.paths.any? { |pattern| File.fnmatch?(pattern, secret.path) }
+            render json: { error: "Forbidden: token does not have access to this secret path" }, status: :forbidden
+            return false
+          end
+        end
+
+        # Check permission
+        unless current_token.has_permission?(permission)
+          render json: { error: "Forbidden: #{permission} permission required" }, status: :forbidden
+          return false
+        end
+
+        true
+      end
+
       def log_access(action:, secret: nil, details: {})
         # Determine actor info based on auth method
         if current_token
