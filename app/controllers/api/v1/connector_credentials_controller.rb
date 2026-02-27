@@ -1,6 +1,7 @@
 module Api
   module V1
     class ConnectorCredentialsController < BaseController
+      before_action :require_project!
       before_action :set_credential, only: [ :show, :destroy, :verify ]
 
       # GET /api/v1/connector_credentials

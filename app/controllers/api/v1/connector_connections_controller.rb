@@ -1,6 +1,7 @@
 module Api
   module V1
     class ConnectorConnectionsController < BaseController
+      before_action :require_project!
       before_action :set_connection, only: [ :show, :update, :destroy, :test, :execute ]
 
       # GET /api/v1/connector_connections

@@ -67,11 +67,14 @@ module Api
           actor_type = "token"
           actor_id = current_token.id.to_s
           actor_name = current_token.name
-        else
-          # Project API key auth
+        elsif current_project
           actor_type = "api_key"
           actor_id = current_project.id.to_s
           actor_name = "Project API Key"
+        else
+          actor_type = "service"
+          actor_id = request.headers["X-Caller-Service"] || "unknown"
+          actor_name = "Service Key"
         end
 
         AuditLog.log_access(
@@ -144,7 +147,18 @@ module Api
         service_key = request.headers["X-Service-Key"]
         expected_key = ENV["SERVICE_KEY"] || "dev_service_key"
 
-        service_key.present? && ActiveSupport::SecurityUtils.secure_compare(service_key, expected_key)
+        return false unless service_key.present? && ActiveSupport::SecurityUtils.secure_compare(service_key, expected_key)
+
+        # Service-key auth succeeds — try to resolve project context from header
+        platform_id = request.headers["X-Platform-Project-Id"]
+        if platform_id.present?
+          @current_project = Project.find_or_create_for_platform!(
+            platform_project_id: platform_id,
+            name: request.headers["X-Project-Name"] || "Project #{platform_id}"
+          )
+        end
+
+        true
       end
 
       def validate_with_platform(key)
