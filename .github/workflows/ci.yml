@@ -116,7 +116,7 @@ jobs:
 
     steps:
       - name: Install PostgreSQL client libraries
-        run: apt-get update -qq && apt-get install --no-install-recommends -y libpq-dev
+        run: apt-get update -qq && apt-get install --no-install-recommends -y libpq-dev postgresql-client
 
       - name: Checkout code
         uses: actions/checkout@v5
