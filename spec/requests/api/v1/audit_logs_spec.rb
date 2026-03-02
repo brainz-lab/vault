@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe "Api::V1::AuditLogs", type: :request do
   let(:project) { create(:project) }
-  let(:token) { create(:access_token, project: project, permissions: %w[read write admin], environments: ["development"]) }
+  let(:token) { create(:access_token, project: project, permissions: %w[read write admin], environments: [ "development" ]) }
   let(:headers) { authenticated_json_headers(token.plain_token) }
 
   describe "authentication" do

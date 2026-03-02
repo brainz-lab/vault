@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe "Api::V1::AccessTokens", type: :request do
   let(:project) { create(:project) }
-  let(:admin_token) { create(:access_token, project: project, permissions: %w[read write admin], environments: ["development"]) }
+  let(:admin_token) { create(:access_token, project: project, permissions: %w[read write admin], environments: [ "development" ]) }
   let(:headers) { authenticated_json_headers(admin_token.plain_token) }
 
   describe "authentication" do
@@ -17,7 +17,7 @@ RSpec.describe "Api::V1::AccessTokens", type: :request do
     end
 
     it "requires admin permission" do
-      read_token = create(:access_token, project: project, permissions: %w[read], environments: ["development"])
+      read_token = create(:access_token, project: project, permissions: %w[read], environments: [ "development" ])
 
       get "/api/v1/access_tokens",
         headers: authenticated_json_headers(read_token.plain_token)
@@ -60,7 +60,7 @@ RSpec.describe "Api::V1::AccessTokens", type: :request do
     end
 
     it "requires admin permission to create tokens" do
-      write_token = create(:access_token, project: project, permissions: %w[read write], environments: ["development"])
+      write_token = create(:access_token, project: project, permissions: %w[read write], environments: [ "development" ])
 
       post "/api/v1/access_tokens",
         params: { name: "Sneaky Token", permissions: %w[read] },

@@ -17,9 +17,9 @@ RSpec.describe AccessChecker do
         name: "Test Policy",
         principal_type: "token",
         principal_id: @token.id.to_s,
-        permissions: ["read"],
-        environments: ["development"],
-        paths: ["*"],
+        permissions: [ "read" ],
+        environments: [ "development" ],
+        paths: [ "*" ],
         enabled: true
       )
 
@@ -36,9 +36,9 @@ RSpec.describe AccessChecker do
         name: "Disabled Policy",
         principal_type: "token",
         principal_id: @token.id.to_s,
-        permissions: ["read"],
-        environments: ["development"],
-        paths: ["*"],
+        permissions: [ "read" ],
+        environments: [ "development" ],
+        paths: [ "*" ],
         enabled: false
       )
 
@@ -51,9 +51,9 @@ RSpec.describe AccessChecker do
         name: "Staging Only Policy",
         principal_type: "token",
         principal_id: @token.id.to_s,
-        permissions: ["read"],
-        environments: ["staging"],
-        paths: ["*"],
+        permissions: [ "read" ],
+        environments: [ "staging" ],
+        paths: [ "*" ],
         enabled: true
       )
 
@@ -73,9 +73,9 @@ RSpec.describe AccessChecker do
         name: "Database Only Policy",
         principal_type: "token",
         principal_id: @token.id.to_s,
-        permissions: ["read"],
+        permissions: [ "read" ],
         environments: [],
-        paths: ["/database/*"],
+        paths: [ "/database/*" ],
         enabled: true
       )
 
@@ -93,7 +93,7 @@ RSpec.describe AccessChecker do
         name: "Read Only Policy",
         principal_type: "token",
         principal_id: @token.id.to_s,
-        permissions: ["read"],
+        permissions: [ "read" ],
         environments: [],
         paths: [],
         enabled: true
@@ -112,9 +112,9 @@ RSpec.describe AccessChecker do
         name: "All Access",
         principal_type: "token",
         principal_id: @token.id.to_s,
-        permissions: ["read"],
-        environments: ["development"],
-        paths: ["*"],
+        permissions: [ "read" ],
+        environments: [ "development" ],
+        paths: [ "*" ],
         enabled: true
       )
 
@@ -138,9 +138,9 @@ RSpec.describe AccessChecker do
         name: "Database Access",
         principal_type: "token",
         principal_id: @token.id.to_s,
-        permissions: ["read"],
+        permissions: [ "read" ],
         environments: [],
-        paths: ["/database/*"],
+        paths: [ "/database/*" ],
         enabled: true
       )
 
@@ -156,17 +156,17 @@ RSpec.describe AccessChecker do
         name: "IP Restricted",
         principal_type: "token",
         principal_id: @token.id.to_s,
-        permissions: ["read"],
+        permissions: [ "read" ],
         environments: [],
         paths: [],
-        conditions: { "allowed_ips" => ["10.0.0.0/8"] },
+        conditions: { "allowed_ips" => [ "10.0.0.0/8" ] },
         enabled: true
       )
 
       context = { ip: "10.0.0.1" }
       result = @checker.check_conditions(policy, context)
       # Result depends on AccessPolicy#check_conditions implementation
-      expect([true, false]).to include(result)
+      expect([ true, false ]).to include(result)
     end
   end
 end

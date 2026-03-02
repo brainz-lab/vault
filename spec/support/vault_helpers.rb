@@ -2,7 +2,7 @@ module VaultHelpers
   def create_project_with_token(permissions: %w[read write admin])
     project = create(:project)
     token = create(:access_token, project: project, permissions: permissions)
-    [project, token, token.plain_token]
+    [ project, token, token.plain_token ]
   end
 
   def setup_master_key

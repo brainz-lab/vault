@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe "Api::V1::Secrets", type: :request do
   let(:project) { create(:project) }
   let(:dev_environment) { project.secret_environments.find_by(slug: "development") }
-  let(:token) { create(:access_token, project: project, permissions: %w[read write admin], environments: ["development"]) }
+  let(:token) { create(:access_token, project: project, permissions: %w[read write admin], environments: [ "development" ]) }
   let(:headers) { authenticated_json_headers(token.plain_token) }
 
   describe "authentication" do
@@ -112,7 +112,7 @@ RSpec.describe "Api::V1::Secrets", type: :request do
     end
 
     it "requires write permission" do
-      read_token = create(:access_token, project: project, permissions: %w[read], environments: ["development"])
+      read_token = create(:access_token, project: project, permissions: %w[read], environments: [ "development" ])
 
       post "/api/v1/secrets",
         params: { key: "NEW_KEY", value: "new_value", environment: "development" },
@@ -160,7 +160,7 @@ RSpec.describe "Api::V1::Secrets", type: :request do
     end
 
     it "requires write permission" do
-      read_token = create(:access_token, project: project, permissions: %w[read], environments: ["development"])
+      read_token = create(:access_token, project: project, permissions: %w[read], environments: [ "development" ])
 
       put "/api/v1/secrets/#{secret.key}",
         params: { description: "No access", environment: "development" },
@@ -181,7 +181,7 @@ RSpec.describe "Api::V1::Secrets", type: :request do
     end
 
     it "requires admin permission" do
-      write_token = create(:access_token, project: project, permissions: %w[read write], environments: ["development"])
+      write_token = create(:access_token, project: project, permissions: %w[read write], environments: [ "development" ])
 
       delete "/api/v1/secrets/#{secret.key}",
         headers: authenticated_json_headers(write_token.plain_token)
