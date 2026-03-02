@@ -10,9 +10,7 @@ module Connectors
         {
           type: "CUSTOM_AUTH",
           props: {
-            domain: { type: "string", required: true, description: "Bitrix24 domain (e.g. yourcompany.bitrix24.com)" },
-            webhook_token: { type: "string", required: true, description: "Webhook token from the webhook URL (e.g. user_id/secret)" },
-            auth_method: { type: "string", required: true, description: "Authentication method: webhook (default), oauth2, or token", default: "webhook" }
+            webhook_url: { type: "string", required: true, description: "Paste the full Bitrix24 webhook URL (e.g. https://yourcompany.bitrix24.co/rest/1/abc123token/)" }
           }
         }
       end
@@ -26,11 +24,10 @@ module Connectors
           title: "How to configure your Bitrix24 Inbound Webhook",
           steps: [
             { title: "Activate your Bitrix24 account", description: "You need an active Bitrix24 plan (even the free plan works). Go to bitrix24.com, sign up or log in, and make sure your account is active. If it's a new account, you may need to manually activate it." },
-            { title: "Go to Developer Resources", description: "In your Bitrix24 portal, navigate to the left sidebar menu and look for 'Developer resources' (Recursos para Desarrolladores). If you don't see it, try logging out and back in." },
-            { title: "Create an Inbound Webhook", description: "Inside Developer Resources, click 'Other' > 'Inbound webhook' (Webhook entrante). This creates a REST API endpoint for external apps to access your Bitrix24 data." },
-            { title: "Set permissions (scopes)", description: "In the webhook configuration, under 'Assign permissions' (Asignar permisos), add the 'CRM (crm)' scope. This is required for contact, deal, lead, and company operations. You can also add 'user' scope for profile access." },
-            { title: "Copy your webhook URL", description: "After saving, Bitrix24 shows a webhook URL like: https://b24-xxxxx.bitrix24.co/rest/1/your-token-here/. You need to split this into two parts for the configuration below." },
-            { title: "Enter credentials", description: "From the webhook URL https://b24-xxxxx.bitrix24.co/rest/1/abc123token/: Domain = b24-xxxxx.bitrix24.co (just the domain, no https://). Webhook Token = 1/abc123token (the path after /rest/)." }
+            { title: "Go to Developer Resources", description: "In your Bitrix24 portal, navigate to the left sidebar menu and look for 'Developer resources'. If you don't see it, try logging out and back in." },
+            { title: "Create an Inbound Webhook", description: "Inside Developer Resources, click 'Other' > 'Inbound webhook'. This creates a REST API endpoint for external apps to access your Bitrix24 data." },
+            { title: "Set permissions (scopes)", description: "In the webhook configuration, under 'Assign permissions', add the 'CRM (crm)' scope. This is required for contact, deal, lead, and company operations. You can also add 'user' scope for profile access." },
+            { title: "Copy and paste your webhook URL", description: "After saving, Bitrix24 shows a webhook URL like: https://yourcompany.bitrix24.co/rest/1/your-token-here/. Copy the full URL and paste it in the Webhook Url field above." }
           ],
           tips: [
             "If the webhook option doesn't appear, log out of Bitrix24 completely and log back in",
@@ -40,9 +37,7 @@ module Connectors
             "The webhook token never expires unless you regenerate it manually"
           ],
           credential_help: {
-            "domain" => "Your Bitrix24 domain only (e.g. b24-hztli9.bitrix24.co). Do NOT include https:// or any path",
-            "webhook_token" => "The token part from your webhook URL. For https://domain/rest/1/abc123/ the token is: 1/abc123",
-            "auth_method" => "Leave as 'webhook' (default). Only change if using OAuth2 or token-based auth"
+            "webhook_url" => "The full webhook URL from Bitrix24, e.g. https://yourcompany.bitrix24.co/rest/1/abc123token/"
           }
         }
       end
@@ -205,12 +200,18 @@ module Connectors
       end
 
       def base_url
-        domain = credentials[:domain].to_s.strip
-        token = credentials[:webhook_token].to_s.strip
-        raise Connectors::AuthenticationError, "Bitrix24 domain is required" if domain.blank?
-        raise Connectors::AuthenticationError, "Bitrix24 webhook token is required" if token.blank?
-
-        "https://#{domain}/rest/#{token}/"
+        if credentials[:webhook_url].present?
+          url = credentials[:webhook_url].to_s.strip.chomp("/") + "/"
+          unless url.match?(%r{https?://[^/]+/rest/\d+/[^/]+/})
+            raise Connectors::AuthenticationError, "Invalid Bitrix24 webhook URL format. Expected: https://yourcompany.bitrix24.co/rest/USER_ID/TOKEN/"
+          end
+          url
+        else
+          domain = credentials[:domain].to_s.strip
+          token = credentials[:webhook_token].to_s.strip
+          raise Connectors::AuthenticationError, "Bitrix24 webhook URL is required" if domain.blank? || token.blank?
+          "https://#{domain}/rest/#{token}/"
+        end
       end
 
       def client
