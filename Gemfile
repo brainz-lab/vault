@@ -122,9 +122,6 @@ group :test do
   # Time manipulation for testing
   gem "timecop"
 
-  # Better test output
-  gem "minitest-reporters"
-
-  # Pin minitest to compatible version with Rails 8.1
-  gem "minitest", "~> 5.25"
+  # RSpec formatters
+  gem "rspec_junit_formatter"
 end
