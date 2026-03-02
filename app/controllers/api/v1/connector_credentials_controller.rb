@@ -104,7 +104,7 @@ module Api
           "access_key_id", "secret_access_key", "host", "port", "database",
           "smtp_host", "smtp_port", "imap_host", "imap_port", "from",
           "bucket", "region", "base_path", "adapter", "smtp_domain",
-          "domain", "webhook_token", "auth_method", "access_token", "refresh_token").compact_blank
+          "domain", "webhook_token", "webhook_url", "auth_method", "access_token", "refresh_token").compact_blank
       end
     end
   end
