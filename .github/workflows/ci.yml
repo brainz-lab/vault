@@ -134,11 +134,17 @@ jobs:
       - name: Install dependencies
         run: bundle install --jobs 4
 
+      - name: Prepare database
+        env:
+          RAILS_ENV: test
+          TEST_DATABASE_URL: postgres://postgres:postgres@postgres:5432/vault_test
+        run: bin/rails db:create db:schema:load:primary db:migrate
+
       - name: Run tests
         env:
           RAILS_ENV: test
           TEST_DATABASE_URL: postgres://postgres:postgres@postgres:5432/vault_test
-        run: bin/rails db:test:prepare && bundle exec rspec
+        run: bundle exec rspec
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
