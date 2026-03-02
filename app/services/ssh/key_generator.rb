@@ -110,11 +110,11 @@ module Ssh
 
         key_type = "ssh-rsa"
         blob = [
-          [key_type.length].pack("N"),
+          [ key_type.length ].pack("N"),
           key_type,
-          [e.length].pack("N"),
+          [ e.length ].pack("N"),
           e,
-          [n.length].pack("N"),
+          [ n.length ].pack("N"),
           n
         ].join
 
@@ -126,9 +126,9 @@ module Ssh
       def format_ed25519_public_key(verify_key, comment)
         key_type = "ssh-ed25519"
         blob = [
-          [key_type.length].pack("N"),
+          [ key_type.length ].pack("N"),
           key_type,
-          [32].pack("N"),
+          [ 32 ].pack("N"),
           verify_key.to_bytes
         ].join
 
@@ -148,9 +148,9 @@ module Ssh
         # Public key blob
         pub_key_type = "ssh-ed25519"
         pub_blob = [
-          [pub_key_type.length].pack("N"),
+          [ pub_key_type.length ].pack("N"),
           pub_key_type,
-          [32].pack("N"),
+          [ 32 ].pack("N"),
           verify_key.to_bytes
         ].join
 
@@ -164,13 +164,13 @@ module Ssh
         priv_section = [
           check_int,
           check_int,
-          [pub_key_type.length].pack("N"),
+          [ pub_key_type.length ].pack("N"),
           pub_key_type,
-          [32].pack("N"),
+          [ 32 ].pack("N"),
           verify_key.to_bytes,
-          [64].pack("N"),
+          [ 64 ].pack("N"),
           private_data,
-          [priv_comment.length].pack("N"),
+          [ priv_comment.length ].pack("N"),
           priv_comment
         ].join
 
@@ -181,16 +181,16 @@ module Ssh
         # Build full key
         full_key = [
           auth_magic,
-          [cipher_name.length].pack("N"),
+          [ cipher_name.length ].pack("N"),
           cipher_name,
-          [kdf_name.length].pack("N"),
+          [ kdf_name.length ].pack("N"),
           kdf_name,
-          [kdf_options.length].pack("N"),
+          [ kdf_options.length ].pack("N"),
           kdf_options,
-          [num_keys].pack("N"),
-          [pub_blob.length].pack("N"),
+          [ num_keys ].pack("N"),
+          [ pub_blob.length ].pack("N"),
           pub_blob,
-          [priv_section.length].pack("N"),
+          [ priv_section.length ].pack("N"),
           priv_section
         ].join
 

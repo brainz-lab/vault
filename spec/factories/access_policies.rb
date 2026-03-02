@@ -4,7 +4,7 @@ FactoryBot.define do
     name { "Test Policy" }
     principal_type { "token" }
     sequence(:principal_id) { |n| SecureRandom.uuid }
-    permissions { ["read"] }
+    permissions { [ "read" ] }
     environments { [] }
     paths { [] }
     conditions { {} }
