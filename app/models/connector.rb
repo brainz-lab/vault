@@ -46,6 +46,20 @@ class Connector < ApplicationRecord
     auth_type.present? && auth_type != "NONE"
   end
 
+  def native_runner_class
+    raise "Not a native connector" unless native?
+
+    case piece_name
+    when "webhook" then Connectors::Native::Webhook
+    when "database" then Connectors::Native::Database
+    when "email" then Connectors::Native::Email
+    when "file_storage" then Connectors::Native::FileStorage
+    when "apollo" then Connectors::Native::Apollo
+    when "bitrix" then Connectors::Native::Bitrix
+    else raise Connectors::Error, "Unknown native connector: #{piece_name}"
+    end
+  end
+
   def to_catalog_entry
     {
       id: id,
