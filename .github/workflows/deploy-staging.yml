@@ -1,8 +1,8 @@
-name: Deploy to DigitalOcean
+name: Deploy to Staging
 
 on:
   push:
-    branches: [main]
+    branches: [develop]
   workflow_dispatch:
 
 env:
@@ -34,7 +34,7 @@ jobs:
           tags: |
             type=ref,event=branch
             type=sha,prefix=
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=staging
 
       - name: Build and Push
         uses: docker/build-push-action@v6
@@ -62,25 +62,14 @@ jobs:
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
 
-      - name: Deploy to clusters
-        env:
-          CLUSTER_IDS: ${{ secrets.DOKS_CLUSTER_IDS }}
-          CLUSTER_ID: ${{ secrets.DOKS_CLUSTER_ID }}
-        run: |
-          if [ -n "$CLUSTER_IDS" ]; then
-            CLUSTERS=$(echo "$CLUSTER_IDS" | tr -d '[]" ' | tr ',' '\n')
-          else
-            CLUSTERS="$CLUSTER_ID"
-          fi
+      - name: Configure kubectl
+        run: doctl kubernetes cluster kubeconfig save ${{ secrets.DOKS_STAGING_CLUSTER_ID }}
 
-          for CLUSTER in $CLUSTERS; do
-            echo "::group::Deploying to cluster $CLUSTER"
-            doctl kubernetes cluster kubeconfig save "$CLUSTER"
-            kubectl rollout restart deployment/vault-web -n default
-            kubectl rollout restart deployment/vault-job -n default
-            kubectl rollout status deployment/vault-web -n default --timeout=5m
-            echo "::endgroup::"
-          done
+      - name: Restart deployment
+        run: |
+          kubectl rollout restart deployment/vault-web -n default
+          kubectl rollout restart deployment/vault-job -n default
+          kubectl rollout status deployment/vault-web -n default --timeout=5m
 
   notify:
     needs: [deploy]
@@ -95,20 +84,20 @@ jobs:
           webhook-type: incoming-webhook
           payload: |
             {
-              "text": "✅ *Vault* deployed successfully to production",
+              "text": "✅ *Vault* deployed successfully to staging",
               "blocks": [
                 {
                   "type": "header",
                   "text": {
                     "type": "plain_text",
-                    "text": "✅ Vault — Deploy Succeeded"
+                    "text": "✅ Vault — Staging Deploy Succeeded"
                   }
                 },
                 {
                   "type": "section",
                   "fields": [
                     { "type": "mrkdwn", "text": "*Service:*\nvault (web + job)" },
-                    { "type": "mrkdwn", "text": "*Environment:*\nproduction (DOKS)" },
+                    { "type": "mrkdwn", "text": "*Environment:*\nstaging (DOKS)" },
                     { "type": "mrkdwn", "text": "*Commit:*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|`${{ github.sha }}`>" },
                     { "type": "mrkdwn", "text": "*Triggered by:*\n${{ github.actor }}" }
                   ]
@@ -130,20 +119,20 @@ jobs:
           webhook-type: incoming-webhook
           payload: |
             {
-              "text": "🚨 *Vault* deploy FAILED",
+              "text": "🚨 *Vault* staging deploy FAILED",
               "blocks": [
                 {
                   "type": "header",
                   "text": {
                     "type": "plain_text",
-                    "text": "🚨 Vault — Deploy Failed"
+                    "text": "🚨 Vault — Staging Deploy Failed"
                   }
                 },
                 {
                   "type": "section",
                   "fields": [
                     { "type": "mrkdwn", "text": "*Service:*\nvault" },
-                    { "type": "mrkdwn", "text": "*Environment:*\nproduction (DOKS)" },
+                    { "type": "mrkdwn", "text": "*Environment:*\nstaging (DOKS)" },
                     { "type": "mrkdwn", "text": "*Commit:*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|`${{ github.sha }}`>" },
                     { "type": "mrkdwn", "text": "*Triggered by:*\n${{ github.actor }}" }
                   ]
