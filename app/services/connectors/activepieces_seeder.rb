@@ -66,6 +66,12 @@ module Connectors
       connector = Connector.find_or_initialize_by(piece_name: slug)
       was_new = connector.new_record?
 
+      # Don't overwrite native connectors with Activepieces placeholders
+      if !was_new && connector.connector_type == "native"
+        stats[:updated] += 0 # skip silently
+        return
+      end
+
       connector.assign_attributes(
         display_name: piece["displayName"] || slug.titleize,
         description: piece["description"],
