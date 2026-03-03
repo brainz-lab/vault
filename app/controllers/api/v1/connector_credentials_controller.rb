@@ -100,11 +100,27 @@ module Api
       end
 
       def credential_values
-        params.permit!.to_h.slice("value", "api_key", "token", "username", "password", "secret",
-          "access_key_id", "secret_access_key", "host", "port", "database",
-          "smtp_host", "smtp_port", "imap_host", "imap_port", "from",
-          "bucket", "region", "base_path", "adapter", "smtp_domain",
-          "domain", "webhook_token", "webhook_url", "auth_method", "access_token", "refresh_token").compact_blank
+        # Static whitelist for known credential fields
+        static_keys = %w[
+          value api_key token username password secret
+          access_key_id secret_access_key host port database
+          smtp_host smtp_port imap_host imap_port from
+          bucket region base_path adapter smtp_domain
+          domain webhook_token webhook_url auth_method access_token refresh_token
+          subdomain api_token
+        ]
+
+        # Also accept any keys defined in the connector's auth_schema props
+        dynamic_keys = []
+        if params[:connector_id].present?
+          connector = Connector.find_by(id: params[:connector_id])
+          if connector&.auth_schema.is_a?(Hash)
+            props = connector.auth_schema["props"] || connector.auth_schema[:props] || {}
+            dynamic_keys = props.keys.map(&:to_s)
+          end
+        end
+
+        params.permit!.to_h.slice(*(static_keys + dynamic_keys).uniq).compact_blank
       end
     end
   end

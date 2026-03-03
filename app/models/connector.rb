@@ -56,6 +56,7 @@ class Connector < ApplicationRecord
     when "file_storage" then Connectors::Native::FileStorage
     when "apollo" then Connectors::Native::Apollo
     when "bitrix" then Connectors::Native::Bitrix
+    when "kommo" then Connectors::Native::Kommo
     else raise Connectors::Error, "Unknown native connector: #{piece_name}"
     end
   end
