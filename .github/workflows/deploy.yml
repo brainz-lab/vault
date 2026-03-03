@@ -49,31 +49,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  prepare-clusters:
-    runs-on: arc-runner-set
-    outputs:
-      clusters: ${{ steps.set-clusters.outputs.clusters }}
-    steps:
-      - name: Resolve cluster list
-        id: set-clusters
-        env:
-          CLUSTER_IDS: ${{ secrets.DOKS_CLUSTER_IDS }}
-          CLUSTER_ID: ${{ secrets.DOKS_CLUSTER_ID }}
-        run: |
-          if [ -n "$CLUSTER_IDS" ]; then
-            echo "clusters=${CLUSTER_IDS}" >> "$GITHUB_OUTPUT"
-          else
-            printf 'clusters=["%s"]\n' "$CLUSTER_ID" >> "$GITHUB_OUTPUT"
-          fi
-
   deploy:
-    needs: [build, prepare-clusters]
+    needs: [build]
     runs-on: arc-runner-set
     timeout-minutes: 15
-    strategy:
-      matrix:
-        cluster_id: ${{ fromJson(needs.prepare-clusters.outputs.clusters) }}
-      fail-fast: false
     steps:
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
@@ -83,14 +62,25 @@ jobs:
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
 
-      - name: Configure kubectl
-        run: doctl kubernetes cluster kubeconfig save ${{ matrix.cluster_id }}
-
-      - name: Restart deployment
+      - name: Deploy to clusters
+        env:
+          CLUSTER_IDS: ${{ secrets.DOKS_CLUSTER_IDS }}
+          CLUSTER_ID: ${{ secrets.DOKS_CLUSTER_ID }}
         run: |
-          kubectl rollout restart deployment/vault-web -n default
-          kubectl rollout restart deployment/vault-job -n default
-          kubectl rollout status deployment/vault-web -n default --timeout=5m
+          if [ -n "$CLUSTER_IDS" ]; then
+            CLUSTERS=$(echo "$CLUSTER_IDS" | tr -d '[]" ' | tr ',' '\n')
+          else
+            CLUSTERS="$CLUSTER_ID"
+          fi
+
+          for CLUSTER in $CLUSTERS; do
+            echo "::group::Deploying to cluster $CLUSTER"
+            doctl kubernetes cluster kubeconfig save "$CLUSTER"
+            kubectl rollout restart deployment/vault-web -n default
+            kubectl rollout restart deployment/vault-job -n default
+            kubectl rollout status deployment/vault-web -n default --timeout=5m
+            echo "::endgroup::"
+          done
 
   notify:
     needs: [deploy]
