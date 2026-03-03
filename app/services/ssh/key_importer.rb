@@ -129,9 +129,9 @@ module Ssh
 
               key_type_str = "ssh-ed25519"
               blob = [
-                [key_type_str.length].pack("N"),
+                [ key_type_str.length ].pack("N"),
                 key_type_str,
-                [32].pack("N"),
+                [ 32 ].pack("N"),
                 pub_bytes
               ].join
 
@@ -156,7 +156,7 @@ module Ssh
         # Try to use OpenSSL to parse (works for some RSA keys in OpenSSH format)
         begin
           key = OpenSSL::PKey::RSA.new(openssh_key)
-          return import_pem_key(key.to_pem, nil)
+          import_pem_key(key.to_pem, nil)
         rescue OpenSSL::PKey::PKeyError
           raise ImportError, "Failed to parse RSA OpenSSH key. Please convert to PEM format."
         end
@@ -171,11 +171,11 @@ module Ssh
 
         key_type = "ssh-rsa"
         blob = [
-          [key_type.length].pack("N"),
+          [ key_type.length ].pack("N"),
           key_type,
-          [e.length].pack("N"),
+          [ e.length ].pack("N"),
           e,
-          [n.length].pack("N"),
+          [ n.length ].pack("N"),
           n
         ].join
 

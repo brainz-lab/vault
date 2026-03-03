@@ -77,7 +77,6 @@ GEM
       uri (>= 0.13.1)
     addressable (2.8.8)
       public_suffix (>= 2.0.2, < 8.0)
-    ansi (1.5.0)
     ast (2.4.3)
     aws-eventstream (1.4.0)
     aws-partitions (1.1200.0)
@@ -109,7 +108,7 @@ GEM
       concurrent-ruby (~> 1.0)
       logger (~> 1.5)
       sqlite3 (~> 2.0)
-    brakeman (7.1.2)
+    brakeman (8.0.4)
       racc
     builder (3.3.0)
     bundler-audit (0.9.3)
@@ -220,11 +219,6 @@ GEM
       logger
     mini_mime (1.1.5)
     minitest (5.27.0)
-    minitest-reporters (1.7.1)
-      ansi
-      builder
-      minitest (>= 5.0)
-      ruby-progressbar
     msgpack (1.8.0)
     net-http (0.9.1)
       uri (>= 0.11.1)
@@ -367,6 +361,8 @@ GEM
       rspec-mocks (~> 3.13)
       rspec-support (~> 3.13)
     rspec-support (3.13.7)
+    rspec_junit_formatter (0.6.0)
+      rspec-core (>= 2, < 4, != 2.12.0)
     rubocop (1.82.1)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
@@ -542,8 +538,6 @@ DEPENDENCIES
   jbuilder
   kamal
   lefthook
-  minitest (~> 5.25)
-  minitest-reporters
   net-ssh (~> 7.3)
   pg (~> 1.1)
   phlex-rails (~> 2.0)
@@ -554,6 +548,7 @@ DEPENDENCIES
   redis (~> 5.0)
   rotp (~> 6.3)
   rspec-rails
+  rspec_junit_formatter
   rubocop-rails-omakase
   selenium-webdriver
   shoulda-matchers

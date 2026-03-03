@@ -97,7 +97,7 @@ RSpec.describe AccessToken, type: :model do
     let(:project)     { create(:project) }
     let(:environment) { project.secret_environments.find_by(name: "Development") }
     let(:secret)      { create(:secret, project: project) }
-    let(:token)       { create(:access_token, project: project, active: true, revoked_at: nil, expires_at: nil, permissions: ["read"]) }
+    let(:token)       { create(:access_token, project: project, active: true, revoked_at: nil, expires_at: nil, permissions: [ "read" ]) }
 
     it "returns true for an active token with the required permission" do
       expect(token.can_access?(secret, environment, permission: "read")).to be true
@@ -181,13 +181,13 @@ RSpec.describe AccessToken, type: :model do
 
   describe "#has_permission?" do
     it "returns true when permission is in the permissions list" do
-      token = build(:access_token, permissions: ["read", "write"])
+      token = build(:access_token, permissions: [ "read", "write" ])
       expect(token.has_permission?("read")).to be true
       expect(token.has_permission?("write")).to be true
     end
 
     it "returns false when permission is not in the permissions list" do
-      token = build(:access_token, permissions: ["read"])
+      token = build(:access_token, permissions: [ "read" ])
       expect(token.has_permission?("delete")).to be false
     end
   end
