@@ -5,6 +5,13 @@ class ApplicationJob < ActiveJob::Base
   # Most jobs are safe to ignore if the underlying records are no longer available
   discard_on ActiveJob::DeserializationError
 
+  rescue_from(StandardError) do |exception|
+    BrainzLab::Reflex.capture(exception, context: { job: self.class.name, arguments: arguments })
+    BrainzLab::Recall.error("Job failed: #{self.class.name}", error: exception.message)
+    BrainzLab::Signal.trigger("job.failure", severity: :high, details: { job: self.class.name, error: exception.message })
+    raise exception
+  end
+
   # Add logging
   around_perform do |job, block|
     Rails.logger.info "[#{job.class.name}] Starting job with args: #{job.arguments.inspect}"
