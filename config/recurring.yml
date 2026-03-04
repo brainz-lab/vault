@@ -13,3 +13,24 @@ production:
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12
+  audit_retention:
+    class: AuditRetentionJob
+    queue: low
+    schedule: at 2am on Sundays
+  check_secret_expiry:
+    class: CheckSecretExpiryJob
+    schedule: at 6am every day
+  connector_catalog_sync:
+    class: ConnectorCatalogSyncJob
+    schedule: every hour at minute 30
+  connector_health_check:
+    class: ConnectorHealthCheckJob
+    schedule: every 30 minutes
+  expire_tokens:
+    class: ExpireTokensJob
+    queue: low
+    schedule: at 4am every day
+  cleanup_versions:
+    class: CleanupVersionsJob
+    queue: low
+    schedule: at 3am on Sundays
