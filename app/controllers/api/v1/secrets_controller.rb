@@ -33,6 +33,8 @@ module Api
 
       # GET /api/v1/secrets/:key
       def show
+        return unless require_token_access!(@secret, permission: "read")
+
         value = current_environment.resolve_value(@secret)
 
         log_access(
@@ -53,7 +55,7 @@ module Api
 
       # POST /api/v1/secrets
       def create
-        return unless require_permission!("write")
+        return unless require_token_access!(nil, permission: "write")
 
         @secret = current_project.secrets.find_or_initialize_by(key: secret_params[:key])
         @secret.attributes = secret_params.except(:value)
@@ -87,7 +89,7 @@ module Api
 
       # PUT/PATCH /api/v1/secrets/:key
       def update
-        return unless require_permission!("write")
+        return unless require_token_access!(@secret, permission: "write")
 
         ActiveRecord::Base.transaction do
           @secret.update!(secret_params.except(:value, :key))
@@ -118,7 +120,7 @@ module Api
 
       # DELETE /api/v1/secrets/:key
       def destroy
-        return unless require_permission!("admin")
+        return unless require_token_access!(@secret, permission: "admin")
 
         @secret.archive!
 
@@ -129,6 +131,8 @@ module Api
 
       # GET /api/v1/secrets/:key/versions
       def versions
+        return unless require_token_access!(@secret, permission: "read")
+
         versions = @secret.versions
                           .includes(:secret_environment)
                           .order(version: :desc)
@@ -156,7 +160,7 @@ module Api
 
       # POST /api/v1/secrets/:key/rollback
       def rollback
-        return unless require_permission!("write")
+        return unless require_token_access!(@secret, permission: "write")
 
         version_number = params[:version].to_i
         target_version = @secret.versions.find_by!(
@@ -187,6 +191,8 @@ module Api
 
       # GET /api/v1/secrets/:key/credential
       def credential
+        return unless require_token_access!(@secret, permission: "read")
+
         unless @secret.otp_enabled? || @secret.credential?
           return render json: { error: "Secret is not a credential type" }, status: :unprocessable_entity
         end
@@ -228,6 +234,8 @@ module Api
 
       # POST /api/v1/secrets/:key/otp/generate
       def generate_otp
+        return unless require_token_access!(@secret, permission: "read")
+
         unless @secret.otp_enabled?
           return render json: { error: "Secret does not support OTP" }, status: :unprocessable_entity
         end
@@ -265,6 +273,8 @@ module Api
 
       # POST /api/v1/secrets/:key/otp/verify
       def verify_otp
+        return unless require_token_access!(@secret, permission: "read")
+
         unless @secret.otp_enabled?
           return render json: { error: "Secret does not support OTP" }, status: :unprocessable_entity
         end

@@ -12,6 +12,8 @@ updates:
       - "ruby"
     commit-message:
       prefix: "chore(deps):"
+    ignore:
+      - dependency-name: "fluyenta-ui"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"

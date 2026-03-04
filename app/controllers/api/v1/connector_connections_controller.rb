@@ -1,6 +1,7 @@
 module Api
   module V1
     class ConnectorConnectionsController < BaseController
+      before_action :require_project!
       before_action :set_connection, only: [ :show, :update, :destroy, :test, :execute ]
 
       # GET /api/v1/connector_connections
@@ -83,20 +84,14 @@ module Api
           credentials = credential.decrypt_credentials
 
           if connector.native?
-            # Actually test native connectors by calling their test_connection action
-            runner_class = Connectors::Executor.new(
-              project: current_project,
-              caller_service: "test"
-            )
-            result = runner_class.execute(
-              connection_id: @connection.id,
-              action_name: "test_connection",
-              input: {}
-            )
+            # Test native connectors directly — bypass executor's .connected scope
+            # so connections in error/disabled state can recover via test
+            runner_class = connector.native_runner_class
+            result = runner_class.new(credentials).execute("test_connection")
 
             @connection.mark_connected!
             credential.mark_verified!
-            render json: { success: true, status: "connected", details: result[:output] }
+            render json: { success: true, status: "connected", details: result }
           elsif connector.activepieces?
             sidecar_url = ENV.fetch("CONNECTOR_SIDECAR_URL", "http://localhost:3100")
             sidecar_key = ENV["CONNECTOR_SIDECAR_SECRET_KEY"]

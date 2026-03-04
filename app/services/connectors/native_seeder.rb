@@ -6,7 +6,8 @@ module Connectors
       Connectors::Native::Email,
       Connectors::Native::FileStorage,
       Connectors::Native::Apollo,
-      Connectors::Native::Bitrix
+      Connectors::Native::Bitrix,
+      Connectors::Native::Kommo
     ].freeze
 
     def seed!

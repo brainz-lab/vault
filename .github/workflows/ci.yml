@@ -5,18 +5,31 @@ on:
   push:
     branches: [ main ]
 
+env:
+  BUNDLE_RUBYGEMS__PKG__GITHUB__COM: ${{ secrets.BUNDLE_RUBYGEMS__PKG__GITHUB__COM }}
+
 jobs:
   scan_ruby:
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
+    container:
+      image: ruby:3.4.7
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Re-resolve fluyenta-ui from GitHub Packages
+        run: bundle lock --update fluyenta-ui
+
+      - name: Cache bundle gems
+        uses: actions/cache@v4
         with:
-          bundler-cache: true
+          path: /usr/local/bundle
+          key: bundle-${{ runner.os }}-${{ hashFiles('Gemfile.lock') }}
+          restore-keys: bundle-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bundle install --jobs 4
 
       - name: Scan for common Rails security vulnerabilities using static analysis
         run: bin/brakeman --no-pager
@@ -25,34 +38,55 @@ jobs:
         run: bin/bundler-audit
 
   scan_js:
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
+    container:
+      image: ruby:3.4.7
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Re-resolve fluyenta-ui from GitHub Packages
+        run: bundle lock --update fluyenta-ui
+
+      - name: Cache bundle gems
+        uses: actions/cache@v4
         with:
-          bundler-cache: true
+          path: /usr/local/bundle
+          key: bundle-${{ runner.os }}-${{ hashFiles('Gemfile.lock') }}
+          restore-keys: bundle-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bundle install --jobs 4
 
       - name: Scan for security vulnerabilities in JavaScript dependencies
         run: bin/importmap audit
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
+    container:
+      image: ruby:3.4.7
     env:
       RUBOCOP_CACHE_ROOT: tmp/rubocop
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
+      - name: Re-resolve fluyenta-ui from GitHub Packages
+        run: bundle lock --update fluyenta-ui
 
-      - name: Prepare RuboCop cache
+      - name: Cache bundle gems
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bundle
+          key: bundle-${{ runner.os }}-${{ hashFiles('Gemfile.lock') }}
+          restore-keys: bundle-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bundle install --jobs 4
+
+      - name: Cache RuboCop results
         uses: actions/cache@v4
         env:
           DEPENDENCIES_HASH: ${{ hashFiles('.ruby-version', '**/.rubocop.yml', '**/.rubocop_todo.yml', 'Gemfile.lock') }}
@@ -66,11 +100,13 @@ jobs:
         run: bin/rubocop -f github
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
+    container:
+      image: ruby:3.4.7
 
     services:
       postgres:
-        image: postgres
+        image: timescale/timescaledb:latest-pg17
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -79,22 +115,36 @@ jobs:
         options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-      - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev
+      - name: Install PostgreSQL client libraries
+        run: apt-get update -qq && apt-get install --no-install-recommends -y libpq-dev postgresql-client
 
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Re-resolve fluyenta-ui from GitHub Packages
+        run: bundle lock --update fluyenta-ui
+
+      - name: Cache bundle gems
+        uses: actions/cache@v4
         with:
-          bundler-cache: true
+          path: /usr/local/bundle
+          key: bundle-pg-${{ runner.os }}-${{ hashFiles('Gemfile.lock') }}
+          restore-keys: bundle-pg-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bundle install --jobs 4
+
+      - name: Prepare database
+        env:
+          RAILS_ENV: test
+          TEST_DATABASE_URL: postgres://postgres:postgres@postgres:5432/vault_test
+        run: bin/rails db:create db:schema:load:primary db:migrate
 
       - name: Run tests
         env:
           RAILS_ENV: test
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432
-        run: bin/rails db:test:prepare test
+          TEST_DATABASE_URL: postgres://postgres:postgres@postgres:5432/vault_test
+        run: bundle exec rspec
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5

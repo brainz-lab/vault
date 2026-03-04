@@ -61,17 +61,49 @@ module Api
         true
       end
 
+      def require_token_access!(secret = nil, permission: "read")
+        # When using project API key auth (no token), grant all access
+        return true if current_token.nil?
+
+        # Check environment scope (deny by default - token must have explicit environment access)
+        if current_environment
+          unless current_token.environments.any? && current_token.environments.include?(current_environment.slug)
+            render json: { error: "Forbidden: token does not have access to #{current_environment.slug} environment" }, status: :forbidden
+            return false
+          end
+        end
+
+        # Check path scope (only if a secret is provided)
+        if secret && current_token.paths.any?
+          unless current_token.paths.any? { |pattern| File.fnmatch?(pattern, secret.path) }
+            render json: { error: "Forbidden: token does not have access to this secret path" }, status: :forbidden
+            return false
+          end
+        end
+
+        # Check permission
+        unless current_token.has_permission?(permission)
+          render json: { error: "Forbidden: #{permission} permission required" }, status: :forbidden
+          return false
+        end
+
+        true
+      end
+
       def log_access(action:, secret: nil, details: {})
         # Determine actor info based on auth method
         if current_token
           actor_type = "token"
           actor_id = current_token.id.to_s
           actor_name = current_token.name
-        else
-          # Project API key auth
+        elsif current_project
           actor_type = "api_key"
           actor_id = current_project.id.to_s
           actor_name = "Project API Key"
+        else
+          actor_type = "service"
+          actor_id = request.headers["X-Caller-Service"] || "unknown"
+          actor_name = "Service Key"
         end
 
         AuditLog.log_access(
@@ -144,7 +176,18 @@ module Api
         service_key = request.headers["X-Service-Key"]
         expected_key = ENV["SERVICE_KEY"] || "dev_service_key"
 
-        service_key.present? && ActiveSupport::SecurityUtils.secure_compare(service_key, expected_key)
+        return false unless service_key.present? && ActiveSupport::SecurityUtils.secure_compare(service_key, expected_key)
+
+        # Service-key auth succeeds — try to resolve project context from header
+        platform_id = request.headers["X-Platform-Project-Id"]
+        if platform_id.present?
+          @current_project = Project.find_or_create_for_platform!(
+            platform_project_id: platform_id,
+            name: request.headers["X-Project-Name"] || "Project #{platform_id}"
+          )
+        end
+
+        true
       end
 
       def validate_with_platform(key)

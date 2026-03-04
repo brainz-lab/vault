@@ -3,7 +3,7 @@ FactoryBot.define do
     association :project
     name { "Test Token" }
     active { true }
-    permissions { ["read"] }
+    permissions { [ "read" ] }
     environments { [] }
     paths { [] }
 

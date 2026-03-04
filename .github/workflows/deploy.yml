@@ -10,8 +10,8 @@ env:
   IMAGE_NAME: ${{ secrets.DO_REGISTRY }}/vault
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: arc-runner-set
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -49,23 +49,47 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  deploy:
+    needs: [build]
+    runs-on: arc-runner-set
+    timeout-minutes: 15
+    steps:
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DOCTL_ACCESS_TOKEN }}
 
-      - name: Configure kubectl
-        run: doctl kubernetes cluster kubeconfig save ${{ secrets.DOKS_CLUSTER_ID }}
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
 
-      - name: Restart deployment
+      - name: Deploy to clusters
+        env:
+          CLUSTER_IDS: ${{ secrets.DOKS_CLUSTER_IDS }}
+          CLUSTER_ID: ${{ secrets.DOKS_CLUSTER_ID }}
         run: |
-          kubectl rollout restart deployment/vault-web -n default
-          kubectl rollout restart deployment/vault-job -n default
-          kubectl rollout status deployment/vault-web -n default --timeout=5m
+          if [ -n "$CLUSTER_IDS" ]; then
+            CLUSTERS=$(echo "$CLUSTER_IDS" | tr -d '[]" ' | tr ',' '\n')
+          else
+            CLUSTERS="$CLUSTER_ID"
+          fi
 
+          for CLUSTER in $CLUSTERS; do
+            echo "::group::Deploying to cluster $CLUSTER"
+            doctl kubernetes cluster kubeconfig save "$CLUSTER"
+            kubectl rollout restart deployment/vault-web -n default
+            kubectl rollout restart deployment/vault-job -n default
+            kubectl rollout status deployment/vault-web -n default --timeout=5m
+            echo "::endgroup::"
+          done
+
+  notify:
+    needs: [deploy]
+    runs-on: arc-runner-set
+    if: always()
+    steps:
       - name: Notify Slack - Deploy Success
-        if: success()
-        uses: slackapi/slack-github-action@v2.1.0
+        if: needs.deploy.result == 'success'
+        uses: slackapi/slack-github-action@v2.1.1
         with:
           webhook: ${{ secrets.SLACK_DEPLOY_WEBHOOK_URL }}
           webhook-type: incoming-webhook
@@ -75,7 +99,10 @@ jobs:
               "blocks": [
                 {
                   "type": "header",
-                  "text": { "type": "plain_text", "text": "✅ Vault — Deploy Succeeded" }
+                  "text": {
+                    "type": "plain_text",
+                    "text": "✅ Vault — Deploy Succeeded"
+                  }
                 },
                 {
                   "type": "section",
@@ -96,8 +123,8 @@ jobs:
             }
 
       - name: Notify Slack - Deploy Failed
-        if: failure()
-        uses: slackapi/slack-github-action@v2.1.0
+        if: needs.deploy.result == 'failure'
+        uses: slackapi/slack-github-action@v2.1.1
         with:
           webhook: ${{ secrets.SLACK_DEPLOY_WEBHOOK_URL }}
           webhook-type: incoming-webhook
@@ -107,7 +134,10 @@ jobs:
               "blocks": [
                 {
                   "type": "header",
-                  "text": { "type": "plain_text", "text": "🚨 Vault — Deploy Failed" }
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚨 Vault — Deploy Failed"
+                  }
                 },
                 {
                   "type": "section",

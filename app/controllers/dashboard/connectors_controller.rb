@@ -20,7 +20,7 @@ module Dashboard
       end
 
       @total_count = scope.count
-      @page = [params[:page].to_i, 1].max
+      @page = [ params[:page].to_i, 1 ].max
       @total_pages = (@total_count.to_f / PER_PAGE).ceil
       @page = @total_pages if @page > @total_pages && @total_pages > 0
 

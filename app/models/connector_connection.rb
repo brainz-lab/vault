@@ -19,7 +19,7 @@ class ConnectorConnection < ApplicationRecord
   end
 
   def mark_connected!
-    update!(status: "connected", error_message: nil)
+    update!(status: "connected", enabled: true, error_message: nil)
   end
 
   def mark_error!(message)

@@ -57,6 +57,7 @@
 # Database dumps
 *.sql
 !db/structure.sql
+!db/cache_structure.sql
 *.dump
 
 # Local development

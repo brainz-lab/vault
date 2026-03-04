@@ -59,9 +59,9 @@ RSpec.describe AccessPolicy, type: :model do
         create(:access_policy,
           project: project,
           enabled: true,
-          environments: [environment.slug],
-          paths: ["*"],
-          permissions: ["read"]
+          environments: [ environment.slug ],
+          paths: [ "*" ],
+          permissions: [ "read" ]
         )
       end
 
@@ -75,9 +75,9 @@ RSpec.describe AccessPolicy, type: :model do
         create(:access_policy,
           project: project,
           enabled: false,
-          environments: [environment.slug],
-          paths: ["*"],
-          permissions: ["read"]
+          environments: [ environment.slug ],
+          paths: [ "*" ],
+          permissions: [ "read" ]
         )
       end
 
@@ -91,9 +91,9 @@ RSpec.describe AccessPolicy, type: :model do
         create(:access_policy,
           project: project,
           enabled: true,
-          environments: [environment.slug],
-          paths: ["*"],
-          permissions: ["read"]
+          environments: [ environment.slug ],
+          paths: [ "*" ],
+          permissions: [ "read" ]
         )
       end
 
@@ -121,7 +121,7 @@ RSpec.describe AccessPolicy, type: :model do
     end
 
     context "when allowed_ips is set and ip matches" do
-      before { policy.update!(conditions: { "allowed_ips" => ["192.168.1.1"] }) }
+      before { policy.update!(conditions: { "allowed_ips" => [ "192.168.1.1" ] }) }
 
       it "returns true" do
         expect(policy.check_conditions({ ip: "192.168.1.1" })).to be true
@@ -129,7 +129,7 @@ RSpec.describe AccessPolicy, type: :model do
     end
 
     context "when allowed_ips is set and ip does not match" do
-      before { policy.update!(conditions: { "allowed_ips" => ["192.168.1.1"] }) }
+      before { policy.update!(conditions: { "allowed_ips" => [ "192.168.1.1" ] }) }
 
       it "returns false" do
         expect(policy.check_conditions({ ip: "10.0.0.1" })).to be false

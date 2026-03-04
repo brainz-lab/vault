@@ -11,6 +11,8 @@ module Mcp
 
     # POST /mcp/tools/:name
     def call
+      return unless require_token_environment!
+
       tool_name = params[:name]
       tool_params = parse_json_body
 
@@ -23,6 +25,8 @@ module Mcp
 
     # POST /mcp/rpc
     def rpc
+      return unless require_token_environment!
+
       body = parse_json_body
       method = body[:method] || body["method"]
       rpc_params = body[:params] || body["params"] || {}
@@ -52,6 +56,21 @@ module Mcp
       unless @current_project
         render json: { error: "Unauthorized" }, status: :unauthorized
       end
+    end
+
+    def require_token_environment!
+      # API key auth (no token) grants full access
+      return true if @current_token.nil?
+
+      env = resolve_environment
+      if env
+        unless @current_token.environments.any? && @current_token.environments.include?(env.slug)
+          render json: { error: "Forbidden: token does not have access to #{env.slug} environment" }, status: :forbidden
+          return false
+        end
+      end
+
+      true
     end
 
     def authenticate_token(raw_token)
