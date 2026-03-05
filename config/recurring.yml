@@ -16,7 +16,7 @@ production:
   audit_retention:
     class: AuditRetentionJob
     queue: low
-    schedule: at 2am on Sundays
+    schedule: "0 2 * * 0"
   check_secret_expiry:
     class: CheckSecretExpiryJob
     schedule: at 6am every day
@@ -33,4 +33,4 @@ production:
   cleanup_versions:
     class: CleanupVersionsJob
     queue: low
-    schedule: at 3am on Sundays
+    schedule: "0 3 * * 0"
