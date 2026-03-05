@@ -65,7 +65,11 @@ gem "rack-cors"
 gem "brainzlab", "~> 0.1.12"
 
 # BrainzLab Platform Client - Transaction reporting to Platform
-gem "brainzlab-platform-client", path: "../brainzlab-platform-client"
+if File.exist?(File.expand_path("../brainzlab-platform-client", __dir__))
+  gem "brainzlab-platform-client", path: "../brainzlab-platform-client"
+else
+  gem "brainzlab-platform-client", "0.1.0", source: "https://rubygems.pkg.github.com/fluyenta"
+end
 
 # BrainzLab UI - Unified design system with Phlex components
 if File.exist?(File.expand_path("../fluyenta-ui", __dir__))
