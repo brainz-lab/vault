@@ -88,3 +88,6 @@ brainzlab-ui
 # Brainzlab UI gem symlink (created by bin/dev)
 /app/assets/tailwind/brainzlab_ui
 sidecar/node_modules/
+
+# Lock file compiled on deploy
+Gemfile.lock
