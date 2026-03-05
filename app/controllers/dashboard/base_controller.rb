@@ -4,6 +4,7 @@ module Dashboard
 
     before_action :require_session!, unless: -> { skip_authentication? }
     before_action :set_current_project
+    before_action :set_transaction_organization
     helper_method :current_user, :current_project, :standalone_mode?
 
     layout "dashboard"
@@ -83,6 +84,15 @@ module Dashboard
       platform_url = ENV["BRAINZLAB_PLATFORM_URL"] || "http://platform.localhost:2999"
       return_url = CGI.escape(request.original_url)
       "#{platform_url}/login?return_to=#{return_url}&app=vault"
+    end
+
+    def set_transaction_organization
+      return unless defined?(BrainzLab::PlatformClient::CurrentTransaction)
+
+      tx = BrainzLab::PlatformClient::CurrentTransaction.get
+      return unless tx
+
+      tx[:organization_id] = current_user[:organization_id]
     end
   end
 end

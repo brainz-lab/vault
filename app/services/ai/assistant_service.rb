@@ -18,11 +18,15 @@ module Ai
 
       messages = build_messages
       tools = build_tools
+      @ai_total_input_tokens = 0
+      @ai_total_output_tokens = 0
+      @ai_model = nil
 
       rounds = 0
       loop do
         rounds += 1
         response = call_claude(messages, tools)
+        track_ai_usage(response)
         content_blocks = response["content"] || []
 
         text_parts = []
@@ -78,19 +82,23 @@ module Ai
         else
           final_text = text_parts.join("\n")
           @chat.assistant_messages.create!(role: :assistant, content: final_text)
+          report_ai_metrics
           return { role: "assistant", content: final_text }
         end
       end
 
       response = call_claude(messages, [])
+      track_ai_usage(response)
       content_blocks = response["content"] || []
       final_text = content_blocks.select { |b| b["type"] == "text" }.map { |b| b["text"] }.join("\n")
       @chat.assistant_messages.create!(role: :assistant, content: final_text)
+      report_ai_metrics
       { role: "assistant", content: final_text }
     rescue => e
       Rails.logger.error "[AssistantService] Error: #{e.message}\n#{e.backtrace.first(5).join("\n")}"
       error_msg = "I encountered an error processing your request: #{e.message}"
       @chat.assistant_messages.create!(role: :assistant, content: error_msg)
+      report_ai_metrics
       { role: "assistant", content: error_msg }
     end
 
@@ -171,6 +179,27 @@ module Ai
       params[:tools] = tools if tools.any?
 
       client.messages(parameters: params)
+    end
+
+    def track_ai_usage(response)
+      return unless response.is_a?(Hash) && response["usage"]
+
+      @ai_model ||= response["model"]
+      @ai_total_input_tokens += response["usage"]["input_tokens"].to_i
+      @ai_total_output_tokens += response["usage"]["output_tokens"].to_i
+    end
+
+    def report_ai_metrics
+      return unless defined?(BrainzLab::PlatformClient::CurrentTransaction)
+      return if @ai_total_input_tokens.to_i.zero? && @ai_total_output_tokens.to_i.zero?
+
+      tx = BrainzLab::PlatformClient::CurrentTransaction.get
+      return unless tx
+
+      tx[:ai_provider] = "anthropic"
+      tx[:ai_model] = @ai_model
+      tx[:ai_input_tokens] = @ai_total_input_tokens
+      tx[:ai_output_tokens] = @ai_total_output_tokens
     end
 
     def execute_tool(name, arguments)
