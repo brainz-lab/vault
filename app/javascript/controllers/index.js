@@ -12,6 +12,7 @@ import DarkModeController from "controllers/dark_mode_controller"
 import ConnectorSearchController from "controllers/connector_search_controller"
 import ConnectorExecuteController from "controllers/connector_execute_controller"
 import ConnectorCredentialFormController from "controllers/connector_credential_form_controller"
+import AssistantChatController from "controllers/assistant_chat_controller"
 
 application.register("dropdown", DropdownController)
 application.register("flash", FlashController)
@@ -24,3 +25,4 @@ application.register("dark-mode", DarkModeController)
 application.register("connector-search", ConnectorSearchController)
 application.register("connector-execute", ConnectorExecuteController)
 application.register("connector-credential-form", ConnectorCredentialFormController)
+application.register("assistant-chat", AssistantChatController)

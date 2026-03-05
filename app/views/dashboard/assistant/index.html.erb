@@ -1,0 +1,45 @@
+<div class="max-w-4xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold" style="color: var(--dm-text);">AI Assistant</h1>
+      <p class="text-sm mt-1" style="color: var(--dm-text-muted);">Chat with AI to manage secrets, credentials, and SSH keys</p>
+    </div>
+    <%= button_to dashboard_assistant_index_path, method: :post, class: "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg", style: "background-color: var(--dm-brand);" do %>
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      New Chat
+    <% end %>
+  </div>
+
+  <% if @chats.any? %>
+    <div class="space-y-2">
+      <% @chats.each do |chat| %>
+        <%= link_to dashboard_assistant_path(chat), class: "block rounded-xl p-4 transition-all", style: "background-color: var(--dm-surface); border: 1px solid var(--dm-border);" do %>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color: var(--dm-info-bg); color: var(--dm-brand);">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-medium truncate" style="color: var(--dm-text);"><%= chat.display_title %></p>
+                <p class="text-xs" style="color: var(--dm-text-muted);"><%= chat.assistant_messages.count %> messages</p>
+              </div>
+            </div>
+            <p class="text-xs flex-shrink-0 ml-4" style="color: var(--dm-text-muted);"><%= time_ago_in_words(chat.updated_at) %> ago</p>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-16 rounded-xl" style="background-color: var(--dm-surface); border: 1px solid var(--dm-border);">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background-color: var(--dm-info-bg); color: var(--dm-brand);">
+        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+      </div>
+      <h3 class="text-lg font-medium mb-2" style="color: var(--dm-text);">No chats yet</h3>
+      <p class="text-sm mb-6" style="color: var(--dm-text-muted);">Start a conversation with the AI assistant to manage your vault</p>
+      <%= button_to dashboard_assistant_index_path, method: :post, class: "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg", style: "background-color: var(--dm-brand);" do %>
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Start your first chat
+      <% end %>
+    </div>
+  <% end %>
+</div>
