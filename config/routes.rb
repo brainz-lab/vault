@@ -91,6 +91,12 @@ Rails.application.routes.draw do
 
   # Dashboard
   namespace :dashboard do
+    resources :assistant, only: [:index, :show, :create] do
+      member do
+        post :message
+      end
+    end
+
     # Global provider keys (not project-scoped)
     resources :provider_keys do
       member do

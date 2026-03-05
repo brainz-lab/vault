@@ -1,0 +1,117 @@
+<div class="h-[calc(100vh-8rem)] flex flex-col" data-controller="assistant-chat" data-assistant-chat-url-value="<%= message_dashboard_assistant_path(@chat) %>">
+  <!-- Header -->
+  <div class="flex items-center gap-3 px-4 py-3 rounded-t-xl flex-shrink-0" style="background-color: var(--dm-surface); border: 1px solid var(--dm-border); border-bottom: none;">
+    <%= link_to dashboard_assistant_index_path, style: "color: var(--dm-text-muted);" do %>
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+    <% end %>
+    <div class="flex-1 min-w-0">
+      <p class="text-sm font-medium truncate" style="color: var(--dm-text);"><%= @chat.display_title %></p>
+      <p class="text-xs" style="color: var(--dm-text-muted);">Vault</p>
+    </div>
+    <%= button_to dashboard_assistant_index_path, method: :post, class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg", style: "background-color: var(--dm-surface-light); color: var(--dm-text-muted); border: 1px solid var(--dm-border);" do %>
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      New
+    <% end %>
+  </div>
+
+  <!-- Messages Area -->
+  <div class="flex-1 overflow-y-auto px-4 py-4 space-y-4" style="background-color: var(--dm-surface); border-left: 1px solid var(--dm-border); border-right: 1px solid var(--dm-border);" data-assistant-chat-target="messages">
+    <% if @messages.empty? %>
+      <div class="text-center py-12">
+        <div class="w-12 h-12 mx-auto mb-3 rounded-xl flex items-center justify-center" style="background-color: var(--dm-info-bg); color: var(--dm-brand);">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        </div>
+        <p class="text-sm font-medium mb-1" style="color: var(--dm-text);">How can I help you?</p>
+        <p class="text-xs" style="color: var(--dm-text-muted);">Ask me about your secrets, credentials, SSH keys, or connectors.</p>
+        <div class="mt-4 flex flex-wrap gap-2 justify-center">
+          <button type="button" data-action="click->assistant-chat#quickPrompt" data-prompt="List all secrets in this project" class="px-3 py-1.5 text-xs rounded-lg" style="background-color: var(--dm-surface-light); color: var(--dm-text-muted); border: 1px solid var(--dm-border);">List secrets</button>
+          <button type="button" data-action="click->assistant-chat#quickPrompt" data-prompt="Show all credentials" class="px-3 py-1.5 text-xs rounded-lg" style="background-color: var(--dm-surface-light); color: var(--dm-text-muted); border: 1px solid var(--dm-border);">Show credentials</button>
+          <button type="button" data-action="click->assistant-chat#quickPrompt" data-prompt="List SSH keys" class="px-3 py-1.5 text-xs rounded-lg" style="background-color: var(--dm-surface-light); color: var(--dm-text-muted); border: 1px solid var(--dm-border);">SSH keys</button>
+          <button type="button" data-action="click->assistant-chat#quickPrompt" data-prompt="Show connector status" class="px-3 py-1.5 text-xs rounded-lg" style="background-color: var(--dm-surface-light); color: var(--dm-text-muted); border: 1px solid var(--dm-border);">Connector status</button>
+        </div>
+      </div>
+    <% end %>
+
+    <% @messages.each do |message| %>
+      <% case message.role %>
+      <% when "user" %>
+        <div class="flex justify-end">
+          <div class="max-w-[75%] rounded-2xl rounded-br-md px-4 py-2.5" style="background-color: var(--dm-brand); color: white;">
+            <p class="text-sm whitespace-pre-wrap"><%= message.content %></p>
+          </div>
+        </div>
+      <% when "assistant" %>
+        <div class="flex justify-start">
+          <div class="max-w-[85%]">
+            <div class="rounded-2xl rounded-bl-md px-4 py-2.5" style="background-color: var(--dm-surface-light);">
+              <div class="text-sm prose prose-sm max-w-none assistant-markdown" style="color: var(--dm-text);"><%= render_markdown(message.content) %></div>
+            </div>
+          </div>
+        </div>
+      <% when "tool_call" %>
+        <div class="flex justify-start">
+          <div class="max-w-[85%]">
+            <% (message.metadata["tool_calls"] || []).each do |tc| %>
+              <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs" style="background-color: var(--dm-info-bg); color: var(--dm-info-text);">
+                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span>Used tool: <strong><%= tc["name"] %></strong></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% when "tool_result" %>
+        <%# Tool results are hidden by default - the assistant response summarizes them %>
+      <% end %>
+    <% end %>
+
+    <!-- Typing indicator (hidden by default) -->
+    <div class="flex justify-start" data-assistant-chat-target="typing" style="display: none;">
+      <div class="rounded-2xl rounded-bl-md px-4 py-3" style="background-color: var(--dm-surface-light);">
+        <div class="flex items-center gap-1.5">
+          <div class="w-2 h-2 rounded-full animate-bounce" style="background-color: var(--dm-text-muted); animation-delay: 0ms;"></div>
+          <div class="w-2 h-2 rounded-full animate-bounce" style="background-color: var(--dm-text-muted); animation-delay: 150ms;"></div>
+          <div class="w-2 h-2 rounded-full animate-bounce" style="background-color: var(--dm-text-muted); animation-delay: 300ms;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input Area -->
+  <div class="px-4 py-3 rounded-b-xl flex-shrink-0" style="background-color: var(--dm-surface); border: 1px solid var(--dm-border); border-top-color: var(--dm-border);">
+    <form data-action="submit->assistant-chat#send" data-assistant-chat-target="form">
+      <div class="flex gap-3 items-end">
+        <div class="flex-1">
+          <textarea data-assistant-chat-target="input"
+                    data-action="keydown->assistant-chat#handleKeydown"
+                    placeholder="Ask anything about your secrets, credentials, SSH keys..."
+                    rows="1"
+                    class="w-full px-3 py-2.5 rounded-xl resize-none text-sm"
+                    style="background-color: var(--dm-input-bg); border: 1px solid var(--dm-input-border); color: var(--dm-text); max-height: 120px; min-height: 40px;"
+          ></textarea>
+        </div>
+        <button type="submit" data-assistant-chat-target="sendButton" class="p-2.5 rounded-xl flex-shrink-0 transition-colors" style="background-color: var(--dm-brand); color: white;">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 0l-7 7m7-7l7 7"/></svg>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .assistant-markdown h1, .assistant-markdown h2, .assistant-markdown h3 { font-weight: 600; margin-top: 0.75em; margin-bottom: 0.25em; }
+  .assistant-markdown h1 { font-size: 1.1em; }
+  .assistant-markdown h2 { font-size: 1em; }
+  .assistant-markdown h3 { font-size: 0.95em; }
+  .assistant-markdown p { margin-bottom: 0.5em; }
+  .assistant-markdown p:last-child { margin-bottom: 0; }
+  .assistant-markdown ul, .assistant-markdown ol { padding-left: 1.25em; margin-bottom: 0.5em; }
+  .assistant-markdown li { margin-bottom: 0.15em; }
+  .assistant-markdown strong { font-weight: 600; }
+  .assistant-markdown code { padding: 0.125em 0.25em; border-radius: 0.25em; font-size: 0.85em; background-color: var(--dm-surface); }
+  .assistant-markdown pre { padding: 0.75em; border-radius: 0.5em; overflow-x: auto; margin-bottom: 0.5em; background-color: var(--dm-surface); }
+  .assistant-markdown pre code { padding: 0; background: none; }
+  .assistant-markdown table { border-collapse: collapse; width: 100%; margin-bottom: 0.5em; font-size: 0.85em; }
+  .assistant-markdown th, .assistant-markdown td { padding: 0.35em 0.5em; text-align: left; border-bottom: 1px solid var(--dm-border); }
+  .assistant-markdown th { font-weight: 600; }
+  .assistant-markdown a { color: var(--dm-brand); text-decoration: underline; }
+</style>

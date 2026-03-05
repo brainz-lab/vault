@@ -35,7 +35,7 @@ RUN apt-get update -qq && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Install application gems
-COPY Gemfile Gemfile.lock ./
+COPY Gemfile ./
 
 RUN --mount=type=secret,id=bundle_github \
     export BUNDLE_RUBYGEMS__PKG__GITHUB__COM=$(cat /run/secrets/bundle_github) && \
