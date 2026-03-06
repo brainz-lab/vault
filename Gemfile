@@ -68,7 +68,7 @@ gem "brainzlab", "~> 0.1.12"
 if File.exist?(File.expand_path("../brainzlab-platform-client", __dir__))
   gem "brainzlab-platform-client", path: "../brainzlab-platform-client"
 else
-  gem "brainzlab-platform-client", "0.1.1", source: "https://rubygems.pkg.github.com/fluyenta"
+  gem "brainzlab-platform-client", "0.1.2", source: "https://rubygems.pkg.github.com/fluyenta"
 end
 
 # BrainzLab UI - Unified design system with Phlex components
