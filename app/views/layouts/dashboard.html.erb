@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full" data-controller="dark-mode"<%= ' data-dark-mode-default-theme-value="light"'.html_safe if ENV['BRAINZLAB_LOGO_LIGHT_URL'].present? %>>
+<html lang="en" class="h-full" data-controller="dark-mode"<%= ' data-dark-mode-default-theme-value="light"'.html_safe if ENV['BRAINZLAB_LOGO_LIGHT_URL'].present? || ENV['BRAINZLAB_LOGO_DARK_URL'].present? %>>
 <head>
   <title>Vault - <%= content_for(:title) || "Secrets Management" %></title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -20,12 +20,17 @@
   <%# Prevent flash of wrong theme on page load and provide toggle function %>
   <script>
     (function() {
-      const savedTheme = localStorage.getItem('brainzlab-theme');
-      const defaultLight = true;
+      const hasCustomLogos = <%= (ENV['BRAINZLAB_LOGO_LIGHT_URL'].present? || ENV['BRAINZLAB_LOGO_DARK_URL'].present?).to_json %>;
+      const defaultLight = hasCustomLogos;
+      // En modo RMP, ignorar y limpiar preferencia guardada
+      if (hasCustomLogos) localStorage.removeItem('brainzlab-theme');
+      const savedTheme = hasCustomLogos ? null : localStorage.getItem('brainzlab-theme');
         const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (savedTheme === 'dark' || (!savedTheme && !defaultLight && systemPrefersDark)) {
+      if (!hasCustomLogos && savedTheme === 'dark' || (!savedTheme && !defaultLight && systemPrefersDark)) {
+        document.documentElement.classList.remove('light');
         document.documentElement.classList.add('dark');
       } else {
+        document.documentElement.classList.remove('dark');
         document.documentElement.classList.add('light');
       }
 
@@ -95,7 +100,7 @@
           <span class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded" style="color: var(--dm-brand); background: color-mix(in srgb, var(--dm-brand) 12%, transparent);">Vault</span>
         <% end %>
         <%# Dark Mode Toggle %>
-        <% unless ENV['BRAINZLAB_LOGO_LIGHT_URL'].present? %>
+        <% unless ENV['BRAINZLAB_LOGO_LIGHT_URL'].present? || ENV['BRAINZLAB_LOGO_DARK_URL'].present? %>
               <button onclick="toggleDarkMode()"
                 class="p-1.5 rounded-lg transition-all dm-text-muted hover:dm-text hover:bg-transparent"
                 data-dark-mode-target="icon"
