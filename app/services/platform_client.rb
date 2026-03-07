@@ -136,7 +136,7 @@ class PlatformClient
     end
 
     def platform_configured?
-      ENV["PLATFORM_URL"].present?
+      ENV["BRAINZLAB_PLATFORM_URL"].present?
     end
   end
 end

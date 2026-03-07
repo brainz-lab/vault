@@ -16,7 +16,7 @@ module Dashboard
     end
 
     def skip_authentication?
-      Rails.env.development? || standalone_mode?
+      Rails.env.development? || (standalone_mode? && !Rails.env.production?)
     end
 
     def require_session!

@@ -120,7 +120,8 @@ module Api
           end
         end
 
-        params.permit!.to_h.slice(*(static_keys + dynamic_keys).uniq).compact_blank
+        allowed_keys = (static_keys + dynamic_keys).uniq
+        params.permit(*allowed_keys).to_h.compact_blank
       end
     end
   end

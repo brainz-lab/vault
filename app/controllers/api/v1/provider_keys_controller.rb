@@ -20,6 +20,8 @@ module Api
       # Get all provider keys with decrypted values (for dotenv-style loading)
       # Returns one key per provider (highest priority)
       def bulk
+        return unless require_permission!("read")
+
         providers = available_providers
         keys = []
 
@@ -63,6 +65,8 @@ module Api
       # GET /api/v1/provider_keys/resolve
       # Get the decrypted key for a provider (the main endpoint Synapse will use)
       def resolve
+        return unless require_permission!("read")
+
         provider = params[:provider]
         model_type = params[:model_type] || "llm"
 
