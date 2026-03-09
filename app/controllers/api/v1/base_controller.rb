@@ -10,7 +10,14 @@ module Api
       protected
 
       def authenticate!
-        # Layer 1: Project-scoped auth (tokens, API keys)
+        # Layer 1: Service-to-service auth with explicit project context.
+        # When a sister service (Nexus, Synapse) sends X-Service-Key + X-Platform-Project-Id,
+        # the platform project takes precedence over the Bearer token's project.
+        if service_key_with_project_context?
+          return if authenticate_service_key
+        end
+
+        # Layer 2: Project-scoped auth (tokens, API keys)
         @current_token = authenticate_token
         @current_project = @current_token&.project
 
@@ -20,7 +27,7 @@ module Api
 
         return if @current_project
 
-        # Layer 2: Service-to-service auth (sister services like Nexus, Synapse)
+        # Layer 3: Service-key auth without project context (catalog queries, etc.)
         return if authenticate_service_key
 
         render json: { error: "Unauthorized" }, status: :unauthorized
@@ -170,6 +177,10 @@ module Api
         end
 
         nil
+      end
+
+      def service_key_with_project_context?
+        request.headers["X-Service-Key"].present? && request.headers["X-Platform-Project-Id"].present?
       end
 
       def authenticate_service_key
