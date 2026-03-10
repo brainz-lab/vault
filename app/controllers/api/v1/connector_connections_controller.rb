@@ -24,6 +24,28 @@ module Api
         connector = Connector.enabled.find(params[:connector_id])
         credential = params[:credential_id].present? ? current_project.connector_credentials.find(params[:credential_id]) : nil
 
+        # Reuse existing connection if one already exists for this connector+project
+        # Vault enforces unique constraint: one enabled connection per (project, connector)
+        existing = current_project.connector_connections.find_by(connector: connector)
+        if existing
+          existing.update!(
+            connector_credential: credential,
+            name: params[:name] || existing.name,
+            config: params[:config] || existing.config,
+            status: "connected",
+            enabled: true,
+            error_message: nil
+          )
+
+          log_access(
+            action: "update_connector_connection",
+            details: { connector: connector.piece_name, connection_name: existing.name }
+          )
+
+          render json: { connection: existing.reload.to_detail }, status: :created
+          return
+        end
+
         connection = current_project.connector_connections.create!(
           connector: connector,
           connector_credential: credential,
@@ -132,6 +154,11 @@ module Api
       rescue Faraday::Error => e
         @connection.mark_error!("Sidecar unavailable")
         render json: { success: false, error: "Sidecar unavailable: #{e.message}" }
+      rescue StandardError => e
+        Rails.logger.error "[ConnectorConnections#test] Unexpected error: #{e.class}: #{e.message}"
+        Rails.logger.error e.backtrace&.first(5)&.join("\n")
+        @connection&.mark_error!(e.message.truncate(200))
+        render json: { success: false, error: e.message.truncate(200) }, status: :internal_server_error
       end
 
       # POST /api/v1/connector_connections/:id/execute

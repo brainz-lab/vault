@@ -329,7 +329,7 @@ module Connectors
           raise Connectors::Error, "Kommo API error (HTTP #{response.status}): #{error_message || 'Unknown error'}"
         end
 
-        response.body || {}
+        response.body.is_a?(Hash) ? response.body : {}
       rescue Faraday::Error => e
         raise Connectors::Error, "Kommo API request failed: #{e.message}"
       end
