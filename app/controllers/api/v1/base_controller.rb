@@ -185,7 +185,8 @@ module Api
 
       def authenticate_service_key
         service_key = request.headers["X-Service-Key"]
-        expected_key = ENV["SERVICE_KEY"] || "dev_service_key"
+        expected_key = ENV["SERVICE_KEY"]
+        return false unless expected_key.present?
 
         return false unless service_key.present? && ActiveSupport::SecurityUtils.secure_compare(service_key, expected_key)
 

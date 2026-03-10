@@ -117,9 +117,9 @@ module Api
 
         # Accept service key for internal calls
         service_key = request.headers["X-Service-Key"]
-        expected_service = ENV["SERVICE_KEY"] || "dev_service_key"
+        expected_service = ENV["SERVICE_KEY"]
 
-        if service_key.present? && ActiveSupport::SecurityUtils.secure_compare(service_key, expected_service)
+        if service_key.present? && expected_service.present? && ActiveSupport::SecurityUtils.secure_compare(service_key, expected_service)
           return true
         end
 

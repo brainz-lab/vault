@@ -48,7 +48,11 @@ module Internal
 
     def authenticate_service!
       service_key = request.headers["X-Service-Key"]
-      expected_key = ENV["SERVICE_KEY"] || "dev_service_key"
+      expected_key = ENV["SERVICE_KEY"]
+      unless expected_key.present?
+        render json: { error: "Service key not configured" }, status: :service_unavailable
+        return
+      end
 
       unless ActiveSupport::SecurityUtils.secure_compare(service_key.to_s, expected_key)
         render json: { error: "Unauthorized" }, status: :unauthorized

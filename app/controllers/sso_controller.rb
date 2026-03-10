@@ -34,7 +34,7 @@ class SsoController < ActionController::Base
       # Ensure at least the current project exists (fallback if full sync failed)
       ensure_project_exists(result)
 
-      return_to ||= project_redirect_path(result) || dashboard_projects_path
+      return_to = safe_return_to(return_to) || project_redirect_path(result) || dashboard_projects_path
 
       # Use client-side redirect to completely bypass Turbo Drive
       # This prevents blank page issues after SSO authentication
@@ -148,7 +148,7 @@ class SsoController < ActionController::Base
   end
 
   def service_key
-    ENV["SERVICE_KEY"] || "dev_service_key"
+    ENV.fetch("SERVICE_KEY")
   end
 
   def platform_configured?
@@ -170,6 +170,18 @@ class SsoController < ActionController::Base
     project = Project.find_by(platform_project_id: result[:project_id].to_s)
     return nil unless project
     "/dashboard/projects/#{project.id}"
+  end
+
+  def safe_return_to(url)
+    return nil if url.blank?
+    uri = URI.parse(url)
+    # Only allow relative paths (no host, no scheme)
+    return nil if uri.host.present? || uri.scheme.present?
+    # Must start with /
+    return nil unless url.start_with?("/")
+    url
+  rescue URI::InvalidURIError
+    nil
   end
 
   def dashboard_projects_path

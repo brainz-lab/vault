@@ -36,7 +36,7 @@ class TrackUsageJob < ApplicationJob
   end
 
   def service_key
-    ENV["SERVICE_KEY"] || "dev_service_key"
+    ENV.fetch("SERVICE_KEY")
   end
 
   def platform_configured?

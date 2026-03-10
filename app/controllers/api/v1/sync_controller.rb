@@ -6,6 +6,8 @@ module Api
       # GET /api/v1/sync/export
       # Export all secrets for an environment
       def export
+        return unless require_permission!("read")
+
         format = params[:format]&.to_sym || :json
         service_filter = params[:service]
         folder_filter = params[:folder]
@@ -85,6 +87,8 @@ module Api
       # POST /api/v1/sync/pull
       # Pull secrets that have changed since a timestamp
       def pull
+        return unless require_permission!("read")
+
         since = params[:since] ? Time.parse(params[:since]) : 1.hour.ago
 
         secrets = current_project.secrets.active.where("updated_at > ?", since)

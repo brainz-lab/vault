@@ -14,10 +14,16 @@ class AccessToken < ApplicationRecord
     return nil unless token.present?
 
     prefix = token[0..7]
+
     digest = Digest::SHA256.hexdigest(token)
 
-    find_by(token_prefix: prefix, token_digest: digest, active: true)
-      &.tap { |t| t.update_columns(last_used_at: Time.current, use_count: t.use_count + 1) }
+    active.where(token_prefix: prefix).find_each do |t|
+      if ActiveSupport::SecurityUtils.secure_compare(t.token_digest, digest)
+        t.update_columns(last_used_at: Time.current, use_count: t.use_count + 1)
+        return t
+      end
+    end
+    nil
   end
 
   def can_access?(secret, environment, permission: "read")
@@ -68,7 +74,7 @@ class AccessToken < ApplicationRecord
     return false unless raw_token.present?
 
     digest = Digest::SHA256.hexdigest(raw_token)
-    if token_digest == digest
+    if ActiveSupport::SecurityUtils.secure_compare(token_digest, digest)
       update_columns(last_used_at: Time.current, use_count: use_count + 1)
       true
     else
