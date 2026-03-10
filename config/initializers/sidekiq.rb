@@ -1,9 +1,12 @@
 if Rails.env.development?
+  # Use Redis DB 1 to isolate Vault jobs from other services sharing the same Redis
+  redis_url = ENV.fetch("REDIS_URL", "redis://localhost:6379") + "/1"
+
   Sidekiq.configure_server do |config|
-    config.redis = { url: ENV.fetch("REDIS_URL", "redis://localhost:6379") }
+    config.redis = { url: redis_url }
   end
 
   Sidekiq.configure_client do |config|
-    config.redis = { url: ENV.fetch("REDIS_URL", "redis://localhost:6379") }
+    config.redis = { url: redis_url }
   end
 end
