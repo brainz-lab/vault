@@ -63,6 +63,7 @@ module Connectors
             "displayName" => "Enrich Person",
             "description" => "Match and enrich person data",
             "props" => {
+              "email" => { "type" => "string", "required" => false, "description" => "Email address" },
               "first_name" => { "type" => "string", "required" => false, "description" => "First name" },
               "last_name" => { "type" => "string", "required" => false, "description" => "Last name" },
               "organization_name" => { "type" => "string", "required" => false, "description" => "Organization name" },
@@ -144,7 +145,7 @@ module Connectors
       end
 
       def enrich_person(params)
-        body = params.slice(:first_name, :last_name, :organization_name, :domain, :linkedin_url).compact
+        body = params.slice(:email, :first_name, :last_name, :organization_name, :domain, :linkedin_url).compact
 
         response = client.post("https://api.apollo.io/api/v1/people/match") do |req|
           req.body = body
@@ -202,7 +203,7 @@ module Connectors
           f.request :json
           f.response :json
           f.options.timeout = 30
-          f.headers["X-Api-Key"] = credentials[:api_key]
+          f.headers["X-Api-Key"] = credentials[:api_key] || credentials[:token]
         end
       end
 
