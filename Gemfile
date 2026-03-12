@@ -62,7 +62,7 @@ gem "faraday", "~> 2.0"
 gem "rack-cors"
 
 # BrainzLab SDK
-gem "brainzlab", "~> 0.1.12"
+gem "fluyenta-ruby", "~> 0.1.15", require: "brainzlab"
 
 # BrainzLab Platform Client - Transaction reporting to Platform
 if File.exist?(File.expand_path("../brainzlab-platform-client", __dir__))
