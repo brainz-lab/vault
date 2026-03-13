@@ -14,14 +14,11 @@ import { Controller } from "@hotwired/stimulus"
  *
  * Usage:
  *   <html data-controller="dark-mode">
- *     <button class="dm-toggle" data-action="click->dark-mode#toggle">
- *       <svg class="icon-sun">...</svg>
- *       <svg class="icon-moon">...</svg>
- *     </button>
+ *     <%%= render Brainzlab::Components::DarkModeToggle.new(data_action: "click->dark-mode#toggle") %>
  *   </html>
  */
 export default class extends Controller {
-  static targets = ["icon"]
+  static targets = ["sunIcon", "moonIcon"]
 
   // Unified localStorage key for all BrainzLab products
   static values = {
@@ -164,26 +161,12 @@ export default class extends Controller {
   }
 
   /**
-   * Update toggle button icon
+   * Update toggle button icons (show/hide sun/moon from gem component)
    */
   updateIcon(theme) {
-    if (!this.hasIconTarget) return
-
-    if (theme === "dark") {
-      // Sun icon for dark mode (click to go light)
-      this.iconTarget.innerHTML = `
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
-      `
-    } else {
-      // Moon icon for light mode (click to go dark)
-      this.iconTarget.innerHTML = `
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-        </svg>
-      `
-    }
+    const isDark = theme === "dark"
+    if (this.hasSunIconTarget) this.sunIconTarget.classList.toggle("hidden", !isDark)
+    if (this.hasMoonIconTarget) this.moonIconTarget.classList.toggle("hidden", isDark)
   }
 
   /**

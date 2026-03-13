@@ -17,44 +17,16 @@
   <%= stylesheet_link_tag "dark_mode", "data-turbo-track": "reload" %>
   <%= javascript_importmap_tags %>
 
-  <%# Prevent flash of wrong theme on page load and provide toggle function %>
+  <%# Prevent flash of wrong theme on page load (runs before CSS/Stimulus) %>
   <script>
     (function() {
-      const hasCustomLogos = <%= (ENV['BRAINZLAB_LOGO_LIGHT_URL'].present? || ENV['BRAINZLAB_LOGO_DARK_URL'].present?).to_json %>;
-      const defaultLight = hasCustomLogos;
-      // En modo RMP, ignorar y limpiar preferencia guardada
+      var hasCustomLogos = <%= (ENV['BRAINZLAB_LOGO_LIGHT_URL'].present? || ENV['BRAINZLAB_LOGO_DARK_URL'].present?).to_json %>;
       if (hasCustomLogos) localStorage.removeItem('brainzlab-theme');
-      const savedTheme = hasCustomLogos ? null : localStorage.getItem('brainzlab-theme');
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (!hasCustomLogos && savedTheme === 'dark' || (!savedTheme && !defaultLight && systemPrefersDark)) {
-        document.documentElement.classList.remove('light');
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        document.documentElement.classList.add('light');
-      }
-
-      // Vanilla JS dark mode toggle - works without Stimulus
-      window.toggleDarkMode = function() {
-        const html = document.documentElement;
-        const isDark = html.classList.contains('dark');
-        if (isDark) {
-          html.classList.remove('dark');
-          html.classList.add('light');
-          localStorage.setItem('brainzlab-theme', 'light');
-        } else {
-          html.classList.remove('light');
-          html.classList.add('dark');
-          localStorage.setItem('brainzlab-theme', 'dark');
-        }
-        // Update icon if exists
-        const icon = document.querySelector('[data-dark-mode-target="icon"]');
-        if (icon) {
-          icon.innerHTML = isDark
-            ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>'
-            : '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>';
-        }
-      };
+      var saved = hasCustomLogos ? null : localStorage.getItem('brainzlab-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var useDark = !hasCustomLogos && (saved === 'dark' || (!saved && prefersDark));
+      document.documentElement.classList.toggle('dark', useDark);
+      document.documentElement.classList.toggle('light', !useDark);
     })();
   </script>
 
@@ -101,19 +73,8 @@
         <% end %>
         <%# Dark Mode Toggle %>
         <% unless ENV['BRAINZLAB_LOGO_LIGHT_URL'].present? || ENV['BRAINZLAB_LOGO_DARK_URL'].present? %>
-              <button onclick="toggleDarkMode()"
-                class="p-1.5 rounded-lg transition-all dm-text-muted hover:dm-text hover:bg-transparent"
-                data-dark-mode-target="icon"
-                aria-label="Toggle dark mode"
-                title="Toggle dark mode">
-          <svg data-dark-mode-target="sunIcon" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-          </svg>
-          <svg data-dark-mode-target="moonIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-          </svg>
-        </button>
-              <% end %>
+          <%= render Brainzlab::Components::DarkModeToggle.new(data_action: "click->dark-mode#toggle") %>
+        <% end %>
       </div>
 
       <% if @current_project %>
