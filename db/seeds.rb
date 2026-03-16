@@ -6,3 +6,6 @@ if Rails.env.development? && Project.count.zero?
   )
   puts "Created development project"
 end
+
+Connectors::NativeSeeder.new.seed!
+puts "Seeded native connectors catalog"
