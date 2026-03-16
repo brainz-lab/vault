@@ -1,6 +1,6 @@
 module Dashboard
   class AssistantController < BaseController
-    before_action :set_chat, only: [:show, :message]
+    before_action :set_chat, only: [ :show, :message ]
 
     def index
       @chats = AssistantChat.where(user_id: assistant_user_id).recent.limit(50)

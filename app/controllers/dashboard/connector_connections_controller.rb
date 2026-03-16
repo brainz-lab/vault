@@ -64,7 +64,7 @@ module Dashboard
 
     def execute
       action_name = params[:action_name]
-      input = params[:input]&.permit!&.to_h || {}
+      input = params[:input]&.then { |p| p.permit(*p.keys).to_h } || {}
 
       executor = Connectors::Executor.new(
         project: current_project,
