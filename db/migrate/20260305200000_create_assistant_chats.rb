@@ -15,6 +15,6 @@ class CreateAssistantChats < ActiveRecord::Migration[8.1]
     end
 
     add_index :assistant_chats, :user_id
-    add_index :assistant_messages, [:assistant_chat_id, :created_at]
+    add_index :assistant_messages, [ :assistant_chat_id, :created_at ]
   end
 end
