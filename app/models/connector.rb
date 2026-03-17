@@ -85,6 +85,7 @@ class Connector < ApplicationRecord
     when "apollo" then Connectors::Native::Apollo
     when "bitrix" then Connectors::Native::Bitrix
     when "kommo" then Connectors::Native::Kommo
+    when "salesforce" then Connectors::Native::Salesforce
     else raise Connectors::Error, "Unknown native connector: #{piece_name}"
     end
   end
