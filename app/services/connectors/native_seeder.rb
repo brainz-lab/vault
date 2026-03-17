@@ -24,7 +24,8 @@ module Connectors
       Connectors::Native::Notion,
       Connectors::Native::JiraCloud,
       Connectors::Native::Airtable,
-      Connectors::Native::StripeConnect
+      Connectors::Native::StripeConnect,
+      Connectors::Native::Salesforce
     ].freeze
 
     def seed!
