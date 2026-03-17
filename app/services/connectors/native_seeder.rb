@@ -4,6 +4,7 @@ module Connectors
       Connectors::Native::Webhook,
       Connectors::Native::Database,
       Connectors::Native::Email,
+      Connectors::Native::Slack,
       Connectors::Native::FileStorage,
       Connectors::Native::Apollo,
       Connectors::Native::Bitrix,
