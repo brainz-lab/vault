@@ -8,7 +8,8 @@ module Connectors
       Connectors::Native::FileStorage,
       Connectors::Native::Apollo,
       Connectors::Native::Bitrix,
-      Connectors::Native::Kommo
+      Connectors::Native::Kommo,
+      Connectors::Native::Salesforce
     ].freeze
 
     def seed!
