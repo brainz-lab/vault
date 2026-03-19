@@ -58,6 +58,76 @@ module Api
         render json: { success: true }
       end
 
+      # POST /api/v1/connector_credentials/oauth_authorize
+      def oauth_authorize
+        return unless require_permission!("write")
+
+        connector = Connector.enabled.find(params[:connector_id])
+        cred_values = credential_values
+
+        # Reuse existing pending credential or create a new one
+        cred_name = params[:name] || "#{connector.display_name} OAuth"
+        existing = current_project.connector_credentials
+          .where(connector: connector, status: "pending")
+          .order(created_at: :desc)
+          .first
+
+        credential = if existing
+          existing.update_credentials(cred_values)
+          existing
+        else
+          cred = ConnectorCredential.create_encrypted(
+            project: current_project,
+            connector: connector,
+            name: "#{cred_name} #{Time.current.to_i}",
+            auth_type: "OAUTH2",
+            credentials: cred_values
+          )
+          cred.update_columns(status: "pending")
+          cred
+        end
+
+        # PKCE: generate code_verifier and code_challenge
+        code_verifier = SecureRandom.urlsafe_base64(32)
+        code_challenge = Base64.urlsafe_encode64(
+          Digest::SHA256.digest(code_verifier), padding: false
+        )
+
+        # Store code_verifier in the credential so callback can use it
+        current_creds = credential.decrypt_credentials
+        current_creds[:_code_verifier] = code_verifier
+        credential.update_credentials(current_creds)
+        credential.update_columns(status: "pending")
+
+        state = Connectors::Oauth::StateManager.generate(
+          project_id: current_project.id,
+          connector_id: connector.id,
+          credential_id: credential.id,
+          return_url: params[:return_url].to_s
+        )
+
+        callback_url = "#{vault_external_url}/oauth/callback/salesforce"
+        instance_url = cred_values["instance_url"] || cred_values[:instance_url]
+        login_url = instance_url.to_s.include?("test.salesforce.com") ? "https://test.salesforce.com" : "https://login.salesforce.com"
+
+        authorize_url = "#{login_url}/services/oauth2/authorize?" + URI.encode_www_form(
+          response_type: "code",
+          client_id: cred_values["client_id"] || cred_values[:client_id],
+          redirect_uri: callback_url,
+          state: state,
+          scope: "api refresh_token",
+          code_challenge: code_challenge,
+          code_challenge_method: "S256"
+        )
+
+        render json: {
+          authorize_url: authorize_url,
+          credential_id: credential.id
+        }
+      rescue ActiveRecord::RecordInvalid => e
+        render json: { error: e.message }, status: :unprocessable_entity
+      end
+
       # POST /api/v1/connector_credentials/:id/verify
       def verify
         connector = @credential.connector
@@ -97,6 +167,10 @@ module Api
 
       def set_credential
         @credential = current_project.connector_credentials.find(params[:id])
+      end
+
+      def vault_external_url
+        ENV.fetch("VAULT_EXTERNAL_URL") { ENV.fetch("VAULT_URL", "http://localhost:4006") }
       end
 
       def credential_values

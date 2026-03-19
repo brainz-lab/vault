@@ -8,7 +8,7 @@ class ConnectorCredential < ApplicationRecord
   validates :encryption_iv, presence: true
   validates :encryption_key_id, presence: true
   validates :name, uniqueness: { scope: [ :project_id, :connector_id ] }
-  validates :status, inclusion: { in: %w[active expired error revoked] }
+  validates :status, inclusion: { in: %w[active pending expired error revoked] }
 
   scope :active, -> { where(status: "active") }
   scope :for_connector, ->(connector) { where(connector: connector) }
