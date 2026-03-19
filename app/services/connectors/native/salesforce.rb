@@ -36,7 +36,7 @@ module Connectors
             { title: "Log in to Salesforce", description: "Go to your Salesforce org and sign in as an administrator." },
             { title: "Navigate to Setup", description: "Click the gear icon in the top right and select 'Setup'." },
             { title: "Create a Connected App", description: "In Setup, search for 'App Manager' in the Quick Find box. Click 'New Connected App'. Fill in the basic info (name, email)." },
-            { title: "Enable OAuth Settings", description: "Check 'Enable OAuth Settings'. Set the Callback URL to your Vault OAuth callback: {VAULT_URL}/oauth/callback/salesforce (or your production URL). Select OAuth scopes: 'Full access (full)' and 'Perform requests at any time (refresh_token, offline_access)'." },
+            { title: "Enable OAuth Settings", description: "Check 'Enable OAuth Settings'. Set the Callback URL to: #{ENV.fetch('VAULT_URL', 'http://localhost:4006')}/oauth/callback/salesforce. Select OAuth scopes: 'Manage user data via APIs (api)' and 'Perform requests at any time (refresh_token, offline_access)'." },
             { title: "Save and get credentials", description: "After saving, wait a few minutes for the app to activate. Then go to 'Manage Consumer Details' to get the Consumer Key (Client ID) and Consumer Secret." },
             { title: "Enter credentials and authorize", description: "Enter your Instance URL, Client ID, and Client Secret below, then click 'Authorize with Salesforce' to connect your account." }
           ],
@@ -44,8 +44,8 @@ module Connectors
             "Your instance URL is the base URL when logged into Salesforce (e.g. https://yourorg.my.salesforce.com)",
             "Connected Apps may take up to 10 minutes to activate after creation",
             "For sandbox environments, use https://test.salesforce.com as the instance URL",
-            "Make sure the Connected App has the 'Full access' and 'refresh_token' OAuth scopes",
-            "The callback URL in Salesforce must match exactly: {VAULT_URL}/oauth/callback/salesforce"
+            "Make sure the Connected App has the 'api' and 'refresh_token' OAuth scopes",
+            "The callback URL in Salesforce must match exactly: #{ENV.fetch('VAULT_URL', 'http://localhost:4006')}/oauth/callback/salesforce"
           ],
           credential_help: {
             "instance_url" => "Your Salesforce org URL, e.g. https://yourorg.my.salesforce.com",
