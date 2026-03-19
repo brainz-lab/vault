@@ -46,6 +46,7 @@ Rails.application.routes.draw do
       end
       resources :connector_credentials, only: [ :index, :create, :show, :destroy ] do
         member { post :verify }
+        collection { post :oauth_authorize }
       end
       resources :connector_connections, only: [ :index, :create, :show, :update, :destroy ] do
         member do
@@ -144,6 +145,9 @@ Rails.application.routes.draw do
 
     root to: "projects#index"
   end
+
+  # OAuth callbacks (Salesforce, etc.)
+  get "oauth/callback/:provider", to: "oauth_callbacks#callback", as: :oauth_callback
 
   # SSO from Platform
   get "sso/callback", to: "sso#callback"
