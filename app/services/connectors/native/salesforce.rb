@@ -7,18 +7,21 @@ module Connectors
       def self.display_name = "Salesforce"
       def self.description = "CRM platform for contacts, leads, accounts, opportunities, and pipeline management"
       def self.category = "crm"
-      def self.auth_type = "CUSTOM_AUTH"
+      def self.auth_type = "OAUTH2"
 
       def self.auth_schema
         {
-          type: "CUSTOM_AUTH",
+          type: "OAUTH2",
+          authUrl: "https://login.salesforce.com/services/oauth2/authorize",
+          tokenUrl: "https://login.salesforce.com/services/oauth2/token",
+          scope: "api refresh_token",
+          pkce: true,
           props: {
             instance_url: { type: "string", required: true, description: "Your Salesforce instance URL, e.g. https://yourorg.my.salesforce.com" },
             client_id: { type: "string", required: true, description: "Connected App Consumer Key (Client ID)" },
-            client_secret: { type: "string", required: true, description: "Connected App Consumer Secret" },
-            username: { type: "string", required: true, description: "Salesforce username (email)" },
-            password: { type: "string", required: true, description: "Salesforce password + security token concatenated" }
-          }
+            client_secret: { type: "string", required: true, description: "Connected App Consumer Secret" }
+          },
+          oauth: { requires_redirect: true }
         }
       end
 
@@ -33,24 +36,21 @@ module Connectors
             { title: "Log in to Salesforce", description: "Go to your Salesforce org and sign in as an administrator." },
             { title: "Navigate to Setup", description: "Click the gear icon in the top right and select 'Setup'." },
             { title: "Create a Connected App", description: "In Setup, search for 'App Manager' in the Quick Find box. Click 'New Connected App'. Fill in the basic info (name, email)." },
-            { title: "Enable OAuth Settings", description: "Check 'Enable OAuth Settings'. Set the callback URL to 'https://login.salesforce.com/services/oauth2/callback'. Select OAuth scopes: 'Full access (full)' and 'Perform requests at any time (refresh_token, offline_access)'." },
+            { title: "Enable OAuth Settings", description: "Check 'Enable OAuth Settings'. Set the Callback URL to your Vault OAuth callback: {VAULT_URL}/oauth/callback/salesforce (or your production URL). Select OAuth scopes: 'Full access (full)' and 'Perform requests at any time (refresh_token, offline_access)'." },
             { title: "Save and get credentials", description: "After saving, wait a few minutes for the app to activate. Then go to 'Manage Consumer Details' to get the Consumer Key (Client ID) and Consumer Secret." },
-            { title: "Get your security token", description: "Go to your personal settings > 'Reset My Security Token'. You'll receive it by email. Append it to your password in the password field above (e.g. 'mypasswordSECURITYTOKEN')." },
-            { title: "Enter credentials", description: "Copy the Instance URL (e.g. https://yourorg.my.salesforce.com), Client ID, Client Secret, your username, and password+token into the fields above." }
+            { title: "Enter credentials and authorize", description: "Enter your Instance URL, Client ID, and Client Secret below, then click 'Authorize with Salesforce' to connect your account." }
           ],
           tips: [
             "Your instance URL is the base URL when logged into Salesforce (e.g. https://yourorg.my.salesforce.com)",
-            "The password field must include your security token appended to the end",
             "Connected Apps may take up to 10 minutes to activate after creation",
-            "For sandbox environments, use https://test.salesforce.com as the login URL",
-            "Make sure the Connected App has the 'Full access' OAuth scope"
+            "For sandbox environments, use https://test.salesforce.com as the instance URL",
+            "Make sure the Connected App has the 'Full access' and 'refresh_token' OAuth scopes",
+            "The callback URL in Salesforce must match exactly: {VAULT_URL}/oauth/callback/salesforce"
           ],
           credential_help: {
             "instance_url" => "Your Salesforce org URL, e.g. https://yourorg.my.salesforce.com",
             "client_id" => "The Consumer Key from your Connected App settings",
-            "client_secret" => "The Consumer Secret from your Connected App settings",
-            "username" => "Your Salesforce login email",
-            "password" => "Your password concatenated with your security token"
+            "client_secret" => "The Consumer Secret from your Connected App settings"
           }
         }
       end
@@ -186,9 +186,7 @@ module Connectors
       }.freeze
 
       def test_connection
-        authenticate!
-        response = client.get("#{api_base_url}/limits")
-        handle_response(response)
+        response = api_request(:get, "/limits")
         { success: true, status: "connected", instance_url: instance_url }
       rescue Connectors::AuthenticationError
         raise
@@ -197,8 +195,6 @@ module Connectors
       end
 
       def list_records(sobject, params)
-        authenticate!
-
         fields = params[:fields] || DEFAULT_FIELDS[sobject] || "Id,Name"
         limit = (params[:limit] || 100).to_i.clamp(1, 2000)
         offset = (params[:offset] || 0).to_i
@@ -209,8 +205,7 @@ module Connectors
         soql += " LIMIT #{limit}"
         soql += " OFFSET #{offset}" if offset > 0
 
-        response = client.get("#{api_base_url}/query", { q: soql })
-        data = handle_response(response)
+        data = api_request(:get, "/query", q: soql)
 
         records = data["records"] || []
         {
@@ -222,85 +217,126 @@ module Connectors
       end
 
       def get_record(sobject, params)
-        authenticate!
         id = params[:id]
         raise Connectors::Error, "id is required" if id.blank?
 
-        response = client.get("#{api_base_url}/sobjects/#{sobject}/#{id}")
-        data = handle_response(response)
+        data = api_request(:get, "/sobjects/#{sobject}/#{id}")
         { item: data, Id: data["Id"] }
       end
 
       def create_record(sobject, params)
-        authenticate!
         fields = params[:fields]
         raise Connectors::Error, "fields is required" if fields.blank?
 
-        # Handle both single object and Nexus format (where fields may be nested)
         body = fields.is_a?(Hash) ? fields : fields
-        response = client.post("#{api_base_url}/sobjects/#{sobject}", body.to_json)
-        data = handle_response(response)
+        data = api_request(:post, "/sobjects/#{sobject}", body)
 
         { id: data["id"], Id: data["id"], success: data["success"] != false }
       end
 
       def update_record(sobject, params)
-        authenticate!
         id = params[:id]
         fields = params[:fields]
         raise Connectors::Error, "id is required" if id.blank?
         raise Connectors::Error, "fields is required" if fields.blank?
 
-        response = client.patch("#{api_base_url}/sobjects/#{sobject}/#{id}", fields.to_json)
+        data = api_request(:patch, "/sobjects/#{sobject}/#{id}", fields)
 
-        # Salesforce returns 204 No Content on successful update
-        if response.status == 204
+        if data == :no_content
           { success: true, id: id, Id: id }
         else
-          data = handle_response(response)
           { success: true, id: id, Id: id, result: data }
         end
       end
 
       def soql_query(params)
-        authenticate!
         soql = params[:soql]
         raise Connectors::Error, "soql is required" if soql.blank?
 
-        response = client.get("#{api_base_url}/query", { q: soql })
-        data = handle_response(response)
+        data = api_request(:get, "/query", q: soql)
 
         records = data["records"] || []
         { records: records, items: records, total: data["totalSize"] || records.size }
       end
 
-      # --- Authentication (OAuth2 Username-Password Flow) ---
+      # --- Authentication (OAuth2 Authorization Code Flow) ---
 
       def authenticate!
-        return if @access_token.present?
+        @access_token = credentials[:access_token]
+        @instance_url = credentials[:instance_url].to_s.chomp("/")
+
+        raise Connectors::AuthenticationError, "No access_token in credentials. Complete the OAuth authorization flow first." if @access_token.blank?
+      end
+
+      def refresh_access_token!
+        refresh_token = credentials[:_refresh_token]
+        raise Connectors::AuthenticationError, "No refresh token available. Re-authorize with Salesforce." if refresh_token.blank?
 
         login_url = credentials[:instance_url].to_s.include?("test.salesforce.com") ? "https://test.salesforce.com" : "https://login.salesforce.com"
 
         response = Faraday.post("#{login_url}/services/oauth2/token") do |req|
           req.headers["Content-Type"] = "application/x-www-form-urlencoded"
           req.body = URI.encode_www_form(
-            grant_type: "password",
+            grant_type: "refresh_token",
             client_id: credentials[:client_id],
             client_secret: credentials[:client_secret],
-            username: credentials[:username],
-            password: credentials[:password]
+            refresh_token: refresh_token
           )
         end
 
         unless response.success?
           body = JSON.parse(response.body) rescue {}
-          error = body["error_description"] || body["error"] || "Authentication failed"
-          raise Connectors::AuthenticationError, "Salesforce OAuth failed: #{error}"
+          raise Connectors::AuthenticationError, "Salesforce token refresh failed: #{body['error_description'] || body['error'] || 'Unknown error'}"
         end
 
         body = JSON.parse(response.body)
         @access_token = body["access_token"]
-        @instance_url = body["instance_url"]
+        @instance_url = body["instance_url"] if body["instance_url"].present?
+
+        # Persist new access_token in credential
+        if credentials[:_credential_id].present?
+          credential = ConnectorCredential.find_by(id: credentials[:_credential_id])
+          if credential
+            current_creds = credential.decrypt_credentials
+            current_creds[:access_token] = @access_token
+            current_creds[:instance_url] = @instance_url if body["instance_url"].present?
+            credential.update_credentials(current_creds)
+          end
+        end
+
+        @client = nil # Reset client with new token
+        @access_token
+      end
+
+      # Wrapper that auto-retries on 401 using refresh_token
+      def api_request(method, path, params_or_body = nil)
+        authenticate!
+
+        response = execute_request(method, path, params_or_body)
+
+        # On 401, try refreshing the token once
+        if response.status == 401
+          refresh_access_token!
+          response = execute_request(method, path, params_or_body)
+        end
+
+        return :no_content if response.status == 204
+
+        handle_response(response)
+      end
+
+      def execute_request(method, path, params_or_body)
+        url = "#{api_base_url}#{path}"
+        case method
+        when :get
+          client.get(url, params_or_body || {})
+        when :post
+          client.post(url, (params_or_body || {}).to_json)
+        when :patch
+          client.patch(url, (params_or_body || {}).to_json)
+        when :delete
+          client.delete(url)
+        end
       end
 
       def instance_url
@@ -328,7 +364,6 @@ module Connectors
 
           case response.status
           when 401
-            @access_token = nil # Clear token so next call re-authenticates
             raise Connectors::AuthenticationError, "Salesforce authentication failed: #{error_message || 'Invalid or expired session'}"
           when 403
             raise Connectors::AuthenticationError, "Salesforce access denied: #{error_message || 'Insufficient permissions'}"
