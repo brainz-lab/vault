@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full" data-controller="dark-mode"<%= ' data-dark-mode-default-theme-value="light"'.html_safe if ENV['BRAINZLAB_LOGO_LIGHT_URL'].present? || ENV['BRAINZLAB_LOGO_DARK_URL'].present? %>>
+<html lang="en" class="h-full" data-controller="dark-mode"<%= ' data-dark-mode-default-theme-value="light"'.html_safe if ENV['BRAINZLAB_DARK_MODE_DISABLED'].present? %>>
 <head>
   <title>Vault - <%= content_for(:title) || "Secrets Management" %></title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -20,13 +20,11 @@
   <%# Prevent flash of wrong theme on page load and provide toggle function %>
   <script>
     (function() {
-      const hasCustomLogos = <%= (ENV['BRAINZLAB_LOGO_LIGHT_URL'].present? || ENV['BRAINZLAB_LOGO_DARK_URL'].present?).to_json %>;
-      const defaultLight = hasCustomLogos;
-      // En modo RMP, ignorar y limpiar preferencia guardada
-      if (hasCustomLogos) localStorage.removeItem('brainzlab-theme');
-      const savedTheme = hasCustomLogos ? null : localStorage.getItem('brainzlab-theme');
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (!hasCustomLogos && savedTheme === 'dark' || (!savedTheme && !defaultLight && systemPrefersDark)) {
+      const darkDisabled = <%= ENV['BRAINZLAB_DARK_MODE_DISABLED'].present?.to_json %>;
+      if (darkDisabled) localStorage.removeItem('brainzlab-theme');
+      const savedTheme = darkDisabled ? null : localStorage.getItem('brainzlab-theme');
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (!darkDisabled && (savedTheme === 'dark' || (!savedTheme && systemPrefersDark))) {
         document.documentElement.classList.remove('light');
         document.documentElement.classList.add('dark');
       } else {
@@ -94,13 +92,12 @@
       <div class="p-5 border-b dm-border-secondary relative z-10 flex items-center justify-between">
         <%= link_to dashboard_projects_path, class: "flex flex-col items-end gap-1 group" do %>
           <div class="flex items-center">
-            <img src="<%= ENV.fetch('BRAINZLAB_LOGO_LIGHT_URL', '/fluyenta-logo-light.png') %>" alt="Fluyenta" class="h-12 dark:hidden">
-                <img src="<%= ENV.fetch('BRAINZLAB_LOGO_DARK_URL', '/fluyenta-logo-dark.png') %>" alt="Fluyenta" class="h-12 hidden dark:block">
+            <%= brainzlab_logo_tag %>
           </div>
           <span class="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded" style="color: var(--dm-brand); background: color-mix(in srgb, var(--dm-brand) 12%, transparent);">Vault</span>
         <% end %>
         <%# Dark Mode Toggle %>
-        <% unless ENV['BRAINZLAB_LOGO_LIGHT_URL'].present? || ENV['BRAINZLAB_LOGO_DARK_URL'].present? %>
+        <% unless ENV['BRAINZLAB_DARK_MODE_DISABLED'].present? %>
               <button onclick="toggleDarkMode()"
                 class="p-1.5 rounded-lg transition-all dm-text-muted hover:dm-text hover:bg-transparent"
                 data-dark-mode-target="icon"
