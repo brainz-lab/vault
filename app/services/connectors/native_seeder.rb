@@ -1,6 +1,7 @@
 module Connectors
   class NativeSeeder
     NATIVE_CONNECTORS = [
+      # Non-OAuth connectors
       Connectors::Native::Webhook,
       Connectors::Native::Database,
       Connectors::Native::Email,
@@ -8,7 +9,17 @@ module Connectors
       Connectors::Native::FileStorage,
       Connectors::Native::Apollo,
       Connectors::Native::Bitrix,
-      Connectors::Native::Kommo
+      Connectors::Native::Kommo,
+      # OAuth connectors
+      Connectors::Native::GoogleSheets,
+      Connectors::Native::SlackOauth,
+      Connectors::Native::GithubOauth,
+      Connectors::Native::Hubspot,
+      Connectors::Native::MicrosoftOutlook,
+      Connectors::Native::Notion,
+      Connectors::Native::JiraCloud,
+      Connectors::Native::Airtable,
+      Connectors::Native::StripeConnect
     ].freeze
 
     def seed!
