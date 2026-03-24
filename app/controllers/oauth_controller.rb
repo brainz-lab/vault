@@ -287,7 +287,9 @@ class OauthController < ActionController::Base
       connector: connector_name
     }.compact.to_json
 
-    opener_origin = ENV.fetch("VAULT_URL", request.base_url)
+    # The popup was opened by Axon (or another service), not by Vault itself.
+    # Use "*" to allow any opener, since the state token already validates the flow.
+    opener_origin = "*"
     safe_status = success ? "Authorization successful." : "Authorization failed."
 
     render html: <<~HTML.html_safe, layout: false
