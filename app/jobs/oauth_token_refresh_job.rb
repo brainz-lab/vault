@@ -9,13 +9,9 @@ class OauthTokenRefreshJob < ApplicationJob
     credentials_needing_refresh.find_each do |credential|
       refresh_credential(credential)
       refreshed_count += 1
-    rescue Oauth::TokenRefresher::RefreshFailedError => e
+    rescue Oauth::TokenRefresher::RefreshFailedError, Oauth::ProviderFactory::RefreshError => e
       failed_count += 1
       Rails.logger.warn "[OauthTokenRefreshJob] Failed to refresh credential=#{credential.id} (#{credential.name}): #{e.message}"
-    rescue StandardError => e
-      failed_count += 1
-      Rails.logger.error "[OauthTokenRefreshJob] Unexpected error refreshing credential=#{credential.id}: #{e.message}"
-      BrainzLab::Reflex.capture(e, context: { job: "OauthTokenRefreshJob", credential_id: credential.id })
     end
 
     Rails.logger.info "[OauthTokenRefreshJob] Refreshed #{refreshed_count} credentials, #{failed_count} failures"
