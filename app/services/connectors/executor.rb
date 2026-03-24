@@ -103,6 +103,8 @@ module Connectors
       when "apollo" then Connectors::Native::Apollo
       when "bitrix" then Connectors::Native::Bitrix
       when "kommo" then Connectors::Native::Kommo
+      when "slack" then Connectors::Native::Slack
+      when "whatsapp" then Connectors::Native::Whatsapp
       else
         raise Connectors::Error, "Unknown native connector: #{piece_name}"
       end
