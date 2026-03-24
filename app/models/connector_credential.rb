@@ -115,15 +115,12 @@ class ConnectorCredential < ApplicationRecord
   end
 
   def store_oauth_tokens!(access_token:, refresh_token: nil, expires_in: nil)
-    credentials = decrypt_credentials.merge(access_token: access_token)
-    update_credentials(credentials)
+    transaction do
+      credentials = decrypt_credentials.merge(access_token: access_token)
+      update_credentials(credentials)
 
-    if refresh_token.present?
-      store_refresh_token(refresh_token)
-    end
-
-    if expires_in.present?
-      update!(token_expires_at: expires_in.to_i.seconds.from_now)
+      store_refresh_token(refresh_token) if refresh_token.present?
+      update!(token_expires_at: expires_in.to_i.seconds.from_now) if expires_in.present?
     end
   end
 

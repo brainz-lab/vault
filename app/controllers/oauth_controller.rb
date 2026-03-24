@@ -2,6 +2,7 @@ class OauthController < ActionController::Base
   include ActionController::Cookies
 
   skip_before_action :verify_authenticity_token, raise: false
+  before_action :authenticate_request!, only: [:authorize]
 
   # GET /oauth/authorize
   # Initiates OAuth flow: builds state, redirects to provider
@@ -22,7 +23,7 @@ class OauthController < ActionController::Base
     state = Oauth::StateManager.generate(
       project_id: project.id,
       connector_id: connector.id,
-      user_id: params[:user_id] || session[:user_id],
+      user_id: current_oauth_user_id,
       return_to: params[:return_to]
     )
 
@@ -117,6 +118,25 @@ class OauthController < ActionController::Base
   end
 
   private
+
+  # Authenticate via session (dashboard) or service key (Axon cross-service call)
+  def authenticate_request!
+    return if session[:user_id].present?
+
+    service_key = request.headers["X-Service-Key"]
+    expected = ENV["SERVICE_KEY"] || "dev_service_key"
+
+    if service_key.present? && ActiveSupport::SecurityUtils.secure_compare(service_key, expected)
+      return
+    end
+
+    render plain: "Unauthorized", status: :unauthorized
+  end
+
+  # Never accept user_id from params — use session only
+  def current_oauth_user_id
+    session[:user_id] || "system"
+  end
 
   def oauth_callback_url
     vault_url = ENV.fetch("VAULT_URL", "http://localhost:#{request.port}")
@@ -241,6 +261,9 @@ class OauthController < ActionController::Base
       connector: connector_name
     }.compact.to_json
 
+    opener_origin = ENV.fetch("VAULT_URL", request.base_url)
+    safe_status = success ? "Authorization successful." : "Authorization failed."
+
     render html: <<~HTML.html_safe, layout: false
       <!DOCTYPE html>
       <html>
@@ -248,13 +271,13 @@ class OauthController < ActionController::Base
       <body>
         <script>
           if (window.opener) {
-            window.opener.postMessage(#{message}, '*');
+            window.opener.postMessage(#{message}, #{opener_origin.to_json});
             window.close();
           } else {
-            document.body.innerText = '#{success ? "Authorization successful." : "Authorization failed: " + error.to_s}';
+            document.body.textContent = #{safe_status.to_json};
           }
         </script>
-        <p>#{success ? "Authorization successful. This window will close automatically." : "Authorization failed: #{ERB::Util.html_escape(error)}"}</p>
+        <p>#{ERB::Util.html_escape(safe_status)} This window will close automatically.</p>
       </body>
       </html>
     HTML
