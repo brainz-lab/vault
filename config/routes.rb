@@ -145,6 +145,10 @@ Rails.application.routes.draw do
     root to: "projects#index"
   end
 
+  # OAuth flow
+  get "oauth/authorize", to: "oauth#authorize"
+  get "oauth/callback", to: "oauth#callback"
+
   # SSO from Platform
   get "sso/callback", to: "sso#callback"
 

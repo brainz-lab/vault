@@ -112,7 +112,13 @@ module Connectors
       credential = connection.connector_credential
       return {} unless credential
 
-      if credential.expired?
+      if credential.oauth?
+        begin
+          credential.active_or_refresh!
+        rescue Oauth::TokenRefresher::RefreshFailedError => e
+          raise AuthenticationError, "OAuth token refresh failed for '#{credential.name}': #{e.message}"
+        end
+      elsif credential.expired?
         raise AuthenticationError, "Credentials expired for '#{credential.name}'"
       end
 

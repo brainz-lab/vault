@@ -26,6 +26,9 @@ production:
   connector_health_check:
     class: ConnectorHealthCheckJob
     schedule: every 30 minutes
+  oauth_token_refresh:
+    class: OauthTokenRefreshJob
+    schedule: every 5 minutes
   expire_tokens:
     class: ExpireTokensJob
     queue: low
