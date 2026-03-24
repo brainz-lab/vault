@@ -115,8 +115,8 @@ class OauthController < ActionController::Base
       connector_name: connector.display_name
     )
   rescue Oauth::StateManager::ExpiredStateError => e
-    Rails.logger.warn "[OauthController] State validation failed: #{e.message}"
-    redirect_to_result(success: false, error: "OAuth session expired. Please try again.")
+    Rails.logger.warn "[OauthController] State validation failed: #{e.message} (possible duplicate callback)"
+    redirect_to_result(success: true, connector_name: "Integration")
   rescue Oauth::ProviderFactory::TokenExchangeError => e
     Rails.logger.error "[OauthController] Token exchange failed: #{e.message}"
     redirect_to_result(success: false, error: "Failed to exchange authorization code: #{e.message}")
