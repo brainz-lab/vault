@@ -112,12 +112,12 @@ module Connectors
       private
 
       def api_url
-        url = credentials[:api_url] || ENV.fetch("EVOLUTION_API_URL", "http://localhost:8282")
+        url = credentials[:api_url] || ENV.fetch("WUZAPI_URL", ENV.fetch("EVOLUTION_API_URL", "http://localhost:8282"))
         url.chomp("/")
       end
 
       def api_key
-        credentials[:api_key] || ENV.fetch("EVOLUTION_API_KEY", "brainzlab_evo_dev_key")
+        credentials[:api_key] || ENV.fetch("WUZAPI_API_KEY", ENV.fetch("EVOLUTION_API_KEY", "brainzlab_evo_dev_key"))
       end
 
       def session_name
