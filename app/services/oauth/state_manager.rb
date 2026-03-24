@@ -8,7 +8,7 @@ module Oauth
     class ExpiredStateError < StandardError; end
 
     class << self
-      def generate(project_id:, connector_id:, user_id:, return_to: nil)
+      def generate(project_id:, connector_id:, user_id:, return_to: nil, popup: nil)
         token = SecureRandom.hex(TOKEN_BYTES)
 
         payload = {
@@ -16,6 +16,7 @@ module Oauth
           connector_id: connector_id,
           user_id: user_id,
           return_to: return_to,
+          popup: popup,
           created_at: Time.current.iso8601
         }.to_json
 
