@@ -7,7 +7,7 @@ module Connectors
       def self.display_name = "WhatsApp"
       def self.description = "Send and receive WhatsApp messages directly from your campaigns"
       def self.category = "communication"
-      def self.logo_url = "https://cdn.brainzlab.ai/connectors/whatsapp.svg"
+      def self.logo_url = "/images/connectors/whatsapp.svg"
       def self.auth_type = "CUSTOM_AUTH"
       def self.auth_schema
         {
