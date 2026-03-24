@@ -10,6 +10,7 @@ module Connectors
       Connectors::Native::Apollo,
       Connectors::Native::Bitrix,
       Connectors::Native::Kommo,
+      Connectors::Native::Whatsapp,
       # OAuth connectors
       Connectors::Native::GoogleSheets,
       Connectors::Native::SlackOauth,
@@ -19,7 +20,7 @@ module Connectors
       Connectors::Native::Notion,
       Connectors::Native::JiraCloud,
       Connectors::Native::Airtable,
-      Connectors::Native::StripeConnect
+      Connectors::Native::StripeConnect,
     ].freeze
 
     def seed!
