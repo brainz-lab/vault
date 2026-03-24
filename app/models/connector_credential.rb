@@ -97,6 +97,36 @@ class ConnectorCredential < ApplicationRecord
     update!(status: "revoked")
   end
 
+  def oauth?
+    auth_type == "OAUTH2"
+  end
+
+  def needs_refresh?
+    oauth? && token_expires_at.present? && token_expires_at < 10.minutes.from_now
+  end
+
+  def active_or_refresh!
+    return unless oauth?
+    return unless needs_refresh?
+    return unless encrypted_refresh_token.present?
+
+    refresher = Oauth::TokenRefresher.new(self)
+    refresher.refresh!
+  end
+
+  def store_oauth_tokens!(access_token:, refresh_token: nil, expires_in: nil)
+    credentials = decrypt_credentials.merge(access_token: access_token)
+    update_credentials(credentials)
+
+    if refresh_token.present?
+      store_refresh_token(refresh_token)
+    end
+
+    if expires_in.present?
+      update!(token_expires_at: expires_in.to_i.seconds.from_now)
+    end
+  end
+
   def to_summary
     {
       id: id,

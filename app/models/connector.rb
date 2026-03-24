@@ -46,6 +46,34 @@ class Connector < ApplicationRecord
     auth_type.present? && auth_type != "NONE"
   end
 
+  def oauth2?
+    auth_type == "OAUTH2"
+  end
+
+  def oauth_client_id
+    return nil unless oauth2?
+
+    ENV["VAULT_OAUTH_#{oauth_env_key}_CLIENT_ID"]
+  end
+
+  def oauth_client_secret
+    return nil unless oauth2?
+
+    ENV["VAULT_OAUTH_#{oauth_env_key}_CLIENT_SECRET"]
+  end
+
+  def token_url
+    return nil unless oauth2?
+
+    (auth_schema || {})["tokenUrl"] || (auth_schema || {})[:tokenUrl]
+  end
+
+  def oauth_scopes
+    return nil unless oauth2?
+
+    (auth_schema || {})["scope"] || (auth_schema || {})[:scope]
+  end
+
   def native_runner_class
     raise "Not a native connector" unless native?
 
@@ -89,5 +117,11 @@ class Connector < ApplicationRecord
       package_name: package_name,
       metadata: metadata
     )
+  end
+
+  private
+
+  def oauth_env_key
+    piece_name.upcase.gsub(/[^A-Z0-9]/, "_")
   end
 end
