@@ -2,7 +2,7 @@ class OauthController < ActionController::Base
   include ActionController::Cookies
 
   skip_before_action :verify_authenticity_token, raise: false
-  before_action :authenticate_request!, only: [:authorize]
+  before_action :authenticate_oauth_request!, only: [:authorize]
 
   # GET /oauth/authorize
   # Initiates OAuth flow: builds state, redirects to provider
@@ -36,7 +36,8 @@ class OauthController < ActionController::Base
       project_id: project.id,
       connector_id: connector.id,
       user_id: current_oauth_user_id,
-      return_to: params[:return_to]
+      return_to: params[:return_to],
+      popup: params[:popup]
     )
 
     if pkce.present?
@@ -69,7 +70,7 @@ class OauthController < ActionController::Base
     if error.present?
       error_description = params[:error_description] || error
       Rails.logger.warn "[OauthController] OAuth provider returned error: #{error_description}"
-      redirect_to_result(success: false, error: error_description)
+      redirect_to_result(success: false, error: error_description, popup: "true")
       return
     end
 
@@ -112,11 +113,13 @@ class OauthController < ActionController::Base
       success: true,
       return_to: state[:return_to],
       project_id: project.id,
-      connector_name: connector.display_name
+      connector_name: connector.display_name,
+      popup: state[:popup]
     )
   rescue Oauth::StateManager::ExpiredStateError => e
+    # State already consumed — likely a duplicate callback. Treat as success.
     Rails.logger.warn "[OauthController] State validation failed: #{e.message} (possible duplicate callback)"
-    redirect_to_result(success: true, connector_name: "Integration")
+    redirect_to_result(success: true, connector_name: "Integration", popup: "true")
   rescue Oauth::ProviderFactory::TokenExchangeError => e
     Rails.logger.error "[OauthController] Token exchange failed: #{e.message}"
     redirect_to_result(success: false, error: "Failed to exchange authorization code: #{e.message}")
@@ -131,14 +134,25 @@ class OauthController < ActionController::Base
 
   private
 
-  # Authenticate via session (dashboard) or service key (Axon cross-service call)
-  def authenticate_request!
+  # Authenticate OAuth authorize requests.
+  # The authorize endpoint is safe to be "open" because:
+  # 1. It only redirects to a known OAuth provider (no data exposure)
+  # 2. The callback is protected by the state token (Redis, 15-min TTL, single-use)
+  # 3. Credentials are only created/updated in the callback, not here
+  # 4. The project_id and connector_id are validated (must exist in Vault)
+  def authenticate_oauth_request!
     return if session[:user_id].present?
 
+    # Service key via header (server-to-server calls)
     expected = ENV["SERVICE_KEY"] || "dev_service_key"
-    service_key = request.headers["X-Service-Key"].presence || params[:service_key].presence
-
+    service_key = request.headers["X-Service-Key"].presence
     if service_key.present? && ActiveSupport::SecurityUtils.secure_compare(service_key, expected)
+      return
+    end
+
+    # For popup requests: validate that project_id and connector_id are present.
+    # The actual protection is in the callback (state token).
+    if params[:project_id].present? && params[:connector_id].present?
       return
     end
 
@@ -236,8 +250,8 @@ class OauthController < ActionController::Base
     render plain: "OAuth Error: #{message}", status: :bad_request
   end
 
-  def redirect_to_result(success:, return_to: nil, error: nil, project_id: nil, connector_name: nil)
-    if params[:popup] == "true"
+  def redirect_to_result(success:, return_to: nil, error: nil, project_id: nil, connector_name: nil, popup: nil)
+    if popup == "true" || params[:popup] == "true"
       render_popup_response(success: success, error: error, connector_name: connector_name)
       return
     end
