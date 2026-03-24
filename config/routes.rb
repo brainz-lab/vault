@@ -146,9 +146,9 @@ Rails.application.routes.draw do
     root to: "projects#index"
   end
 
-  # OAuth flow
-  get "oauth/authorize", to: "oauth#authorize"
-  get "oauth/callback", to: "oauth#callback"
+  # OAuth flow (connector authorization)
+  get "oauth/authorize", to: "oauth#authorize", as: :oauth_authorize
+  get "oauth/callback", to: "oauth#callback", as: :oauth_flow_callback
   # OAuth callbacks (Salesforce, etc.)
   get "oauth/callback/:provider", to: "oauth_callbacks#callback", as: :oauth_callback
 
