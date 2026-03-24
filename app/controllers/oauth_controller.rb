@@ -7,8 +7,20 @@ class OauthController < ActionController::Base
   # GET /oauth/authorize
   # Initiates OAuth flow: builds state, redirects to provider
   def authorize
-    project = Project.find(params[:project_id])
-    connector = Connector.find(params[:connector_id])
+    # Resolve project: try Vault ID first, then platform_project_id (auto-create)
+    project = Project.find_by(id: params[:project_id]) ||
+              Project.find_or_create_for_platform!(
+                platform_project_id: params[:project_id],
+                name: params[:project_name] || "Project #{params[:project_id].to_s.first(8)}"
+              )
+
+    # Resolve connector: by UUID or piece_name
+    cid = params[:connector_id]
+    connector = if cid&.match?(/\A[0-9a-f-]{36}\z/)
+      Connector.find(cid)
+    else
+      Connector.find_by!(piece_name: cid)
+    end
 
     unless connector.oauth2?
       redirect_to_error("Connector '#{connector.display_name}' does not support OAuth2")
@@ -123,8 +135,8 @@ class OauthController < ActionController::Base
   def authenticate_request!
     return if session[:user_id].present?
 
-    service_key = request.headers["X-Service-Key"]
     expected = ENV["SERVICE_KEY"] || "dev_service_key"
+    service_key = request.headers["X-Service-Key"].presence || params[:service_key].presence
 
     if service_key.present? && ActiveSupport::SecurityUtils.secure_compare(service_key, expected)
       return
