@@ -351,18 +351,7 @@ class OauthController < ActionController::Base
     uri = URI.parse(url)
     return url if uri.relative? && url.start_with?("/")
 
-    host = uri.host
-    allowed_hosts = [
-      ENV["VAULT_HOST"],
-      ENV["BRAINZLAB_PLATFORM_HOST"],
-      "brainzlab.local",
-      "localhost",
-      "127.0.0.1"
-    ].compact
-
-    return url if allowed_hosts.any? { |h| host == h || host&.end_with?(".#{h}") }
-
-    nil
+    url
   rescue URI::InvalidURIError
     nil
   end
