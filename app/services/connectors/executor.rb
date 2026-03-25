@@ -104,6 +104,15 @@ module Connectors
       when "bitrix" then Connectors::Native::Bitrix
       when "kommo" then Connectors::Native::Kommo
       when "slack" then Connectors::Native::Slack
+      when "slack-oauth" then Connectors::Native::SlackOauth
+      when "github" then Connectors::Native::GithubOauth
+      when "google-sheets" then Connectors::Native::GoogleSheets
+      when "hubspot" then Connectors::Native::Hubspot
+      when "microsoft-outlook" then Connectors::Native::MicrosoftOutlook
+      when "notion" then Connectors::Native::Notion
+      when "jira-cloud" then Connectors::Native::JiraCloud
+      when "airtable" then Connectors::Native::Airtable
+      when "stripe" then Connectors::Native::StripeConnect
       when "whatsapp" then Connectors::Native::Whatsapp
       else
         raise Connectors::Error, "Unknown native connector: #{piece_name}"
