@@ -15,7 +15,7 @@ module Connectors
           type: "OAUTH2",
           authUrl: "https://accounts.google.com/o/oauth2/v2/auth?access_type=offline&prompt=consent",
           tokenUrl: "https://oauth2.googleapis.com/token",
-          scope: "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.readonly",
+          scope: "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file",
           pkce: false
         }
       end
@@ -37,6 +37,16 @@ module Connectors
 
       def self.actions
         [
+          {
+            "name" => "create_spreadsheet",
+            "displayName" => "Create Spreadsheet",
+            "description" => "Create a new Google Sheets spreadsheet with optional headers",
+            "props" => {
+              "title" => { "type" => "string", "required" => true, "description" => "Spreadsheet title" },
+              "sheet_name" => { "type" => "string", "required" => false, "description" => "First sheet name (default: Sheet1)" },
+              "headers" => { "type" => "json", "required" => false, "description" => "Column headers as array [\"Name\", \"Email\", \"Phone\"]" }
+            }
+          },
           {
             "name" => "read_spreadsheet",
             "displayName" => "Read Spreadsheet",
@@ -82,6 +92,7 @@ module Connectors
 
       def execute(action, **params)
         case action.to_s
+        when "create_spreadsheet" then create_spreadsheet(params)
         when "read_spreadsheet" then read_spreadsheet(params)
         when "write_spreadsheet" then write_spreadsheet(params)
         when "append_rows" then append_rows(params)
@@ -91,6 +102,35 @@ module Connectors
       end
 
       private
+
+      def create_spreadsheet(params)
+        title = params[:title] || "New Spreadsheet"
+        sheet_name = params[:sheet_name] || "Sheet1"
+
+        body = {
+          properties: { title: title },
+          sheets: [{ properties: { title: sheet_name } }]
+        }
+
+        resp = api_post(SHEETS_API, body)
+        spreadsheet_id = resp["spreadsheetId"]
+
+        # Add headers if provided
+        headers = params[:headers]
+        if headers.present?
+          headers = JSON.parse(headers) if headers.is_a?(String)
+          if headers.is_a?(Array) && headers.any?
+            append_rows(spreadsheet_id: spreadsheet_id, range: sheet_name, values: [headers])
+          end
+        end
+
+        {
+          spreadsheet_id: spreadsheet_id,
+          title: title,
+          sheet_name: sheet_name,
+          url: "https://docs.google.com/spreadsheets/d/#{spreadsheet_id}"
+        }
+      end
 
       def read_spreadsheet(params)
         resp = api_get("#{SHEETS_API}/#{params[:spreadsheet_id]}/values/#{params[:range]}")
@@ -111,9 +151,10 @@ module Connectors
       def append_rows(params)
         values = params[:values].is_a?(String) ? JSON.parse(params[:values]) : params[:values]
         body = { range: params[:range], majorDimension: "ROWS", values: values }
+        input_option = params[:value_input_option] || "RAW"
 
         resp = api_post(
-          "#{SHEETS_API}/#{params[:spreadsheet_id]}/values/#{params[:range]}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS",
+          "#{SHEETS_API}/#{params[:spreadsheet_id]}/values/#{params[:range]}:append?valueInputOption=#{input_option}&insertDataOption=INSERT_ROWS",
           body
         )
         { updated_range: resp.dig("updates", "updatedRange"), updated_rows: resp.dig("updates", "updatedRows") }

@@ -14,6 +14,10 @@ module Connectors
       # OAuth connectors
       Connectors::Native::Salesforce,
       Connectors::Native::GoogleSheets,
+      Connectors::Native::GoogleDrive,
+      Connectors::Native::GoogleCalendar,
+      Connectors::Native::Gmail,
+      # OAuth connectors — other
       Connectors::Native::SlackOauth,
       Connectors::Native::GithubOauth,
       Connectors::Native::Hubspot,
@@ -21,8 +25,7 @@ module Connectors
       Connectors::Native::Notion,
       Connectors::Native::JiraCloud,
       Connectors::Native::Airtable,
-      Connectors::Native::StripeConnect,
-      Connectors::Native::Salesforce
+      Connectors::Native::StripeConnect
     ].freeze
 
     def seed!
