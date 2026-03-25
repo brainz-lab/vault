@@ -89,11 +89,26 @@ module Connectors
       end
 
       def list_channels(params)
-        limit = (params[:limit] || 100).to_i
-        result = api_get("conversations.list", types: "public_channel,private_channel", limit: limit)
-        channels = (result["channels"] || []).map do |c|
+        max_channels = (params[:limit] || 500).to_i
+        all_channels = []
+        cursor = nil
+
+        # Paginate through all channels (Slack returns max 200 per page)
+        loop do
+          api_params = { types: "public_channel,private_channel", limit: [200, max_channels - all_channels.size].min }
+          api_params[:cursor] = cursor if cursor.present?
+
+          result = api_get("conversations.list", api_params)
+          all_channels.concat(result["channels"] || [])
+
+          cursor = result.dig("response_metadata", "next_cursor")
+          break if cursor.blank? || all_channels.size >= max_channels
+        end
+
+        channels = all_channels.first(max_channels).map do |c|
           { id: c["id"], name: c["name"], is_private: c["is_private"] || false }
         end
+
         # Sort: private first, then alphabetical
         channels.sort_by! { |c| [c[:is_private] ? 0 : 1, c[:name].to_s.downcase] }
         { channels: channels, count: channels.size }
