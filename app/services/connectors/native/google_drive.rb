@@ -15,7 +15,7 @@ module Connectors
           type: "OAUTH2",
           authUrl: "https://accounts.google.com/o/oauth2/v2/auth?access_type=offline&prompt=consent",
           tokenUrl: "https://oauth2.googleapis.com/token",
-          scope: "https://www.googleapis.com/auth/drive",
+          scope: "https://www.googleapis.com/auth/drive.file",
           pkce: false
         }
       end
@@ -208,13 +208,13 @@ module Connectors
       end
 
       def build_multipart_body(boundary, metadata, content, mime_type)
-        body = ""
+        body = String.new
         body << "--#{boundary}\r\n"
         body << "Content-Type: application/json; charset=UTF-8\r\n\r\n"
         body << metadata.to_json
         body << "\r\n--#{boundary}\r\n"
         body << "Content-Type: #{mime_type}\r\n\r\n"
-        body << content
+        body << content.to_s
         body << "\r\n--#{boundary}--"
         body
       end
