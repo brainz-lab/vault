@@ -15,7 +15,7 @@ module Connectors
           type: "OAUTH2",
           authUrl: "https://slack.com/oauth/v2/authorize",
           tokenUrl: "https://slack.com/api/oauth.v2.access",
-          scope: "chat:write channels:read channels:history users:read files:write reactions:write",
+          scope: "chat:write channels:read channels:history groups:read groups:history users:read files:write reactions:write",
           pkce: false
         }
       end
@@ -91,7 +91,11 @@ module Connectors
       def list_channels(params)
         limit = (params[:limit] || 100).to_i
         result = api_get("conversations.list", types: "public_channel,private_channel", limit: limit)
-        channels = (result["channels"] || []).map { |c| { id: c["id"], name: c["name"] } }
+        channels = (result["channels"] || []).map do |c|
+          { id: c["id"], name: c["name"], is_private: c["is_private"] || false }
+        end
+        # Sort: private first, then alphabetical
+        channels.sort_by! { |c| [c[:is_private] ? 0 : 1, c[:name].to_s.downcase] }
         { channels: channels, count: channels.size }
       end
 
@@ -112,8 +116,23 @@ module Connectors
           r.body = body.to_json
         end
         data = JSON.parse(resp.body)
-        raise Connectors::AuthenticationError, "Slack: #{data['error']}" if %w[invalid_auth token_revoked].include?(data["error"])
-        raise Connectors::Error, "Slack API error: #{data['error']}" unless data["ok"]
+        unless data["ok"]
+          error = data["error"]
+          case error
+          when "invalid_auth", "token_revoked", "not_authed"
+            raise Connectors::AuthenticationError, "Slack authentication failed. Please reconnect the Slack OAuth integration."
+          when "channel_not_found"
+            raise Connectors::Error, "Slack channel not found. For private channels, the Fluyenta app must be invited to the channel first (Channel Settings → Integrations → Add App)."
+          when "not_in_channel"
+            raise Connectors::Error, "The Fluyenta bot is not a member of this channel. Invite it via Channel Settings → Integrations → Add App."
+          when "ratelimited"
+            raise Connectors::RateLimitError, "Slack rate limit reached. Try again in a few seconds."
+          when "missing_scope"
+            raise Connectors::AuthenticationError, "Missing Slack permission: #{data['needed']}. Reconnect with updated scopes."
+          else
+            raise Connectors::Error, "Slack error: #{error}"
+          end
+        end
         data
       end
 
