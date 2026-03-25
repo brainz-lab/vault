@@ -107,6 +107,9 @@ module Connectors
       when "slack-oauth" then Connectors::Native::SlackOauth
       when "github" then Connectors::Native::GithubOauth
       when "google-sheets" then Connectors::Native::GoogleSheets
+      when "google-drive" then Connectors::Native::GoogleDrive
+      when "google-calendar" then Connectors::Native::GoogleCalendar
+      when "gmail" then Connectors::Native::Gmail
       when "hubspot" then Connectors::Native::Hubspot
       when "microsoft-outlook" then Connectors::Native::MicrosoftOutlook
       when "notion" then Connectors::Native::Notion

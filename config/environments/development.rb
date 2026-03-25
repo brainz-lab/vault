@@ -11,6 +11,7 @@ Rails.application.configure do
   config.hosts << "vault.localhost"
   config.hosts << /.*\.localhost/
   config.hosts << ".brainzlab.local"
+  config.hosts << ".ngrok-free.app"
 
   # Make code changes take effect immediately without server restart.
   config.enable_reloading = true

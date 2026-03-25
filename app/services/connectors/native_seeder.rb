@@ -11,8 +11,12 @@ module Connectors
       Connectors::Native::Bitrix,
       Connectors::Native::Kommo,
       Connectors::Native::Whatsapp,
-      # OAuth connectors
+      # OAuth connectors — Google
       Connectors::Native::GoogleSheets,
+      Connectors::Native::GoogleDrive,
+      Connectors::Native::GoogleCalendar,
+      Connectors::Native::Gmail,
+      # OAuth connectors — other
       Connectors::Native::SlackOauth,
       Connectors::Native::GithubOauth,
       Connectors::Native::Hubspot,
