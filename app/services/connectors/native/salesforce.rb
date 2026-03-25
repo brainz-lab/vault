@@ -31,27 +31,15 @@ module Connectors
 
       def self.setup_guide
         {
-          title: "How to configure your Salesforce Connected App",
           steps: [
-            { title: "Log in to Salesforce", description: "Go to your Salesforce org and sign in as an administrator." },
-            { title: "Navigate to Setup", description: "Click the gear icon in the top right and select 'Setup'." },
-            { title: "Create a Connected App", description: "In Setup, search for 'App Manager' in the Quick Find box. Click 'New Connected App'. Fill in the basic info (name, email)." },
-            { title: "Enable OAuth Settings", description: "Check 'Enable OAuth Settings'. Set the Callback URL to: #{ENV.fetch('VAULT_URL', 'http://localhost:4006')}/oauth/callback/salesforce. Select OAuth scopes: 'Manage user data via APIs (api)' and 'Perform requests at any time (refresh_token, offline_access)'." },
-            { title: "Save and get credentials", description: "After saving, wait a few minutes for the app to activate. Then go to 'Manage Consumer Details' to get the Consumer Key (Client ID) and Consumer Secret." },
-            { title: "Enter credentials and authorize", description: "Enter your Instance URL, Client ID, and Client Secret below, then click 'Authorize with Salesforce' to connect your account." }
+            "Log in to Salesforce Setup as administrator",
+            "Go to App Manager > New Connected App",
+            "Enable OAuth Settings with Callback URL: {VAULT_URL}/oauth/callback",
+            "Add OAuth scopes: 'Manage user data via APIs (api)' and 'Perform requests at any time (refresh_token, offline_access)'",
+            "Copy the Consumer Key (Client ID) and Consumer Secret",
+            "Enter your Instance URL, Client ID, and Client Secret, then click 'Authorize with Salesforce'"
           ],
-          tips: [
-            "Your instance URL is the base URL when logged into Salesforce (e.g. https://yourorg.my.salesforce.com)",
-            "Connected Apps may take up to 10 minutes to activate after creation",
-            "For sandbox environments, use https://test.salesforce.com as the instance URL",
-            "Make sure the Connected App has the 'api' and 'refresh_token' OAuth scopes",
-            "The callback URL in Salesforce must match exactly: #{ENV.fetch('VAULT_URL', 'http://localhost:4006')}/oauth/callback/salesforce"
-          ],
-          credential_help: {
-            "instance_url" => "Your Salesforce org URL, e.g. https://yourorg.my.salesforce.com",
-            "client_id" => "The Consumer Key from your Connected App settings",
-            "client_secret" => "The Consumer Secret from your Connected App settings"
-          }
+          docs_url: "https://help.salesforce.com/s/articleView?id=sf.connected_app_create_api_integration.htm"
         }
       end
 
@@ -272,40 +260,32 @@ module Connectors
         refresh_token = credentials[:_refresh_token]
         raise Connectors::AuthenticationError, "No refresh token available. Re-authorize with Salesforce." if refresh_token.blank?
 
-        login_url = credentials[:instance_url].to_s.include?("test.salesforce.com") ? "https://test.salesforce.com" : "https://login.salesforce.com"
+        connector = Connector.find_by(piece_name: "salesforce")
+        raise Connectors::AuthenticationError, "Salesforce connector not found" unless connector
 
-        response = Faraday.post("#{login_url}/services/oauth2/token") do |req|
-          req.headers["Content-Type"] = "application/x-www-form-urlencoded"
-          req.body = URI.encode_www_form(
-            grant_type: "refresh_token",
-            client_id: credentials[:client_id],
-            client_secret: credentials[:client_secret],
-            refresh_token: refresh_token
-          )
-        end
+        # Use ProviderFactory with user-provided credentials (client_id/secret stored in credential)
+        user_creds = { client_id: credentials[:client_id], client_secret: credentials[:client_secret] }
+        provider = Oauth::ProviderFactory.new(connector, credentials: user_creds)
+        tokens = provider.refresh_tokens(refresh_token)
 
-        unless response.success?
-          body = JSON.parse(response.body) rescue {}
-          raise Connectors::AuthenticationError, "Salesforce token refresh failed: #{body['error_description'] || body['error'] || 'Unknown error'}"
-        end
-
-        body = JSON.parse(response.body)
-        @access_token = body["access_token"]
-        @instance_url = body["instance_url"] if body["instance_url"].present?
+        @access_token = tokens[:access_token]
+        @instance_url = tokens[:instance_url] if tokens[:instance_url].present?
 
         # Persist new access_token in credential
         if credentials[:_credential_id].present?
-          credential = ConnectorCredential.find_by(id: credentials[:_credential_id])
-          if credential
-            current_creds = credential.decrypt_credentials
+          cred = ConnectorCredential.find_by(id: credentials[:_credential_id])
+          if cred
+            current_creds = cred.decrypt_credentials
             current_creds[:access_token] = @access_token
-            current_creds[:instance_url] = @instance_url if body["instance_url"].present?
-            credential.update_credentials(current_creds)
+            current_creds[:instance_url] = @instance_url if tokens[:instance_url].present?
+            cred.update_credentials(current_creds)
           end
         end
 
         @client = nil # Reset client with new token
         @access_token
+      rescue Oauth::ProviderFactory::RefreshError => e
+        raise Connectors::AuthenticationError, "Salesforce token refresh failed: #{e.message}"
       end
 
       # Wrapper that auto-retries on 401 using refresh_token

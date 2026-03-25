@@ -59,6 +59,12 @@ module Api
       end
 
       # POST /api/v1/connector_credentials/oauth_authorize
+      # For connectors where the user provides their own OAuth app credentials
+      # (e.g. Salesforce). Creates a pending credential, stores user credentials,
+      # and returns an authorize URL that goes through OauthController.
+      #
+      # For platform-managed OAuth (Slack, GitHub) where client_id/secret are in ENV,
+      # redirect directly to GET /oauth/authorize instead.
       def oauth_authorize
         return unless require_permission!("write")
 
@@ -70,18 +76,7 @@ module Api
           return
         end
 
-        # Read auth config from connector's auth_schema
-        schema = connector.auth_schema || {}
-        auth_url = schema["authUrl"] || schema[:authUrl]
-        scope = schema["scope"] || schema[:scope]
-        pkce_enabled = schema["pkce"] || schema[:pkce]
-
-        unless auth_url.present?
-          render json: { error: "Connector '#{connector.display_name}' missing authUrl in auth_schema" }, status: :unprocessable_entity
-          return
-        end
-
-        # Reuse existing pending credential or create a new one
+        # Create or reuse a pending credential to store the user's OAuth app credentials
         cred_name = params[:name] || "#{connector.display_name} OAuth"
         existing = current_project.connector_credentials
           .where(connector: connector, status: "pending")
@@ -103,46 +98,16 @@ module Api
           cred
         end
 
-        # PKCE: generate code_verifier and code_challenge if enabled
-        code_challenge = nil
-        if pkce_enabled
-          code_verifier = SecureRandom.urlsafe_base64(32)
-          code_challenge = Base64.urlsafe_encode64(
-            Digest::SHA256.digest(code_verifier), padding: false
-          )
-
-          # Store code_verifier in the credential so callback can use it
-          current_creds = credential.decrypt_credentials
-          current_creds[:_code_verifier] = code_verifier
-          credential.update_credentials(current_creds)
-          credential.update_columns(status: "pending")
-        end
-
-        state = Connectors::Oauth::StateManager.generate(
+        # Build the Vault OAuth authorize URL — credential_id is stored in the state
+        # so the callback can retrieve the user's client_id/client_secret
+        oauth_params = {
           project_id: current_project.id,
-          connector_id: connector.id,
-          credential_id: credential.id,
-          return_url: params[:return_url].to_s
-        )
+          connector_id: connector.piece_name,
+          return_to: params[:return_url].to_s,
+          credential_id: credential.id
+        }.compact_blank
 
-        callback_url = "#{vault_external_url}/oauth/callback/#{connector.piece_name}"
-
-        # Allow instance_url-based auth URL override (e.g. Salesforce sandbox)
-        effective_auth_url = resolve_auth_url(auth_url, cred_values)
-
-        authorize_params = {
-          response_type: "code",
-          client_id: cred_values["client_id"] || cred_values[:client_id],
-          redirect_uri: callback_url,
-          state: state
-        }
-        authorize_params[:scope] = scope if scope.present?
-        if pkce_enabled && code_challenge.present?
-          authorize_params[:code_challenge] = code_challenge
-          authorize_params[:code_challenge_method] = "S256"
-        end
-
-        authorize_url = "#{effective_auth_url}?" + URI.encode_www_form(authorize_params)
+        authorize_url = "#{vault_external_url}/oauth/authorize?" + URI.encode_www_form(oauth_params)
 
         render json: {
           authorize_url: authorize_url,
@@ -195,16 +160,6 @@ module Api
 
       def vault_external_url
         ENV.fetch("VAULT_EXTERNAL_URL") { ENV.fetch("VAULT_URL", "http://localhost:4006") }
-      end
-
-      # For connectors with instance_url (e.g. Salesforce sandbox), adjust the auth/token URL domain
-      def resolve_auth_url(base_url, cred_values)
-        instance_url = (cred_values["instance_url"] || cred_values[:instance_url]).to_s
-        if instance_url.include?("test.salesforce.com")
-          base_url.gsub("login.salesforce.com", "test.salesforce.com")
-        else
-          base_url
-        end
       end
 
       def credential_values
