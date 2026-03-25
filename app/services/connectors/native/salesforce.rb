@@ -34,12 +34,12 @@ module Connectors
           steps: [
             "Log in to Salesforce Setup as administrator",
             "Go to App Manager > New Connected App",
-            "Enable OAuth Settings with Callback URL: {VAULT_URL}/oauth/callback",
+            "Enable OAuth Settings with Callback URL: #{ENV["VAULT_URL"]}/oauth/callback",
             "Add OAuth scopes: 'Manage user data via APIs (api)' and 'Perform requests at any time (refresh_token, offline_access)'",
             "Copy the Consumer Key (Client ID) and Consumer Secret",
-            "Enter your Instance URL, Client ID, and Client Secret, then click 'Authorize with Salesforce'"
+            "Enter your Instance URL, Client ID, and Client Secret, then click 'Authorize with Salesforce'",
+            "Go to https://help.salesforce.com/s/articleView?id=sf.connected_app_create_api_integration.htm for more details"
           ],
-          docs_url: "https://help.salesforce.com/s/articleView?id=sf.connected_app_create_api_integration.htm"
         }
       end
 
