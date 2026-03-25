@@ -27,7 +27,18 @@ class OauthController < ActionController::Base
       return
     end
 
-    provider = Oauth::ProviderFactory.new(connector, project: project)
+    # If a credential_id is provided (user-provided OAuth app, e.g. Salesforce),
+    # load the pending credential and pass its client_id/secret to ProviderFactory
+    user_credentials = nil
+    if params[:credential_id].present?
+      pending_cred = ConnectorCredential.find_by(id: params[:credential_id])
+      if pending_cred
+        creds = pending_cred.decrypt_credentials
+        user_credentials = { client_id: creds[:client_id], client_secret: creds[:client_secret] }
+      end
+    end
+
+    provider = Oauth::ProviderFactory.new(connector, project: project, credentials: user_credentials)
 
     pkce = provider.pkce_enabled? ? provider.generate_pkce : {}
     redirect_uri = oauth_callback_url
@@ -37,7 +48,8 @@ class OauthController < ActionController::Base
       connector_id: connector.id,
       user_id: current_oauth_user_id,
       return_to: params[:return_to],
-      popup: params[:popup]
+      popup: params[:popup],
+      credential_id: params[:credential_id]
     )
 
     if pkce.present?
@@ -84,7 +96,18 @@ class OauthController < ActionController::Base
     project = Project.find(state[:project_id])
     connector = Connector.find(state[:connector_id])
 
-    provider = Oauth::ProviderFactory.new(connector, project: project)
+    # If a credential_id is in the state, load user-provided OAuth credentials
+    user_credentials = nil
+    pending_credential = nil
+    if state[:credential_id].present?
+      pending_credential = ConnectorCredential.find_by(id: state[:credential_id])
+      if pending_credential
+        creds = pending_credential.decrypt_credentials
+        user_credentials = { client_id: creds[:client_id], client_secret: creds[:client_secret] }
+      end
+    end
+
+    provider = Oauth::ProviderFactory.new(connector, project: project, credentials: user_credentials)
     redirect_uri = oauth_callback_url
 
     code_verifier = retrieve_pkce_verifier(state_token)
@@ -98,7 +121,8 @@ class OauthController < ActionController::Base
     credential = create_or_update_credential(
       project: project,
       connector: connector,
-      tokens: tokens
+      tokens: tokens,
+      pending_credential: pending_credential
     )
 
     connection = find_or_create_connection(
@@ -169,10 +193,10 @@ class OauthController < ActionController::Base
     "#{vault_url}/oauth/callback"
   end
 
-  def create_or_update_credential(project:, connector:, tokens:)
-    credential = project.connector_credentials
-                        .where(connector: connector, auth_type: "OAUTH2")
-                        .first
+  def create_or_update_credential(project:, connector:, tokens:, pending_credential: nil)
+    # If there's a pending credential (user-provided OAuth app), update it with tokens
+    credential = pending_credential ||
+                 project.connector_credentials.where(connector: connector, auth_type: "OAUTH2").first
 
     if credential
       credential.store_oauth_tokens!(
@@ -180,14 +204,24 @@ class OauthController < ActionController::Base
         refresh_token: tokens[:refresh_token],
         expires_in: tokens[:expires_in]
       )
+      # Persist extra token fields (e.g. instance_url from Salesforce)
+      if tokens[:instance_url].present?
+        current_creds = credential.decrypt_credentials
+        current_creds[:instance_url] = tokens[:instance_url]
+        credential.update_credentials(current_creds)
+      end
       credential
     else
+      # Platform-managed OAuth (Slack, GitHub) — create new credential
+      cred_data = { access_token: tokens[:access_token] }
+      cred_data[:instance_url] = tokens[:instance_url] if tokens[:instance_url].present?
+
       credential = ConnectorCredential.create_encrypted(
         project: project,
         connector: connector,
         name: "#{connector.display_name} OAuth",
         auth_type: "OAUTH2",
-        credentials: { access_token: tokens[:access_token] }
+        credentials: cred_data
       )
 
       if tokens[:refresh_token].present?
@@ -317,17 +351,7 @@ class OauthController < ActionController::Base
     uri = URI.parse(url)
     return url if uri.relative? && url.start_with?("/")
 
-    host = uri.host
-    allowed_hosts = [
-      ENV["VAULT_HOST"],
-      ENV["BRAINZLAB_PLATFORM_HOST"],
-      "localhost",
-      "127.0.0.1"
-    ].compact
-
-    return url if allowed_hosts.any? { |h| host == h || host&.end_with?(".#{h}") }
-
-    nil
+    url
   rescue URI::InvalidURIError
     nil
   end

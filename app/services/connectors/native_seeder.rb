@@ -22,6 +22,7 @@ module Connectors
       Connectors::Native::JiraCloud,
       Connectors::Native::Airtable,
       Connectors::Native::StripeConnect,
+      Connectors::Native::Salesforce
     ].freeze
 
     def seed!

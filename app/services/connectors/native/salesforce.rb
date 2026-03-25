@@ -302,6 +302,8 @@ module Connectors
 
         @client = nil # Reset client with new token
         @access_token
+      rescue Oauth::ProviderFactory::RefreshError => e
+        raise Connectors::AuthenticationError, "Salesforce token refresh failed: #{e.message}"
       end
 
       # Wrapper that auto-retries on 401 using refresh_token

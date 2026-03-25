@@ -10,9 +10,14 @@ module Oauth
 
     # project is optional — when provided, checks for a Vault secret
     # named "OAUTH_{CONNECTOR_KEY}" in the project as enterprise override.
-    def initialize(connector, project: nil)
+    #
+    # credentials is optional — when provided, uses these client_id/client_secret
+    # instead of looking in ENV or Vault secrets. Used for connectors where each
+    # customer provides their own OAuth app (e.g. Salesforce).
+    def initialize(connector, project: nil, credentials: nil)
       @connector = connector
       @project = project
+      @explicit_credentials = credentials
     end
 
     def authorization_url(state:, redirect_uri:, code_challenge: nil, code_challenge_method: nil)
@@ -76,9 +81,12 @@ module Oauth
     end
 
     # Lookup order:
-    # 1. Vault secret "OAUTH_{CONNECTOR}" in project (enterprise override)
-    # 2. ENV variable VAULT_OAUTH_{CONNECTOR}_CLIENT_ID (platform default)
+    # 1. Explicit credentials (user-provided, e.g. Salesforce per-customer Connected App)
+    # 2. Vault secret "OAUTH_{CONNECTOR}" in project (enterprise override)
+    # 3. ENV variable VAULT_OAUTH_{CONNECTOR}_CLIENT_ID (platform default)
     def oauth_client_id
+      return @explicit_credentials[:client_id] if @explicit_credentials&.dig(:client_id).present?
+
       vault_creds = vault_oauth_credentials
       return vault_creds[:client_id] if vault_creds
 
@@ -87,6 +95,8 @@ module Oauth
     end
 
     def oauth_client_secret
+      return @explicit_credentials[:client_secret] if @explicit_credentials&.dig(:client_secret).present?
+
       vault_creds = vault_oauth_credentials
       return vault_creds[:client_secret] if vault_creds
 
@@ -176,8 +186,9 @@ module Oauth
         refresh_token: body["refresh_token"],
         expires_in: body["expires_in"],
         token_type: body["token_type"],
-        scope: body["scope"]
-      }.tap do |tokens|
+        scope: body["scope"],
+        instance_url: body["instance_url"]
+      }.compact.tap do |tokens|
         raise TokenExchangeError, "Token response missing access_token" unless tokens[:access_token].present?
       end
     end
