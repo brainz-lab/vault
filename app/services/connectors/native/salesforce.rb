@@ -65,7 +65,7 @@ module Connectors
               "limit" => { "type" => "integer", "required" => false, "description" => "Maximum number of records to return (default 100)" },
               "offset" => { "type" => "integer", "required" => false, "description" => "Offset for pagination" },
               "where" => { "type" => "string", "required" => false, "description" => "SOQL WHERE clause (e.g. \"LastName = 'Smith'\")" },
-              "fields" => { "type" => "string", "required" => false, "description" => "Comma-separated fields to query (default: Id,FirstName,LastName,Email,Phone,Title,Account.Name,MailingCity,MailingCountry,MailingState,OwnerId,LeadSource,Description)" }
+              "fields" => { "type" => "string", "required" => false, "description" => "Comma-separated fields to query (default: Id,FirstName,LastName,Email,Phone,Title,AccountId,MailingCity,MailingCountry,MailingState,OwnerId,LeadSource,Description)" }
             } },
           { "name" => "get_contact", "displayName" => "Get Contact", "description" => "Get a contact by ID",
             "props" => {
@@ -180,7 +180,7 @@ module Connectors
       API_VERSION = "v59.0"
 
       DEFAULT_FIELDS = {
-        "Contact" => "Id,FirstName,LastName,Email,Phone,Title,AccountId,Account.Name,MailingCity,MailingCountry,MailingState,Website,OwnerId,LeadSource,Description",
+        "Contact" => "Id,FirstName,LastName,Email,Phone,Title,AccountId,MailingCity,MailingCountry,MailingState,OwnerId,LeadSource,Description",
         "Lead" => "Id,FirstName,LastName,Email,Phone,Title,Company,City,Country,State,Website,OwnerId,LeadSource,Status,Description",
         "Account" => "Id,Name,Website,Industry,Phone,BillingCity,BillingCountry,BillingState,OwnerId,Description,NumberOfEmployees",
         "Opportunity" => "Id,Name,StageName,Amount,CloseDate,AccountId,OwnerId,Description,Probability"
@@ -200,12 +200,7 @@ module Connectors
         limit = (params[:limit] || 100).to_i.clamp(1, 2000)
         offset = (params[:offset] || 0).to_i
 
-        soql = "SELECT #{fields} FROM #{sobject}"
-        soql += " WHERE #{params[:where]}" if params[:where].present?
-        soql += " ORDER BY CreatedDate DESC"
-        soql += " LIMIT #{limit}"
-        soql += " OFFSET #{offset}" if offset > 0
-
+        soql = build_list_soql(sobject, fields, params[:where], limit, offset)
         data = api_request(:get, "/query", q: soql)
 
         records = data["records"] || []
@@ -215,6 +210,32 @@ module Connectors
           total: data["totalSize"] || records.size,
           next: data["nextRecordsUrl"].present? ? offset + limit : nil
         }
+      rescue Connectors::Error => e
+        # If query fails due to invalid fields and we're using custom fields, retry with defaults
+        raise unless e.message.include?("INVALID_FIELD") || e.message.include?("No such column")
+        raise if params[:fields].present? # Don't retry if user explicitly chose fields
+
+        fallback_fields = "Id,Name"
+        soql = build_list_soql(sobject, fallback_fields, params[:where], limit, offset)
+        data = api_request(:get, "/query", q: soql)
+
+        records = data["records"] || []
+        {
+          records: records,
+          items: records,
+          total: data["totalSize"] || records.size,
+          next: data["nextRecordsUrl"].present? ? offset + limit : nil,
+          warning: "Some default fields were not available. Fell back to Id,Name. Use the 'fields' parameter to specify exact fields for your org."
+        }
+      end
+
+      def build_list_soql(sobject, fields, where_clause, limit, offset)
+        soql = "SELECT #{fields} FROM #{sobject}"
+        soql += " WHERE #{where_clause}" if where_clause.present?
+        soql += " ORDER BY CreatedDate DESC"
+        soql += " LIMIT #{limit}"
+        soql += " OFFSET #{offset}" if offset > 0
+        soql
       end
 
       def get_record(sobject, params)
