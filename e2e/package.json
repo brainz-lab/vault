@@ -1,0 +1,16 @@
+{
+  "name": "vault-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "E2E tests for vault",
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:features": "playwright test --grep @feature",
+    "test:gate": "playwright test --grep @smoke --reporter=github,html",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0"
+  }
+}
