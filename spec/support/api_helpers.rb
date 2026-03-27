@@ -4,7 +4,7 @@ module ApiHelpers
   end
 
   def json_headers
-    { "Content-Type" => "application/json", "Accept" => "application/json" }
+    { "Accept" => "application/json" }
   end
 
   def auth_headers(token_value)

@@ -60,6 +60,7 @@ RSpec.describe "Api::V1::Environments", type: :request do
 
   describe "POST /api/v1/environments" do
     it "creates a new environment" do
+      headers # force lazy evaluation before counting
       expect {
         post "/api/v1/environments",
           params: { name: "QA", slug: "qa", position: 5, color: "#3b82f6" },

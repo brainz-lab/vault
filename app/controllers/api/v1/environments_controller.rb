@@ -1,6 +1,7 @@
 module Api
   module V1
     class EnvironmentsController < BaseController
+      before_action :require_admin!, only: [ :create, :update, :destroy ]
       before_action :set_environment, only: [ :show, :update, :destroy ]
 
       # GET /api/v1/environments
@@ -19,8 +20,6 @@ module Api
 
       # POST /api/v1/environments
       def create
-        require_permission!("admin")
-
         @environment = current_project.secret_environments.build(environment_params)
         @environment.save!
 
@@ -31,8 +30,6 @@ module Api
 
       # PUT/PATCH /api/v1/environments/:slug
       def update
-        require_permission!("admin")
-
         @environment.update!(environment_params)
 
         log_access(action: "update_environment", details: { slug: @environment.slug })
@@ -42,8 +39,6 @@ module Api
 
       # DELETE /api/v1/environments/:slug
       def destroy
-        require_permission!("admin")
-
         if @environment.secret_versions.exists?
           render json: { error: "Cannot delete environment with secrets" }, status: :unprocessable_entity
           return
@@ -57,6 +52,10 @@ module Api
       end
 
       private
+
+      def require_admin!
+        require_permission!("admin")
+      end
 
       def set_environment
         @environment = current_project.secret_environments.find_by!(slug: params[:slug])

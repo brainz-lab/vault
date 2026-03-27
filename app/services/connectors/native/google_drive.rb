@@ -166,7 +166,7 @@ module Connectors
           name: params[:name],
           mimeType: "application/vnd.google-apps.folder"
         }
-        body[:parents] = [params[:parent_id]] if params[:parent_id].present?
+        body[:parents] = [ params[:parent_id] ] if params[:parent_id].present?
 
         resp = api_post("#{DRIVE_API}/files", body)
         { id: resp["id"], name: resp["name"] }
@@ -175,7 +175,7 @@ module Connectors
       def upload_file(params)
         mime_type = params[:mime_type] || "text/plain"
         metadata = { name: params[:name], mimeType: mime_type }
-        metadata[:parents] = [params[:folder_id]] if params[:folder_id].present?
+        metadata[:parents] = [ params[:folder_id] ] if params[:folder_id].present?
 
         boundary = SecureRandom.hex(16)
         body = build_multipart_body(boundary, metadata, params[:content], mime_type)

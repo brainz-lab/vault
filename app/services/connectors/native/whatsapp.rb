@@ -167,7 +167,7 @@ module Connectors
 
       def check_number(params)
         phone = normalize_phone(params[:phone])
-        result = api_post("/user/check", { Phone: [phone] })
+        result = api_post("/user/check", { Phone: [ phone ] })
         users = result.dig("data", "Users") || {}
         exists = users.values.any? { |v| v.is_a?(Hash) && v["Devices"].present? }
         { exists: exists, phone: phone }
@@ -218,7 +218,7 @@ module Connectors
 
         # Connect the session (Immediate: true to avoid 10s wait)
         result = api_post("/session/connect", {
-          Subscribe: ["Message", "ReadReceipt"],
+          Subscribe: [ "Message", "ReadReceipt" ],
           Immediate: true
         })
 

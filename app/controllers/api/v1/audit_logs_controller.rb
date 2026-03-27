@@ -8,7 +8,7 @@ module Api
         logs = current_project.audit_logs.order(created_at: :desc)
 
         # Filter by action
-        logs = logs.where(action: params[:action]) if params[:action].present?
+        logs = logs.where(action: params[:audit_action]) if params[:audit_action].present?
 
         # Filter by secret
         if params[:secret_key].present?

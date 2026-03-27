@@ -109,7 +109,7 @@ module Connectors
 
         body = {
           properties: { title: title },
-          sheets: [{ properties: { title: sheet_name } }]
+          sheets: [ { properties: { title: sheet_name } } ]
         }
 
         resp = api_post(SHEETS_API, body)
@@ -120,7 +120,7 @@ module Connectors
         if headers.present?
           headers = JSON.parse(headers) if headers.is_a?(String)
           if headers.is_a?(Array) && headers.any?
-            append_rows(spreadsheet_id: spreadsheet_id, range: sheet_name, values: [headers])
+            append_rows(spreadsheet_id: spreadsheet_id, range: sheet_name, values: [ headers ])
           end
         end
 

@@ -19,7 +19,7 @@ RSpec.describe SecretFolder, type: :model do
 
     it "enforces uniqueness of path scoped to project" do
       existing = create(:secret_folder)
-      duplicate = build(:secret_folder, project: existing.project, path: existing.path)
+      duplicate = build(:secret_folder, project: existing.project, name: existing.name)
       duplicate.valid?
       expect(duplicate.errors[:path]).to be_present
     end

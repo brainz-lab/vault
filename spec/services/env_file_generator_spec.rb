@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe EnvFileGenerator do
   before do
     @project = create(:project, name: "Generator Test Project")
-    @environment = create(:secret_environment, project: @project, name: "Development", slug: "development")
+    @environment = @project.secret_environments.find_by(slug: "development")
     @generator = described_class.new(@environment)
   end
 

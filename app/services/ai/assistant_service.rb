@@ -20,6 +20,8 @@ module Ai
       tools = build_tools
       @ai_total_input_tokens = 0
       @ai_total_output_tokens = 0
+      @ai_total_cache_creation_tokens = 0
+      @ai_total_cache_read_tokens = 0
       @ai_model = nil
 
       rounds = 0
@@ -130,7 +132,7 @@ module Ai
           if messages.last && messages.last[:role] == "user" && messages.last[:content].is_a?(Array)
             messages.last[:content] << tool_result_block
           else
-            messages << { role: "user", content: [tool_result_block] }
+            messages << { role: "user", content: [ tool_result_block ] }
           end
         end
       end
@@ -184,22 +186,30 @@ module Ai
     def track_ai_usage(response)
       return unless response.is_a?(Hash) && response["usage"]
 
+      usage = response["usage"]
       @ai_model ||= response["model"]
-      @ai_total_input_tokens += response["usage"]["input_tokens"].to_i
-      @ai_total_output_tokens += response["usage"]["output_tokens"].to_i
+      @ai_total_input_tokens += usage["input_tokens"].to_i
+      @ai_total_output_tokens += usage["output_tokens"].to_i
+      @ai_total_cache_creation_tokens += usage["cache_creation_input_tokens"].to_i
+      @ai_total_cache_read_tokens += usage["cache_read_input_tokens"].to_i
     end
 
     def report_ai_metrics
-      return unless defined?(BrainzLab::PlatformClient::CurrentTransaction)
+      return unless defined?(BrainzLab::PlatformClient::AiMetrics)
       return if @ai_total_input_tokens.to_i.zero? && @ai_total_output_tokens.to_i.zero?
 
-      tx = BrainzLab::PlatformClient::CurrentTransaction.get
-      return unless tx
+      # Build a synthetic response with accumulated totals for the gem adapter
+      accumulated_response = {
+        "model" => @ai_model,
+        "usage" => {
+          "input_tokens" => @ai_total_input_tokens,
+          "output_tokens" => @ai_total_output_tokens,
+          "cache_creation_input_tokens" => @ai_total_cache_creation_tokens,
+          "cache_read_input_tokens" => @ai_total_cache_read_tokens
+        }
+      }
 
-      tx[:ai_provider] = "anthropic"
-      tx[:ai_model] = @ai_model
-      tx[:ai_input_tokens] = @ai_total_input_tokens
-      tx[:ai_output_tokens] = @ai_total_output_tokens
+      BrainzLab::PlatformClient::AiMetrics.extract(accumulated_response, provider: :anthropic)
     end
 
     def execute_tool(name, arguments)

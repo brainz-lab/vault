@@ -11,13 +11,6 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: public; Type: SCHEMA; Schema: -; Owner: -
---
-
--- *not* creating schema, since initdb creates it
-
-
---
 -- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -92,6 +85,72 @@ CREATE TABLE public.ar_internal_metadata (
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL
 );
+
+
+--
+-- Name: assistant_chats; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.assistant_chats (
+    id bigint NOT NULL,
+    user_id integer,
+    title character varying,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: assistant_chats_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.assistant_chats_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: assistant_chats_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.assistant_chats_id_seq OWNED BY public.assistant_chats.id;
+
+
+--
+-- Name: assistant_messages; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.assistant_messages (
+    id bigint NOT NULL,
+    assistant_chat_id bigint NOT NULL,
+    role integer DEFAULT 0,
+    content text,
+    metadata jsonb DEFAULT '{}'::jsonb,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: assistant_messages_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.assistant_messages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: assistant_messages_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.assistant_messages_id_seq OWNED BY public.assistant_messages.id;
 
 
 --
@@ -829,6 +888,20 @@ CREATE TABLE public.ssh_server_keys (
 
 
 --
+-- Name: assistant_chats id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.assistant_chats ALTER COLUMN id SET DEFAULT nextval('public.assistant_chats_id_seq'::regclass);
+
+
+--
+-- Name: assistant_messages id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.assistant_messages ALTER COLUMN id SET DEFAULT nextval('public.assistant_messages_id_seq'::regclass);
+
+
+--
 -- Name: solid_queue_blocked_executions id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -927,6 +1000,22 @@ ALTER TABLE ONLY public.access_tokens
 
 ALTER TABLE ONLY public.ar_internal_metadata
     ADD CONSTRAINT ar_internal_metadata_pkey PRIMARY KEY (key);
+
+
+--
+-- Name: assistant_chats assistant_chats_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.assistant_chats
+    ADD CONSTRAINT assistant_chats_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: assistant_messages assistant_messages_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.assistant_messages
+    ADD CONSTRAINT assistant_messages_pkey PRIMARY KEY (id);
 
 
 --
@@ -1283,6 +1372,27 @@ CREATE INDEX index_access_tokens_on_project_id_and_active ON public.access_token
 --
 
 CREATE UNIQUE INDEX index_access_tokens_on_project_id_and_token_digest ON public.access_tokens USING btree (project_id, token_digest);
+
+
+--
+-- Name: index_assistant_chats_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_assistant_chats_on_user_id ON public.assistant_chats USING btree (user_id);
+
+
+--
+-- Name: index_assistant_messages_on_assistant_chat_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_assistant_messages_on_assistant_chat_id ON public.assistant_messages USING btree (assistant_chat_id);
+
+
+--
+-- Name: index_assistant_messages_on_assistant_chat_id_and_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_assistant_messages_on_assistant_chat_id_and_created_at ON public.assistant_messages USING btree (assistant_chat_id, created_at);
 
 
 --
@@ -1943,6 +2053,14 @@ ALTER TABLE ONLY public.secret_versions
 
 
 --
+-- Name: assistant_messages fk_rails_410e66ee7b; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.assistant_messages
+    ADD CONSTRAINT fk_rails_410e66ee7b FOREIGN KEY (assistant_chat_id) REFERENCES public.assistant_chats(id);
+
+
+--
 -- Name: solid_queue_blocked_executions fk_rails_4cd34e2228; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2117,6 +2235,7 @@ ALTER TABLE ONLY public.connector_credentials
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260305200000'),
 ('20260226000001'),
 ('20260223000004'),
 ('20260223000003'),

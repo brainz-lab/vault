@@ -46,9 +46,9 @@ RSpec.describe AuditLog, type: :model do
       let!(:secret_log) { create(:audit_log, project: project, resource_type: "secret", resource_id: secret.id, resource_path: secret.path) }
       let!(:other_log)  { create(:audit_log, project: project, resource_path: "/OTHER_KEY") }
 
-      it "returns logs matching the given secret path" do
-        expect(AuditLog.for_secret(secret.path)).to include(secret_log)
-        expect(AuditLog.for_secret(secret.path)).not_to include(other_log)
+      it "returns logs matching the given secret" do
+        expect(AuditLog.for_secret(secret)).to include(secret_log)
+        expect(AuditLog.for_secret(secret)).not_to include(other_log)
       end
     end
 

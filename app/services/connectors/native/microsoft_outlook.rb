@@ -71,7 +71,7 @@ module Connectors
           message: {
             subject: params[:subject],
             body: { contentType: params[:content_type] || "Text", content: params[:body] },
-            toRecipients: [{ emailAddress: { address: params[:to] } }]
+            toRecipients: [ { emailAddress: { address: params[:to] } } ]
           }
         }
         resp = faraday.post("#{GRAPH_API}/me/sendMail") do |r|

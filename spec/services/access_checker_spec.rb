@@ -5,8 +5,8 @@ RSpec.describe AccessChecker do
     @project = create(:project, name: "Access Test Project")
     @checker = described_class.new(@project)
     @token = create(:access_token, :full_access, project: @project)
-    @development = create(:secret_environment, project: @project, name: "Development", slug: "development")
-    @staging = create(:secret_environment, project: @project, name: "Staging", slug: "staging")
+    @development = @project.secret_environments.find_by(slug: "development")
+    @staging = @project.secret_environments.find_by(slug: "staging")
     @secret = create(:secret, project: @project, key: "DATABASE_URL")
   end
 

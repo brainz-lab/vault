@@ -37,7 +37,7 @@ RSpec.describe "Api::V1::AuditLogs", type: :request do
     end
 
     it "filters by action" do
-      get "/api/v1/audit_logs", params: { action: "read" }, headers: headers
+      get "/api/v1/audit_logs", params: { audit_action: "read" }, headers: headers
 
       expect(response).to have_http_status(:success)
 

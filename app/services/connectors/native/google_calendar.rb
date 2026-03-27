@@ -216,7 +216,7 @@ module Connectors
           ids = params[:calendars].is_a?(String) ? JSON.parse(params[:calendars]) : params[:calendars]
           ids.map { |id| { id: id } }
         else
-          [{ id: "primary" }]
+          [ { id: "primary" } ]
         end
 
         body = {

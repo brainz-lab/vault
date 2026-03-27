@@ -6,7 +6,7 @@ RSpec.describe SecretResolver do
     EncryptionKey.delete_all
 
     @project = create(:project, name: "Resolver Test Project")
-    @environment = create(:secret_environment, project: @project, name: "Development", slug: "development")
+    @environment = @project.secret_environments.find_by(slug: "development")
     @resolver = described_class.new(@project, @environment)
   end
 

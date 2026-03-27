@@ -16,7 +16,9 @@ RSpec.describe AccessToken, type: :model do
 
     it "enforces uniqueness of token_digest scoped to project" do
       existing = create(:access_token)
-      duplicate = build(:access_token, project: existing.project, token_digest: existing.token_digest)
+      duplicate = build(:access_token, project: existing.project)
+      duplicate.instance_variable_set(:@skip_generate, true)
+      duplicate.token_digest = existing.token_digest
       duplicate.valid?
       expect(duplicate.errors[:token_digest]).to be_present
     end
@@ -97,7 +99,7 @@ RSpec.describe AccessToken, type: :model do
     let(:project)     { create(:project) }
     let(:environment) { project.secret_environments.find_by(name: "Development") }
     let(:secret)      { create(:secret, project: project) }
-    let(:token)       { create(:access_token, project: project, active: true, revoked_at: nil, expires_at: nil, permissions: [ "read" ]) }
+    let(:token)       { create(:access_token, project: project, active: true, revoked_at: nil, expires_at: nil, permissions: [ "read" ], environments: [ "development" ]) }
 
     it "returns true for an active token with the required permission" do
       expect(token.can_access?(secret, environment, permission: "read")).to be true

@@ -54,7 +54,7 @@ module Connectors
         case action.to_s
         when "list_projects" then api_get("/rest/api/3/project")
         when "search_issues" then api_post("/rest/api/3/search", { jql: params[:jql], maxResults: params[:max_results] || 20 })
-        when "create_issue" then api_post("/rest/api/3/issue", { fields: { project: { key: params[:project_key] }, summary: params[:summary], issuetype: { name: params[:issue_type] }, description: params[:description] ? { type: "doc", version: 1, content: [{ type: "paragraph", content: [{ type: "text", text: params[:description] }] }] } : nil }.compact })
+        when "create_issue" then api_post("/rest/api/3/issue", { fields: { project: { key: params[:project_key] }, summary: params[:summary], issuetype: { name: params[:issue_type] }, description: params[:description] ? { type: "doc", version: 1, content: [ { type: "paragraph", content: [ { type: "text", text: params[:description] } ] } ] } : nil }.compact })
         when "get_issue" then api_get("/rest/api/3/issue/#{params[:issue_key]}")
         else raise Connectors::ActionNotFoundError, "Unknown Jira action: #{action}"
         end

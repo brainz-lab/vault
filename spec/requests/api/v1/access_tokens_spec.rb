@@ -45,6 +45,7 @@ RSpec.describe "Api::V1::AccessTokens", type: :request do
 
   describe "POST /api/v1/access_tokens" do
     it "creates a new token and returns the raw token value" do
+      headers # force lazy evaluation of admin_token before counting
       expect {
         post "/api/v1/access_tokens",
           params: { name: "New Token", permissions: %w[read write] },

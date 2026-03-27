@@ -2,7 +2,7 @@ class OauthController < ActionController::Base
   include ActionController::Cookies
 
   skip_before_action :verify_authenticity_token, raise: false
-  before_action :authenticate_oauth_request!, only: [:authorize]
+  before_action :authenticate_oauth_request!, only: [ :authorize ]
 
   # GET /oauth/authorize
   # Initiates OAuth flow: builds state, redirects to provider
@@ -335,7 +335,7 @@ class OauthController < ActionController::Base
   def append_params(url, **params)
     uri = URI.parse(url)
     existing = URI.decode_www_form(uri.query || "")
-    uri.query = URI.encode_www_form(existing + params.map { |k, v| [k.to_s, v.to_s] })
+    uri.query = URI.encode_www_form(existing + params.map { |k, v| [ k.to_s, v.to_s ] })
     uri.to_s
   rescue URI::InvalidURIError
     url
