@@ -136,6 +136,16 @@ module Api
               @connection.mark_error!(response.body["error"] || "Test failed")
               render json: { success: false, error: response.body["error"] }
             end
+          elsif connector.airbyte? && connector.manifest_yaml.present?
+            engine = Connectors::Manifest::Engine.new(connector.manifest_yaml, credentials)
+            if engine.check_connection
+              @connection.mark_connected!
+              credential.mark_verified!
+              render json: { success: true, status: "connected" }
+            else
+              @connection.mark_error!("Check stream returned no data")
+              render json: { success: false, error: "Connection check failed" }
+            end
           else
             @connection.mark_connected!
             credential.mark_verified!

@@ -53,6 +53,8 @@ module Connectors
         execute_activepieces(connector, action_name, input, credentials, timeout)
       when "native"
         execute_native(connector, action_name, input, credentials)
+      when "airbyte"
+        execute_manifest(connector, action_name, input, credentials)
       else
         raise Connectors::Error, "Unsupported connector type: #{connector.connector_type}"
       end
@@ -92,6 +94,15 @@ module Connectors
       runner_class = native_runner_for(connector.piece_name)
       runner = runner_class.new(credentials)
       runner.execute(action_name, **input.symbolize_keys)
+    end
+
+    def execute_manifest(connector, action_name, input, credentials)
+      unless connector.manifest_yaml.present?
+        raise Connectors::Error, "No manifest available for connector '#{connector.piece_name}'. Manifest-only Airbyte connectors require a YAML manifest."
+      end
+
+      engine = Connectors::Manifest::Engine.new(connector.manifest_yaml, credentials)
+      engine.execute(action_name, **input.symbolize_keys)
     end
 
     def native_runner_for(piece_name)

@@ -37,3 +37,7 @@ production:
     class: CleanupVersionsJob
     queue: low
     schedule: "0 3 * * 0"
+  manifest_update:
+    class: ManifestUpdateJob
+    queue: maintenance
+    schedule: "0 3 * * 0"

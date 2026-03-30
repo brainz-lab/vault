@@ -18,6 +18,8 @@ class Connector < ApplicationRecord
   scope :by_category, ->(category) { where(category: category) }
   scope :native, -> { by_type("native") }
   scope :activepieces, -> { by_type("activepieces") }
+  scope :airbyte, -> { by_type("airbyte") }
+  scope :manifest_ready, -> { airbyte.where.not(manifest_yaml: nil) }
   scope :search, ->(query) {
     where("piece_name ILIKE :q OR display_name ILIKE :q OR description ILIKE :q", q: "%#{query}%")
   }

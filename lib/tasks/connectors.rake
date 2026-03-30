@@ -12,11 +12,12 @@ namespace :connectors do
     puts "Activepieces connectors: #{stats[:created]} created, #{stats[:updated]} updated, #{stats[:errors]} errors (#{stats[:total]} total)"
   end
 
-  desc "Seed all Airbyte connectors from OSS registry"
+  desc "Seed executable Airbyte connectors (manifest-only/low-code from OSS registry)"
   task seed_airbyte: :environment do
-    puts "Fetching Airbyte registry..."
+    puts "Fetching Airbyte registry (only manifest-compatible connectors)..."
     stats = Connectors::AirbyteSeeder.new.seed!
-    puts "Airbyte connectors: #{stats[:created]} created, #{stats[:updated]} updated, #{stats[:errors]} errors (#{stats[:sources]} sources, #{stats[:destinations]} destinations)"
+    puts "Airbyte connectors: #{stats[:created]} created, #{stats[:updated]} updated, #{stats[:skipped]} skipped (no manifest), #{stats[:errors]} errors"
+    puts "  Executable: #{stats[:sources]} sources + #{stats[:destinations]} destinations (from #{stats[:total_registry]} in registry)"
   end
 
   desc "Seed ALL connectors (native + activepieces + airbyte)"
@@ -26,7 +27,7 @@ namespace :connectors do
     puts "  Native: #{native_stats[:created]} created, #{native_stats[:updated]} updated"
 
     puts "\n=== Seeding Activepieces Connectors ==="
-    ap_stats = Connectors::ActivepiecesSeeder.new.seed!
+    #ap_stats = Connectors::ActivepiecesSeeder.new.seed!
     puts "  Activepieces: #{ap_stats[:created]} created, #{ap_stats[:updated]} updated, #{ap_stats[:errors]} errors"
 
     puts "\n=== Seeding Airbyte Connectors ==="
@@ -84,7 +85,8 @@ namespace :connectors do
     puts "  Total:        #{total}"
     puts "  Native:       #{native}"
     puts "  Activepieces: #{activepieces}"
-    puts "  Airbyte:      #{airbyte}"
+    manifest_ready = Connector.manifest_ready.count
+    puts "  Airbyte:      #{airbyte} (#{manifest_ready} with manifest)"
     puts "  Installed:    #{installed}"
     puts "  Enabled:      #{enabled}"
 

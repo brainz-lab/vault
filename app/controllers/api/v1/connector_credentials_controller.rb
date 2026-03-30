@@ -100,6 +100,12 @@ module Api
       end
 
       def credential_values
+        # If credentials are passed as a nested hash, use them directly
+        if params[:credentials].is_a?(ActionController::Parameters) || params[:credentials].is_a?(Hash)
+          creds = params[:credentials]
+          return creds.respond_to?(:to_unsafe_h) ? creds.to_unsafe_h.compact_blank : creds.to_h.compact_blank
+        end
+
         # Static whitelist for known credential fields
         static_keys = %w[
           value api_key token username password secret
@@ -107,16 +113,19 @@ module Api
           smtp_host smtp_port imap_host imap_port from
           bucket region base_path adapter smtp_domain
           domain webhook_token webhook_url auth_method access_token refresh_token
-          subdomain api_token
+          subdomain api_token email domain_name start_date
         ]
 
-        # Also accept any keys defined in the connector's auth_schema props
+        # Also accept any keys defined in the connector's auth_schema
         dynamic_keys = []
         if params[:connector_id].present?
           connector = Connector.find_by(id: params[:connector_id])
           if connector&.auth_schema.is_a?(Hash)
+            # Activepieces format: auth_schema.props
             props = connector.auth_schema["props"] || connector.auth_schema[:props] || {}
-            dynamic_keys = props.keys.map(&:to_s)
+            # Airbyte format: auth_schema.properties (JSON Schema)
+            properties = connector.auth_schema["properties"] || connector.auth_schema[:properties] || {}
+            dynamic_keys = (props.keys + properties.keys).map(&:to_s)
           end
         end
 

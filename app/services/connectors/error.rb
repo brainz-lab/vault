@@ -6,4 +6,5 @@ module Connectors
   class NotConnectedError < Error; end
   class ActionNotFoundError < Error; end
   class SidecarUnavailableError < Error; end
+  class SecurityError < Error; end
 end

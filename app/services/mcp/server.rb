@@ -42,7 +42,11 @@ module Mcp
       "vault_connector_execute" => Tools::ConnectorExecute,
       "vault_connector_test" => Tools::ConnectorTest,
       "vault_connector_set_credential" => Tools::ConnectorSetCredential,
-      "vault_connector_list_credentials" => Tools::ConnectorListCredentials
+      "vault_connector_list_credentials" => Tools::ConnectorListCredentials,
+      # Airbyte manifest tools
+      "vault_airbyte_discover" => Tools::AirbyteDiscover,
+      "vault_airbyte_read" => Tools::AirbyteRead,
+      "vault_airbyte_check" => Tools::AirbyteCheck
     }.freeze
 
     def initialize(project:, environment: nil)
