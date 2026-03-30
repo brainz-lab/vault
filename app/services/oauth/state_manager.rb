@@ -8,7 +8,7 @@ module Oauth
     class ExpiredStateError < StandardError; end
 
     class << self
-      def generate(project_id:, connector_id:, user_id:, return_to: nil, popup: nil)
+      def generate(project_id:, connector_id:, user_id:, return_to: nil, popup: nil, credential_id: nil)
         token = SecureRandom.hex(TOKEN_BYTES)
 
         payload = {
@@ -17,8 +17,9 @@ module Oauth
           user_id: user_id,
           return_to: return_to,
           popup: popup,
+          credential_id: credential_id,
           created_at: Time.current.iso8601
-        }.to_json
+        }.compact.to_json
 
         redis.set(state_key(token), payload, ex: STATE_TTL)
 
