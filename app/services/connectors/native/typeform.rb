@@ -6,7 +6,7 @@ module Connectors
       def self.piece_name = "typeform"
       def self.display_name = "Typeform"
       def self.description = "Manage forms and retrieve responses from Typeform"
-      def self.category = "forms"
+      def self.category = "forms_and_surveys"
       def self.logo_url = "https://cdn.brainzlab.ai/connectors/typeform.svg"
       def self.auth_type = "SECRET_TEXT"
       def self.auth_schema

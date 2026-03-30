@@ -6,7 +6,7 @@ module Connectors
       def self.piece_name = "calendly"
       def self.display_name = "Calendly"
       def self.description = "Manage events, invitees, and scheduling in Calendly"
-      def self.category = "scheduling"
+      def self.category = "productivity"
       def self.logo_url = "https://cdn.brainzlab.ai/connectors/calendly.svg"
       def self.auth_type = "SECRET_TEXT"
       def self.auth_schema
