@@ -102,7 +102,8 @@ module Connectors
       end
 
       engine = Connectors::Manifest::Engine.new(connector.manifest_yaml, credentials)
-      engine.execute(action_name, **input.symbolize_keys)
+      limit = input.delete(:limit) || input.delete("limit") || 100
+      engine.execute(action_name, limit: limit.to_i, **input.symbolize_keys)
     end
 
     def native_runner_for(piece_name)
