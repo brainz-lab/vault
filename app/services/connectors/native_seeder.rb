@@ -24,7 +24,31 @@ module Connectors
       Connectors::Native::Notion,
       Connectors::Native::JiraCloud,
       Connectors::Native::Airtable,
-      Connectors::Native::StripeConnect
+      Connectors::Native::StripeConnect,
+      # Batch 2 — high-demand connectors
+      Connectors::Native::Twilio,
+      Connectors::Native::Sendgrid,
+      Connectors::Native::Telegram,
+      Connectors::Native::Shopify,
+      Connectors::Native::Zendesk,
+      # Batch 3 — CRM, marketing, productivity
+      Connectors::Native::Pipedrive,
+      Connectors::Native::Mailchimp,
+      Connectors::Native::Intercom,
+      Connectors::Native::Asana,
+      Connectors::Native::Discord,
+      # Batch 4 — productivity, support, forms, scheduling
+      Connectors::Native::Monday,
+      Connectors::Native::Freshdesk,
+      Connectors::Native::Typeform,
+      Connectors::Native::Calendly,
+      Connectors::Native::Trello,
+      # Batch 5 — developer tools, accounting, project management
+      Connectors::Native::Gitlab,
+      Connectors::Native::Sentry,
+      Connectors::Native::Quickbooks,
+      Connectors::Native::Linear,
+      Connectors::Native::Clickup
     ].freeze
 
     def seed!

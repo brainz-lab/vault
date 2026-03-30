@@ -129,6 +129,26 @@ module Connectors
       when "airtable" then Connectors::Native::Airtable
       when "stripe" then Connectors::Native::StripeConnect
       when "whatsapp" then Connectors::Native::Whatsapp
+      when "twilio" then Connectors::Native::Twilio
+      when "sendgrid" then Connectors::Native::Sendgrid
+      when "telegram" then Connectors::Native::Telegram
+      when "shopify" then Connectors::Native::Shopify
+      when "zendesk" then Connectors::Native::Zendesk
+      when "pipedrive" then Connectors::Native::Pipedrive
+      when "mailchimp" then Connectors::Native::Mailchimp
+      when "intercom" then Connectors::Native::Intercom
+      when "asana" then Connectors::Native::Asana
+      when "discord" then Connectors::Native::Discord
+      when "monday" then Connectors::Native::Monday
+      when "freshdesk" then Connectors::Native::Freshdesk
+      when "typeform" then Connectors::Native::Typeform
+      when "calendly" then Connectors::Native::Calendly
+      when "trello" then Connectors::Native::Trello
+      when "gitlab" then Connectors::Native::Gitlab
+      when "sentry" then Connectors::Native::Sentry
+      when "quickbooks" then Connectors::Native::Quickbooks
+      when "linear" then Connectors::Native::Linear
+      when "clickup" then Connectors::Native::Clickup
       else
         raise Connectors::Error, "Unknown native connector: #{piece_name}"
       end
