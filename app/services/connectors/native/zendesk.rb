@@ -276,7 +276,8 @@ module Connectors
         data = JSON.parse(resp.body)
 
         unless resp.success?
-          error_msg = data.dig("error", "message") || data["error"] || data["description"] || "HTTP #{resp.status}"
+          error_detail = data["error"]
+          error_msg = (error_detail.is_a?(Hash) ? error_detail["message"] : error_detail) || data["description"] || "HTTP #{resp.status}"
           raise Connectors::AuthenticationError, "Zendesk: #{error_msg}" if resp.status == 401
           raise Connectors::RateLimitError, "Zendesk rate limited" if resp.status == 429
           raise Connectors::Error, "Zendesk API error: #{error_msg}"

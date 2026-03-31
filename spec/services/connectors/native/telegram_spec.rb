@@ -20,11 +20,11 @@ RSpec.describe Connectors::Native::Telegram, type: :service do
     end
 
     it "uses default_chat_id when chat_id not provided" do
-      stub_request(:post, "#{api_base}/sendMessage")
-        .with(body: hash_including("chat_id" => 987654321))
-        .to_return(status: 200, body: { ok: true, result: { message_id: 1, chat: { id: 987654321 }, date: 1 } }.to_json)
+      stub_json_post("#{api_base}/sendMessage",
+        body: { ok: true, result: { message_id: 1, chat: { id: 987654321 }, date: 1 } })
 
-      connector.execute("send_message", text: "test")
+      result = connector.execute("send_message", text: "test")
+      expect(result[:message_id]).to eq(1)
     end
 
     it "raises error without chat_id and no default" do

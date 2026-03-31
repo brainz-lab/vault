@@ -12,7 +12,8 @@
 #
 module ConnectorHelpers
   def stub_json(method, url, body:, status: 200, headers: {})
-    stub_request(method, url).to_return(
+    pattern = url.is_a?(Regexp) ? url : /\A#{Regexp.escape(url)}/
+    stub_request(method, pattern).to_return(
       status: status,
       body: body.is_a?(String) ? body : body.to_json,
       headers: { "Content-Type" => "application/json" }.merge(headers)

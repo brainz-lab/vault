@@ -63,7 +63,7 @@ RSpec.describe Connectors::Native::Trello, type: :service do
 
   describe "error handling" do
     it "raises AuthenticationError on 401" do
-      stub_json_get("#{api_base}/members/me/boards", body: "invalid token", status: 401)
+      stub_json_get("#{api_base}/members/me/boards", body: { message: "invalid token" }, status: 401)
 
       expect { connector.execute("list_boards") }
         .to raise_error(Connectors::AuthenticationError, /Trello/)
