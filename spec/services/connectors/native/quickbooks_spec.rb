@@ -30,7 +30,7 @@ RSpec.describe Connectors::Native::Quickbooks, type: :service do
 
       result = connector.execute("create_invoice",
         customer_id: "cust1",
-        line_items: [{ description: "Consulting", amount: 250, quantity: 1 }].to_json)
+        line_items: [ { description: "Consulting", amount: 250, quantity: 1 } ].to_json)
       expect(result[:success]).to be true
       expect(result[:total]).to eq(250.0)
     end
@@ -64,7 +64,7 @@ RSpec.describe Connectors::Native::Quickbooks, type: :service do
     it "uses sandbox URL" do
       sandbox = described_class.new({ access_token: "tok", realm_id: "999", environment: "sandbox" })
       stub_json_get("https://sandbox-quickbooks.api.intuit.com/v3/company/999/query",
-        body: { QueryResponse: { CompanyInfo: [{ CompanyName: "Sandbox Co" }] } })
+        body: { QueryResponse: { CompanyInfo: [ { CompanyName: "Sandbox Co" } ] } })
 
       result = sandbox.execute("get_company_info")
       expect(result[:name]).to eq("Sandbox Co")

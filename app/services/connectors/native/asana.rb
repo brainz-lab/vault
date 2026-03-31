@@ -158,7 +158,7 @@ module Connectors
         body[:workspace] = resolve_workspace(params)
 
         if params[:project_gid].present?
-          body[:projects] = [params[:project_gid]]
+          body[:projects] = [ params[:project_gid] ]
         end
 
         if params[:tags].present?

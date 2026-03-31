@@ -49,7 +49,7 @@ RSpec.describe Connectors::Native::Twilio, type: :service do
   describe "#execute list_messages" do
     it "returns messages" do
       stub_json_get("#{api_base}/Messages.json",
-        body: { messages: [{ sid: "SM1", to: "+1", from: "+2", body: "hi", status: "delivered", date_sent: "2026-01-01" }] })
+        body: { messages: [ { sid: "SM1", to: "+1", from: "+2", body: "hi", status: "delivered", date_sent: "2026-01-01" } ] })
 
       result = connector.execute("list_messages")
       expect(result[:messages]).to be_an(Array)

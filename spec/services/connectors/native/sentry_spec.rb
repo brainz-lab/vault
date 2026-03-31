@@ -12,9 +12,9 @@ RSpec.describe Connectors::Native::Sentry, type: :service do
   describe "#execute list_issues" do
     it "returns issues" do
       stub_json_get("#{api_base}/projects/myorg/web-app/issues/",
-        body: [{ id: "1", title: "TypeError: undefined", culprit: "app.js", status: "unresolved",
+        body: [ { id: "1", title: "TypeError: undefined", culprit: "app.js", status: "unresolved",
           level: "error", count: 42, userCount: 10, firstSeen: "2026-01-01", lastSeen: "2026-01-02",
-          assignedTo: nil, permalink: "https://sentry.io/issues/1/" }])
+          assignedTo: nil, permalink: "https://sentry.io/issues/1/" } ])
 
       result = connector.execute("list_issues", project_slug: "web-app")
       expect(result[:issues].first[:title]).to eq("TypeError: undefined")
@@ -36,7 +36,7 @@ RSpec.describe Connectors::Native::Sentry, type: :service do
   describe "#execute list_projects" do
     it "returns projects" do
       stub_json_get("#{api_base}/organizations/myorg/projects/",
-        body: [{ id: "p1", slug: "web-app", name: "Web App", platform: "javascript", status: "active", dateCreated: "2026-01-01" }])
+        body: [ { id: "p1", slug: "web-app", name: "Web App", platform: "javascript", status: "active", dateCreated: "2026-01-01" } ])
 
       result = connector.execute("list_projects")
       expect(result[:projects].first[:slug]).to eq("web-app")

@@ -275,7 +275,7 @@ module Connectors
     end
 
     def build_source_actions_from_manifest(source, manifest_yaml)
-      manifest = YAML.safe_load(manifest_yaml, permitted_classes: [Date, Time])
+      manifest = YAML.safe_load(manifest_yaml, permitted_classes: [ Date, Time ])
       streams = manifest["streams"] || []
       return build_source_actions(source) if streams.empty?
 

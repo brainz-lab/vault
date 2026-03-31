@@ -22,7 +22,7 @@ class ManifestUpdateJob < ApplicationJob
       next unless new_manifest
 
       # Validate parseable
-      YAML.safe_load(new_manifest, permitted_classes: [Date, Time])
+      YAML.safe_load(new_manifest, permitted_classes: [ Date, Time ])
 
       changes = detect_changes(connector.manifest_yaml, new_manifest)
 
@@ -71,8 +71,8 @@ class ManifestUpdateJob < ApplicationJob
   end
 
   def detect_changes(old_yaml, new_yaml)
-    old_manifest = YAML.safe_load(old_yaml, permitted_classes: [Date, Time])
-    new_manifest = YAML.safe_load(new_yaml, permitted_classes: [Date, Time])
+    old_manifest = YAML.safe_load(old_yaml, permitted_classes: [ Date, Time ])
+    new_manifest = YAML.safe_load(new_yaml, permitted_classes: [ Date, Time ])
 
     old_streams = (old_manifest["streams"] || []).filter_map { |s| s["name"] }
     new_streams = (new_manifest["streams"] || []).filter_map { |s| s["name"] }

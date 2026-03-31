@@ -13,7 +13,7 @@ module Connectors
     #
     class Engine
       def initialize(manifest_yaml, credentials)
-        @manifest = YAML.safe_load(manifest_yaml, permitted_classes: [Date, Time])
+        @manifest = YAML.safe_load(manifest_yaml, permitted_classes: [ Date, Time ])
         @credentials = (credentials || {}).deep_stringify_keys
         @definitions = @manifest["definitions"] || {}
         @streams_config = @manifest["streams"] || []
@@ -194,13 +194,13 @@ module Connectors
           auth_type = auth_config["type"] || auth_config[:type]
 
           klass = case auth_type
-                  when "BearerAuthenticator" then Authenticators::Bearer
-                  when "ApiKeyAuthenticator" then Authenticators::ApiKey
-                  when "BasicHttpAuthenticator" then Authenticators::BasicHttp
-                  when "OAuthAuthenticator" then Authenticators::Oauth
-                  when "NoAuth", nil then Authenticators::NoAuth
-                  else Authenticators::NoAuth
-                  end
+          when "BearerAuthenticator" then Authenticators::Bearer
+          when "ApiKeyAuthenticator" then Authenticators::ApiKey
+          when "BasicHttpAuthenticator" then Authenticators::BasicHttp
+          when "OAuthAuthenticator" then Authenticators::Oauth
+          when "NoAuth", nil then Authenticators::NoAuth
+          else Authenticators::NoAuth
+          end
 
           klass.new(auth_config, @credentials, interpolator: @interpolator)
         end
@@ -217,11 +217,11 @@ module Connectors
           strategy_type = strategy["type"] || strategy[:type]
 
           klass = case strategy_type
-                  when "CursorPagination" then Paginators::Cursor
-                  when "OffsetIncrement" then Paginators::Offset
-                  when "PageIncrement" then Paginators::PageIncrement
-                  else Paginators::NoPagination
-                  end
+          when "CursorPagination" then Paginators::Cursor
+          when "OffsetIncrement" then Paginators::Offset
+          when "PageIncrement" then Paginators::PageIncrement
+          else Paginators::NoPagination
+          end
 
           klass.new(paginator_config, interpolator: @interpolator)
         end

@@ -24,7 +24,7 @@ module Connectors
 
         case data
         when Array then data
-        when Hash then [data]
+        when Hash then [ data ]
         else []
         end
       end

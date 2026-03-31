@@ -64,7 +64,7 @@ RSpec.describe Connectors::Native::Discord, type: :service do
   describe "#execute get_messages" do
     it "returns messages" do
       stub_json_get("#{api_base}/channels/ch1/messages",
-        body: [{ id: "m1", content: "hello", author: { username: "bob" }, timestamp: "2026-01-01", type: 0 }])
+        body: [ { id: "m1", content: "hello", author: { username: "bob" }, timestamp: "2026-01-01", type: 0 } ])
 
       result = connector.execute("get_messages", channel_id: "ch1")
       expect(result[:messages].first[:content]).to eq("hello")

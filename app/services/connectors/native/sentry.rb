@@ -134,7 +134,7 @@ module Connectors
         events = result.first((params[:limit] || 10).to_i).map do |e|
           { id: e["id"], event_id: e["eventID"], title: e["title"], message: e["message"]&.truncate(200),
             platform: e["platform"], dateCreated: e["dateCreated"],
-            tags: e["tags"]&.to_h { |t| [t["key"], t["value"]] } }
+            tags: e["tags"]&.to_h { |t| [ t["key"], t["value"] ] } }
         end
         { events: events, count: events.size }
       end

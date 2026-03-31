@@ -20,7 +20,7 @@ module Mcp
             description: "Maximum number of records to return (default: 100)"
           }
         },
-        required: ["connection_id", "stream"]
+        required: [ "connection_id", "stream" ]
       }.freeze
 
       def call(params)

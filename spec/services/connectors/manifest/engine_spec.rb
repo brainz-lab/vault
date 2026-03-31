@@ -109,7 +109,7 @@ RSpec.describe Connectors::Manifest::Engine do
   describe "#stream_names" do
     it "returns list of names" do
       engine = described_class.new(simple_manifest, {})
-      expect(engine.stream_names).to eq(["pokemon"])
+      expect(engine.stream_names).to eq([ "pokemon" ])
     end
   end
 
@@ -118,7 +118,7 @@ RSpec.describe Connectors::Manifest::Engine do
       stub_request(:get, /pokeapi\.co/)
         .to_return(
           status: 200,
-          body: { results: [{ name: "bulbasaur" }, { name: "charmander" }] }.to_json,
+          body: { results: [ { name: "bulbasaur" }, { name: "charmander" } ] }.to_json,
           headers: { "Content-Type" => "application/json" }
         )
       allow(Resolv).to receive(:getaddress).and_return("104.16.0.1")
@@ -135,7 +135,7 @@ RSpec.describe Connectors::Manifest::Engine do
         .with(headers: { "X-Api-Key" => "my-secret-key" })
         .to_return(
           status: 200,
-          body: { data: [{ id: 1, name: "Alice" }] }.to_json,
+          body: { data: [ { id: 1, name: "Alice" } ] }.to_json,
           headers: { "Content-Type" => "application/json" }
         )
       allow(Resolv).to receive(:getaddress).and_return("93.184.216.34")
@@ -152,7 +152,7 @@ RSpec.describe Connectors::Manifest::Engine do
         .with(query: hash_including("limit" => "2", "offset" => "0"))
         .to_return(
           status: 200,
-          body: { items: [{ id: 1 }, { id: 2 }] }.to_json,
+          body: { items: [ { id: 1 }, { id: 2 } ] }.to_json,
           headers: { "Content-Type" => "application/json" }
         )
 
@@ -160,7 +160,7 @@ RSpec.describe Connectors::Manifest::Engine do
         .with(query: hash_including("limit" => "2", "offset" => "2"))
         .to_return(
           status: 200,
-          body: { items: [{ id: 3 }] }.to_json,
+          body: { items: [ { id: 3 } ] }.to_json,
           headers: { "Content-Type" => "application/json" }
         )
       allow(Resolv).to receive(:getaddress).and_return("93.184.216.34")
@@ -169,7 +169,7 @@ RSpec.describe Connectors::Manifest::Engine do
       records = engine.execute("items")
 
       expect(records.length).to eq(3)
-      expect(records.map { |r| r["id"] }).to eq([1, 2, 3])
+      expect(records.map { |r| r["id"] }).to eq([ 1, 2, 3 ])
     end
 
     it "raises ActionNotFoundError for unknown stream" do
@@ -183,7 +183,7 @@ RSpec.describe Connectors::Manifest::Engine do
       stub_request(:get, /pokeapi\.co/)
         .to_return(
           status: 200,
-          body: { results: [{ name: "pikachu" }] }.to_json,
+          body: { results: [ { name: "pikachu" } ] }.to_json,
           headers: { "Content-Type" => "application/json" }
         )
       allow(Resolv).to receive(:getaddress).and_return("104.16.0.1")

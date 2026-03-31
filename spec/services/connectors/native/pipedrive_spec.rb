@@ -37,7 +37,7 @@ RSpec.describe Connectors::Native::Pipedrive, type: :service do
     it "returns persons" do
       stub_json_get("#{api_base}/persons",
         body: { success: true, data: [
-          { id: 10, name: "Bob", email: [{ value: "bob@example.com" }], phone: [{ value: "+1234" }], org_id: { name: "Corp" } }
+          { id: 10, name: "Bob", email: [ { value: "bob@example.com" } ], phone: [ { value: "+1234" } ], org_id: { name: "Corp" } }
         ] })
 
       result = connector.execute("list_persons")

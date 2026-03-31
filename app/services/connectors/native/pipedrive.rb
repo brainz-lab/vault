@@ -187,8 +187,8 @@ module Connectors
 
       def create_person(params)
         body = { name: params[:name] }
-        body[:email] = [{ value: params[:email], primary: true, label: "work" }] if params[:email].present?
-        body[:phone] = [{ value: params[:phone], primary: true, label: "work" }] if params[:phone].present?
+        body[:email] = [ { value: params[:email], primary: true, label: "work" } ] if params[:email].present?
+        body[:phone] = [ { value: params[:phone], primary: true, label: "work" } ] if params[:phone].present?
         body[:org_id] = params[:org_id] if params[:org_id].present?
 
         result = api_post("persons", body)

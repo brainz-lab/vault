@@ -125,7 +125,7 @@ module Connectors
       private
 
       def list_products(params)
-        query = { limit: [(params[:limit] || 50).to_i, 250].min }
+        query = { limit: [ (params[:limit] || 50).to_i, 250 ].min }
         query[:status] = params[:status] if params[:status].present?
         query[:collection_id] = params[:collection_id] if params[:collection_id].present?
 
@@ -153,7 +153,7 @@ module Connectors
       end
 
       def list_orders(params)
-        query = { limit: [(params[:limit] || 50).to_i, 250].min }
+        query = { limit: [ (params[:limit] || 50).to_i, 250 ].min }
         query[:status] = params[:status] || "any"
         query[:financial_status] = params[:financial_status] if params[:financial_status].present?
         query[:created_at_min] = params[:created_at_min] if params[:created_at_min].present?
@@ -183,14 +183,14 @@ module Connectors
       end
 
       def list_customers(params)
-        query = { limit: [(params[:limit] || 50).to_i, 250].min }
+        query = { limit: [ (params[:limit] || 50).to_i, 250 ].min }
 
         path = if params[:query].present?
                  query[:query] = params[:query]
                  "customers/search.json"
-               else
+        else
                  "customers.json"
-               end
+        end
 
         result = api_get(path, query)
         customers = (result["customers"] || []).map do |c|
@@ -215,7 +215,7 @@ module Connectors
           variant = {}
           variant[:price] = params[:price] if params[:price].present?
           variant[:sku] = params[:sku] if params[:sku].present?
-          product[:variants] = [variant]
+          product[:variants] = [ variant ]
         end
 
         result = api_post("products.json", { product: product })

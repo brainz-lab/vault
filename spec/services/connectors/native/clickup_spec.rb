@@ -12,9 +12,9 @@ RSpec.describe Connectors::Native::Clickup, type: :service do
   describe "#execute list_tasks" do
     it "returns tasks" do
       stub_json_get("#{api_base}/list/l1/task",
-        body: { tasks: [{ id: "t1", name: "Fix bug", status: { status: "in progress" },
-          priority: { priority: "high" }, assignees: [{ username: "alice" }],
-          due_date: "1711929600000", url: "https://app.clickup.com/t/t1" }] })
+        body: { tasks: [ { id: "t1", name: "Fix bug", status: { status: "in progress" },
+          priority: { priority: "high" }, assignees: [ { username: "alice" } ],
+          due_date: "1711929600000", url: "https://app.clickup.com/t/t1" } ] })
 
       result = connector.execute("list_tasks", list_id: "l1")
       expect(result[:tasks].first[:name]).to eq("Fix bug")
@@ -46,7 +46,7 @@ RSpec.describe Connectors::Native::Clickup, type: :service do
   describe "#execute list_workspaces" do
     it "returns workspaces" do
       stub_json_get("#{api_base}/team",
-        body: { teams: [{ id: "w1", name: "My Workspace", members: [{}] }] })
+        body: { teams: [ { id: "w1", name: "My Workspace", members: [ {} ] } ] })
 
       result = connector.execute("list_workspaces")
       expect(result[:workspaces].first[:name]).to eq("My Workspace")

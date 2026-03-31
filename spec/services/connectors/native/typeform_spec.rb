@@ -12,7 +12,7 @@ RSpec.describe Connectors::Native::Typeform, type: :service do
   describe "#execute list_forms" do
     it "returns forms" do
       stub_json_get("#{api_base}/forms",
-        body: { items: [{ id: "f1", title: "Survey", status: "public", _links: { responses: "url" }, created_at: "2026-01-01" }], total_items: 1 })
+        body: { items: [ { id: "f1", title: "Survey", status: "public", _links: { responses: "url" }, created_at: "2026-01-01" } ], total_items: 1 })
 
       result = connector.execute("list_forms")
       expect(result[:forms].first[:title]).to eq("Survey")
@@ -24,7 +24,7 @@ RSpec.describe Connectors::Native::Typeform, type: :service do
     it "returns form with fields" do
       stub_json_get("#{api_base}/forms/f1",
         body: { id: "f1", title: "Survey", status: "public",
-          fields: [{ id: "q1", ref: "name_field", title: "Your name?", type: "short_text", validations: { required: true } }] })
+          fields: [ { id: "q1", ref: "name_field", title: "Your name?", type: "short_text", validations: { required: true } } ] })
 
       result = connector.execute("get_form", form_id: "f1")
       expect(result[:fields].first[:title]).to eq("Your name?")
@@ -35,8 +35,8 @@ RSpec.describe Connectors::Native::Typeform, type: :service do
   describe "#execute list_responses" do
     it "returns responses" do
       stub_json_get("#{api_base}/forms/f1/responses",
-        body: { items: [{ response_id: "r1", landed_at: "2026-01-01", submitted_at: "2026-01-01",
-          answers: [{ field: { ref: "name_field", type: "short_text" }, type: "text", text: "Alice" }] }], total_items: 1 })
+        body: { items: [ { response_id: "r1", landed_at: "2026-01-01", submitted_at: "2026-01-01",
+          answers: [ { field: { ref: "name_field", type: "short_text" }, type: "text", text: "Alice" } ] } ], total_items: 1 })
 
       result = connector.execute("list_responses", form_id: "f1")
       expect(result[:responses].first[:answers].first[:value]).to eq("Alice")

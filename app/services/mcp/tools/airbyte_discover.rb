@@ -16,7 +16,7 @@ module Mcp
             description: "Optional connection ID. If provided, uses stored credentials."
           }
         },
-        required: ["piece_name"]
+        required: [ "piece_name" ]
       }.freeze
 
       def call(params)

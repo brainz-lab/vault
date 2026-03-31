@@ -27,7 +27,7 @@ RSpec.describe Connectors::Manifest::ErrorHandler do
 
   describe "#with_retry" do
     it "retries up to max_retries on retryable errors" do
-      handler = described_class.new({ "max_retries" => 2, "backoff_strategies" => [{ "type" => "ConstantBackoffStrategy", "backoff_time_in_seconds" => 0 }] })
+      handler = described_class.new({ "max_retries" => 2, "backoff_strategies" => [ { "type" => "ConstantBackoffStrategy", "backoff_time_in_seconds" => 0 } ] })
       attempts = 0
 
       expect {
@@ -41,7 +41,7 @@ RSpec.describe Connectors::Manifest::ErrorHandler do
     end
 
     it "succeeds if retry works" do
-      handler = described_class.new({ "max_retries" => 2, "backoff_strategies" => [{ "type" => "ConstantBackoffStrategy", "backoff_time_in_seconds" => 0 }] })
+      handler = described_class.new({ "max_retries" => 2, "backoff_strategies" => [ { "type" => "ConstantBackoffStrategy", "backoff_time_in_seconds" => 0 } ] })
       attempts = 0
 
       result = handler.with_retry do

@@ -118,9 +118,9 @@ module Connectors
 
         raise Connectors::Error, "Sender email is required" unless from[:email].present?
 
-        personalizations = [{ to: [{ email: params[:to] }] }]
-        personalizations[0][:cc] = [{ email: params[:cc] }] if params[:cc].present?
-        personalizations[0][:bcc] = [{ email: params[:bcc] }] if params[:bcc].present?
+        personalizations = [ { to: [ { email: params[:to] } ] } ]
+        personalizations[0][:cc] = [ { email: params[:cc] } ] if params[:cc].present?
+        personalizations[0][:bcc] = [ { email: params[:bcc] } ] if params[:bcc].present?
 
         body = {
           personalizations: personalizations,
@@ -153,7 +153,7 @@ module Connectors
         dynamic_data = JSON.parse(dynamic_data) if dynamic_data.is_a?(String)
 
         body = {
-          personalizations: [{ to: [{ email: params[:to] }], dynamic_template_data: dynamic_data || {} }],
+          personalizations: [ { to: [ { email: params[:to] } ], dynamic_template_data: dynamic_data || {} } ],
           from: from,
           template_id: params[:template_id]
         }
@@ -184,7 +184,7 @@ module Connectors
         contact[:last_name] = params[:last_name] if params[:last_name].present?
         contact[:custom_fields] = parse_json(params[:custom_fields]) if params[:custom_fields].present?
 
-        body = { contacts: [contact] }
+        body = { contacts: [ contact ] }
 
         list_ids = parse_json(params[:list_ids])
         body[:list_ids] = list_ids if list_ids.is_a?(Array) && list_ids.any?

@@ -137,9 +137,9 @@ module Connectors
 
         path = if params[:status].present?
                  "search.json?query=type:ticket status:#{params[:status]}&sort_by=#{query[:sort_by]}&sort_order=#{query[:sort_order]}"
-               else
+        else
                  "tickets.json?sort_by=#{query[:sort_by]}&sort_order=#{query[:sort_order]}"
-               end
+        end
 
         result = api_get(path)
         tickets = (result["tickets"] || result["results"] || []).first((params[:limit] || 25).to_i)
@@ -196,9 +196,9 @@ module Connectors
       def list_users(params)
         path = if params[:role].present?
                  "users.json?role=#{params[:role]}"
-               else
+        else
                  "users.json"
-               end
+        end
 
         result = api_get(path)
         users = (result["users"] || []).first((params[:limit] || 25).to_i)

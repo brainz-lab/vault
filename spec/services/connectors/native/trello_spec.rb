@@ -12,7 +12,7 @@ RSpec.describe Connectors::Native::Trello, type: :service do
   describe "#execute list_boards" do
     it "returns boards" do
       stub_json_get("#{api_base}/members/me/boards",
-        body: [{ id: "b1", name: "Project X", closed: false, url: "https://trello.com/b/b1", dateLastActivity: "2026-01-01" }])
+        body: [ { id: "b1", name: "Project X", closed: false, url: "https://trello.com/b/b1", dateLastActivity: "2026-01-01" } ])
 
       result = connector.execute("list_boards")
       expect(result[:boards].first[:name]).to eq("Project X")
@@ -22,12 +22,12 @@ RSpec.describe Connectors::Native::Trello, type: :service do
   describe "#execute list_cards" do
     it "returns cards for a list" do
       stub_json_get("#{api_base}/lists/l1/cards",
-        body: [{ id: "c1", name: "Task 1", desc: "Do it", due: "2026-04-01", closed: false,
-          idList: "l1", labels: [{ name: "urgent" }], shortUrl: "https://trello.com/c/c1" }])
+        body: [ { id: "c1", name: "Task 1", desc: "Do it", due: "2026-04-01", closed: false,
+          idList: "l1", labels: [ { name: "urgent" } ], shortUrl: "https://trello.com/c/c1" } ])
 
       result = connector.execute("list_cards", list_id: "l1")
       expect(result[:cards].first[:name]).to eq("Task 1")
-      expect(result[:cards].first[:labels]).to eq(["urgent"])
+      expect(result[:cards].first[:labels]).to eq([ "urgent" ])
     end
   end
 

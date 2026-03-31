@@ -143,7 +143,7 @@ module Connectors
 
       def get_updates(params)
         body = {}
-        body[:limit] = [params[:limit].to_i, 100].min if params[:limit].present?
+        body[:limit] = [ params[:limit].to_i, 100 ].min if params[:limit].present?
         body[:offset] = params[:offset].to_i if params[:offset].present?
 
         result = api_post("getUpdates", body)

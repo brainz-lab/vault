@@ -36,7 +36,7 @@ RSpec.describe Connectors::Native::Linear, type: :service do
   describe "#execute list_teams" do
     it "returns teams" do
       stub_json_post("https://api.linear.app/graphql",
-        body: { data: { teams: { nodes: [{ id: "t1", key: "ENG", name: "Engineering", issueCount: 150 }] } } })
+        body: { data: { teams: { nodes: [ { id: "t1", key: "ENG", name: "Engineering", issueCount: 150 } ] } } })
 
       result = connector.execute("list_teams")
       expect(result[:teams].first[:key]).to eq("ENG")
@@ -56,7 +56,7 @@ RSpec.describe Connectors::Native::Linear, type: :service do
   describe "error handling" do
     it "raises on authentication errors" do
       stub_json_post("https://api.linear.app/graphql",
-        body: { errors: [{ message: "authentication required" }] })
+        body: { errors: [ { message: "authentication required" } ] })
 
       expect { connector.execute("list_issues") }
         .to raise_error(Connectors::AuthenticationError, /Linear/)

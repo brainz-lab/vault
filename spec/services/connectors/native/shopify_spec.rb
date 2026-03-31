@@ -13,7 +13,7 @@ RSpec.describe Connectors::Native::Shopify, type: :service do
     it "returns products" do
       stub_json_get("#{api_base}/products.json",
         body: { products: [
-          { id: 1, title: "T-Shirt", vendor: "Acme", product_type: "Apparel", status: "active", variants: [{}], created_at: "2026-01-01", tags: "sale" }
+          { id: 1, title: "T-Shirt", vendor: "Acme", product_type: "Apparel", status: "active", variants: [ {} ], created_at: "2026-01-01", tags: "sale" }
         ] })
 
       result = connector.execute("list_products")
@@ -40,7 +40,7 @@ RSpec.describe Connectors::Native::Shopify, type: :service do
       stub_json_get("#{api_base}/orders.json",
         body: { orders: [
           { id: 100, order_number: 1001, email: "buyer@example.com", financial_status: "paid",
-            fulfillment_status: nil, total_price: "29.99", currency: "USD", line_items: [{}], created_at: "2026-01-01" }
+            fulfillment_status: nil, total_price: "29.99", currency: "USD", line_items: [ {} ], created_at: "2026-01-01" }
         ] })
 
       result = connector.execute("list_orders")

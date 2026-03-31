@@ -212,7 +212,7 @@ module Connectors
         "{ #{pairs.join(', ')} }"
       end
 
-      def escape_gql(str) = str.to_s.gsub('\\', '\\\\\\\\').gsub('"', '\\"').gsub("\n", '\\n')
+      def escape_gql(str) = str.to_s.gsub("\\", "\\\\\\\\").gsub('"', '\\"').gsub("\n", '\\n')
       def api_key = credentials[:api_key]
 
       def parse_json(value)

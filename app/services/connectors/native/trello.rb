@@ -149,11 +149,11 @@ module Connectors
 
         path = if params[:list_id].present?
                  "lists/#{params[:list_id]}/cards"
-               elsif params[:board_id].present?
+        elsif params[:board_id].present?
                  "boards/#{params[:board_id]}/cards/#{filter}"
-               else
+        else
                  raise Connectors::Error, "Either board_id or list_id is required"
-               end
+        end
 
         result = api_get(path, fields: fields)
         cards = result.map do |c|

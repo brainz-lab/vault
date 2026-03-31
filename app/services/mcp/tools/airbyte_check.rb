@@ -12,7 +12,7 @@ module Mcp
             description: "The connection ID to test"
           }
         },
-        required: ["connection_id"]
+        required: [ "connection_id" ]
       }.freeze
 
       def call(params)

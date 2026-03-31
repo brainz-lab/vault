@@ -122,7 +122,7 @@ module Connectors
         result = graphql(query)
         items = result.dig("data", "boards", 0, "items_page", "items") || []
         items = items.map do |i|
-          columns = (i["column_values"] || []).to_h { |c| [c["id"], c["text"]] }
+          columns = (i["column_values"] || []).to_h { |c| [ c["id"], c["text"] ] }
           { id: i["id"], name: i["name"], group: i.dig("group", "title"),
             columns: columns, created_at: i["created_at"] }
         end
@@ -191,7 +191,7 @@ module Connectors
       end
 
       def escape_gql(str)
-        str.to_s.gsub('\\', '\\\\\\\\').gsub('"', '\\"').gsub("\n", '\\n')
+        str.to_s.gsub("\\", "\\\\\\\\").gsub('"', '\\"').gsub("\n", '\\n')
       end
 
       def api_token = credentials[:api_token]

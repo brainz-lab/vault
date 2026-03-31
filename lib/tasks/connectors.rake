@@ -27,7 +27,7 @@ namespace :connectors do
     puts "  Native: #{native_stats[:created]} created, #{native_stats[:updated]} updated"
 
     puts "\n=== Seeding Activepieces Connectors ==="
-    #ap_stats = Connectors::ActivepiecesSeeder.new.seed!
+    # ap_stats = Connectors::ActivepiecesSeeder.new.seed!
     puts "  Activepieces: #{ap_stats[:created]} created, #{ap_stats[:updated]} updated, #{ap_stats[:errors]} errors"
 
     puts "\n=== Seeding Airbyte Connectors ==="

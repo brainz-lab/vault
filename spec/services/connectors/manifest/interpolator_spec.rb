@@ -44,8 +44,8 @@ RSpec.describe Connectors::Manifest::Interpolator do
 
     context "with Array values" do
       it "interpolates each element" do
-        result = interpolator.interpolate(["{{ config.org }}", "static"])
-        expect(result).to eq(["acme", "static"])
+        result = interpolator.interpolate([ "{{ config.org }}", "static" ])
+        expect(result).to eq([ "acme", "static" ])
       end
     end
 

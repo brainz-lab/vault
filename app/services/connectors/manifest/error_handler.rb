@@ -12,7 +12,7 @@ module Connectors
     class ErrorHandler
       DEFAULT_MAX_RETRIES = 3
       DEFAULT_BACKOFF_SECONDS = 5
-      RETRYABLE_STATUS_CODES = [429, 500, 502, 503, 504].freeze
+      RETRYABLE_STATUS_CODES = [ 429, 500, 502, 503, 504 ].freeze
 
       def initialize(config = {})
         @max_retries = config["max_retries"] || config[:max_retries] || DEFAULT_MAX_RETRIES

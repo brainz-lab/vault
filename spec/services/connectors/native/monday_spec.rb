@@ -11,8 +11,8 @@ RSpec.describe Connectors::Native::Monday, type: :service do
   describe "#execute list_boards" do
     it "returns boards via GraphQL" do
       stub_json_post("https://api.monday.com/v2",
-        body: { data: { boards: [{ id: "1", name: "Sprint Board", state: "active", board_kind: "public",
-          columns: [{ id: "status", title: "Status", type: "color" }] }] } })
+        body: { data: { boards: [ { id: "1", name: "Sprint Board", state: "active", board_kind: "public",
+          columns: [ { id: "status", title: "Status", type: "color" } ] } ] } })
 
       result = connector.execute("list_boards")
       expect(result[:boards].first[:name]).to eq("Sprint Board")
@@ -43,7 +43,7 @@ RSpec.describe Connectors::Native::Monday, type: :service do
   describe "error handling" do
     it "raises on GraphQL errors" do
       stub_json_post("https://api.monday.com/v2",
-        body: { errors: [{ message: "Not Authenticated" }] })
+        body: { errors: [ { message: "Not Authenticated" } ] })
 
       expect { connector.execute("list_boards") }
         .to raise_error(Connectors::AuthenticationError, /Monday/)

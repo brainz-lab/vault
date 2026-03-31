@@ -38,7 +38,7 @@ module Connectors
 
         current = start_dt
         while current < end_dt
-          slice_end = [current + step, end_dt].min
+          slice_end = [ current + step, end_dt ].min
           yield({
             "start_time" => format_datetime(current),
             "end_time" => format_datetime(slice_end),
@@ -54,7 +54,7 @@ module Connectors
 
         # Resolve interpolated values
         resolved = @interpolator.interpolate(values)
-        resolved = resolved.is_a?(Array) ? resolved : [resolved]
+        resolved = resolved.is_a?(Array) ? resolved : [ resolved ]
 
         resolved.each do |value|
           yield({ "partition" => value, cursor_field => value })

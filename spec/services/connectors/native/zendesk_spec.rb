@@ -14,7 +14,7 @@ RSpec.describe Connectors::Native::Zendesk, type: :service do
       stub_json_get("#{api_base}/tickets.json",
         body: { tickets: [
           { id: 1, subject: "Help me", description: "I need help", status: "open", priority: "normal",
-            type: "question", requester_id: 10, assignee_id: 20, tags: ["vip"], created_at: "2026-01-01", updated_at: "2026-01-02" }
+            type: "question", requester_id: 10, assignee_id: 20, tags: [ "vip" ], created_at: "2026-01-01", updated_at: "2026-01-02" }
         ] })
 
       result = connector.execute("list_tickets")
@@ -59,7 +59,7 @@ RSpec.describe Connectors::Native::Zendesk, type: :service do
   describe "#execute search" do
     it "returns search results" do
       stub_json_get("#{api_base}/search.json",
-        body: { results: [{ id: 1, result_type: "ticket", subject: "Found it", status: "open", priority: "low" }], count: 1 })
+        body: { results: [ { id: 1, result_type: "ticket", subject: "Found it", status: "open", priority: "low" } ], count: 1 })
 
       result = connector.execute("search", query: "status:open", type: "ticket")
       expect(result[:results].first[:subject]).to eq("Found it")

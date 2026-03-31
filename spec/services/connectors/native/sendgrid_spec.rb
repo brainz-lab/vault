@@ -39,7 +39,7 @@ RSpec.describe Connectors::Native::Sendgrid, type: :service do
   describe "#execute list_contacts" do
     it "returns contacts" do
       stub_json_get("#{api_base}/marketing/contacts",
-        body: { result: [{ id: "c1", email: "a@b.com", first_name: "A", last_name: "B", created_at: "2026-01-01" }] })
+        body: { result: [ { id: "c1", email: "a@b.com", first_name: "A", last_name: "B", created_at: "2026-01-01" } ] })
 
       result = connector.execute("list_contacts")
       expect(result[:contacts].first[:email]).to eq("a@b.com")
@@ -47,7 +47,7 @@ RSpec.describe Connectors::Native::Sendgrid, type: :service do
 
     it "searches contacts with query" do
       stub_json_post("#{api_base}/marketing/contacts/search",
-        body: { result: [{ id: "c2", email: "x@y.com", first_name: "X", last_name: "Y", created_at: "2026-01-01" }] })
+        body: { result: [ { id: "c2", email: "x@y.com", first_name: "X", last_name: "Y", created_at: "2026-01-01" } ] })
 
       result = connector.execute("list_contacts", query: "email LIKE '%@y.com'")
       expect(result[:contacts].first[:email]).to eq("x@y.com")
@@ -67,7 +67,7 @@ RSpec.describe Connectors::Native::Sendgrid, type: :service do
   describe "#execute list_lists" do
     it "returns contact lists" do
       stub_json_get("#{api_base}/marketing/lists",
-        body: { result: [{ id: "l1", name: "Newsletter", contact_count: 100 }] })
+        body: { result: [ { id: "l1", name: "Newsletter", contact_count: 100 } ] })
 
       result = connector.execute("list_lists")
       expect(result[:lists].first[:name]).to eq("Newsletter")
@@ -77,7 +77,7 @@ RSpec.describe Connectors::Native::Sendgrid, type: :service do
   describe "error handling" do
     it "raises AuthenticationError on 401" do
       stub_json_get("#{api_base}/marketing/contacts",
-        body: { errors: [{ message: "Invalid API key" }] }, status: 401)
+        body: { errors: [ { message: "Invalid API key" } ] }, status: 401)
 
       expect { connector.execute("list_contacts") }
         .to raise_error(Connectors::AuthenticationError, /SendGrid/)

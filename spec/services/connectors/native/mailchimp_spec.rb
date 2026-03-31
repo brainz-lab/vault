@@ -12,7 +12,7 @@ RSpec.describe Connectors::Native::Mailchimp, type: :service do
   describe "#execute list_audiences" do
     it "returns audiences" do
       stub_json_get("#{api_base}/lists",
-        body: { lists: [{ id: "l1", name: "Newsletter", stats: { member_count: 500, unsubscribe_count: 10, campaign_count: 20 } }] })
+        body: { lists: [ { id: "l1", name: "Newsletter", stats: { member_count: 500, unsubscribe_count: 10, campaign_count: 20 } } ] })
 
       result = connector.execute("list_audiences")
       expect(result[:audiences].first[:name]).to eq("Newsletter")
@@ -23,8 +23,8 @@ RSpec.describe Connectors::Native::Mailchimp, type: :service do
   describe "#execute list_members" do
     it "returns members" do
       stub_json_get("#{api_base}/lists/l1/members",
-        body: { members: [{ id: "m1", email_address: "a@b.com", status: "subscribed",
-          merge_fields: { FNAME: "Alice", LNAME: "B" }, tags: [{ name: "vip" }] }], total_items: 1 })
+        body: { members: [ { id: "m1", email_address: "a@b.com", status: "subscribed",
+          merge_fields: { FNAME: "Alice", LNAME: "B" }, tags: [ { name: "vip" } ] } ], total_items: 1 })
 
       result = connector.execute("list_members", list_id: "l1")
       expect(result[:members].first[:email]).to eq("a@b.com")
@@ -47,8 +47,8 @@ RSpec.describe Connectors::Native::Mailchimp, type: :service do
   describe "#execute list_campaigns" do
     it "returns campaigns" do
       stub_json_get("#{api_base}/campaigns",
-        body: { campaigns: [{ id: "c1", type: "regular", status: "sent",
-          settings: { subject_line: "Hello", title: "March Newsletter" }, emails_sent: 500, send_time: "2026-01-01" }] })
+        body: { campaigns: [ { id: "c1", type: "regular", status: "sent",
+          settings: { subject_line: "Hello", title: "March Newsletter" }, emails_sent: 500, send_time: "2026-01-01" } ] })
 
       result = connector.execute("list_campaigns")
       expect(result[:campaigns].first[:subject]).to eq("Hello")

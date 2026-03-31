@@ -12,8 +12,8 @@ RSpec.describe Connectors::Native::Freshdesk, type: :service do
   describe "#execute list_tickets" do
     it "returns tickets" do
       stub_json_get("#{api_base}/tickets",
-        body: [{ id: 1, subject: "Help", status: 2, priority: 1, type: "Question",
-          requester_id: 10, responder_id: 20, tags: [], created_at: "2026-01-01", updated_at: "2026-01-02" }])
+        body: [ { id: 1, subject: "Help", status: 2, priority: 1, type: "Question",
+          requester_id: 10, responder_id: 20, tags: [], created_at: "2026-01-01", updated_at: "2026-01-02" } ])
 
       result = connector.execute("list_tickets")
       expect(result[:tickets].first[:subject]).to eq("Help")

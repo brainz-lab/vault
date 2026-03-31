@@ -12,8 +12,8 @@ RSpec.describe Connectors::Native::Asana, type: :service do
   describe "#execute list_tasks" do
     it "returns tasks assigned to me" do
       stub_json_get("#{api_base}/tasks",
-        body: { data: [{ gid: "t1", name: "Fix bug", completed: false, due_on: "2026-04-01",
-          assignee: { name: "Alice" } }] })
+        body: { data: [ { gid: "t1", name: "Fix bug", completed: false, due_on: "2026-04-01",
+          assignee: { name: "Alice" } } ] })
 
       result = connector.execute("list_tasks")
       expect(result[:tasks].first[:name]).to eq("Fix bug")
@@ -55,7 +55,7 @@ RSpec.describe Connectors::Native::Asana, type: :service do
   describe "#execute list_projects" do
     it "returns projects" do
       stub_json_get("#{api_base}/projects",
-        body: { data: [{ gid: "p1", name: "Project X", archived: false, current_status: { text: "On track" } }] })
+        body: { data: [ { gid: "p1", name: "Project X", archived: false, current_status: { text: "On track" } } ] })
 
       result = connector.execute("list_projects")
       expect(result[:projects].first[:name]).to eq("Project X")
@@ -65,7 +65,7 @@ RSpec.describe Connectors::Native::Asana, type: :service do
   describe "#execute list_workspaces" do
     it "returns workspaces" do
       stub_json_get("#{api_base}/workspaces",
-        body: { data: [{ gid: "ws123", name: "My Workspace" }] })
+        body: { data: [ { gid: "ws123", name: "My Workspace" } ] })
 
       result = connector.execute("list_workspaces")
       expect(result[:workspaces].first[:name]).to eq("My Workspace")
@@ -75,7 +75,7 @@ RSpec.describe Connectors::Native::Asana, type: :service do
   describe "error handling" do
     it "raises AuthenticationError on 401" do
       stub_json_get("#{api_base}/tasks",
-        body: { errors: [{ message: "Not authorized" }] }, status: 401)
+        body: { errors: [ { message: "Not authorized" } ] }, status: 401)
 
       expect { connector.execute("list_tasks") }
         .to raise_error(Connectors::AuthenticationError, /Asana/)

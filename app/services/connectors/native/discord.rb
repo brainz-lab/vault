@@ -139,7 +139,7 @@ module Connectors
         embed[:url] = params[:url] if params[:url].present?
         embed[:fields] = parse_json(params[:fields]) if params[:fields].present?
 
-        result = bot_post("channels/#{channel}/messages", { embeds: [embed] })
+        result = bot_post("channels/#{channel}/messages", { embeds: [ embed ] })
         { success: true, id: result["id"], channel_id: result["channel_id"] }
       end
 
@@ -167,7 +167,7 @@ module Connectors
       def list_channels(params)
         require_bot!
         result = bot_get("guilds/#{params[:guild_id]}/channels")
-        channels = result.select { |c| [0, 2, 5, 15].include?(c["type"]) }.map do |c|
+        channels = result.select { |c| [ 0, 2, 5, 15 ].include?(c["type"]) }.map do |c|
           type_name = { 0 => "text", 2 => "voice", 5 => "announcement", 15 => "forum" }[c["type"]]
           { id: c["id"], name: c["name"], type: type_name, position: c["position"], topic: c["topic"] }
         end
@@ -176,7 +176,7 @@ module Connectors
 
       def get_messages(params)
         require_bot!
-        limit = [(params[:limit] || 50).to_i, 100].min
+        limit = [ (params[:limit] || 50).to_i, 100 ].min
         result = bot_get("channels/#{params[:channel_id]}/messages", limit: limit)
         messages = result.map do |m|
           { id: m["id"], content: m["content"], author: m.dig("author", "username"),

@@ -12,8 +12,8 @@ RSpec.describe Connectors::Native::Intercom, type: :service do
   describe "#execute list_contacts" do
     it "returns contacts" do
       stub_json_get("#{api_base}/contacts",
-        body: { data: [{ id: "c1", external_id: "ext1", email: "a@b.com", name: "Alice",
-          phone: "+1234", role: "user", created_at: 1234567890, updated_at: 1234567890 }], total_count: 1 })
+        body: { data: [ { id: "c1", external_id: "ext1", email: "a@b.com", name: "Alice",
+          phone: "+1234", role: "user", created_at: 1234567890, updated_at: 1234567890 } ], total_count: 1 })
 
       result = connector.execute("list_contacts")
       expect(result[:contacts].first[:email]).to eq("a@b.com")
@@ -24,8 +24,8 @@ RSpec.describe Connectors::Native::Intercom, type: :service do
   describe "#execute search_contacts" do
     it "searches by email" do
       stub_json_post("#{api_base}/contacts/search",
-        body: { data: [{ id: "c2", external_id: nil, email: "x@y.com", name: "X",
-          phone: nil, role: "lead", created_at: 1, updated_at: 1 }] })
+        body: { data: [ { id: "c2", external_id: nil, email: "x@y.com", name: "X",
+          phone: nil, role: "lead", created_at: 1, updated_at: 1 } ] })
 
       result = connector.execute("search_contacts", query: "x@y.com")
       expect(result[:contacts].first[:email]).to eq("x@y.com")
@@ -46,8 +46,8 @@ RSpec.describe Connectors::Native::Intercom, type: :service do
   describe "#execute list_conversations" do
     it "returns conversations" do
       stub_json_get("#{api_base}/conversations",
-        body: { conversations: [{ id: "conv1", state: "open", open: true, read: false,
-          source: { subject: "Help needed", body: "I need help" }, created_at: 1, updated_at: 1 }] })
+        body: { conversations: [ { id: "conv1", state: "open", open: true, read: false,
+          source: { subject: "Help needed", body: "I need help" }, created_at: 1, updated_at: 1 } ] })
 
       result = connector.execute("list_conversations")
       expect(result[:conversations].first[:state]).to eq("open")
@@ -77,7 +77,7 @@ RSpec.describe Connectors::Native::Intercom, type: :service do
   describe "error handling" do
     it "raises AuthenticationError on 401" do
       stub_json_get("#{api_base}/contacts",
-        body: { type: "error.list", errors: [{ code: "unauthorized", message: "Invalid token" }] }, status: 401)
+        body: { type: "error.list", errors: [ { code: "unauthorized", message: "Invalid token" } ] }, status: 401)
 
       expect { connector.execute("list_contacts") }
         .to raise_error(Connectors::AuthenticationError, /Intercom/)
