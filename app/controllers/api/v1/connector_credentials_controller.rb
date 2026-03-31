@@ -58,6 +58,65 @@ module Api
         render json: { success: true }
       end
 
+      # POST /api/v1/connector_credentials/oauth_authorize
+      # For connectors where the user provides their own OAuth app credentials
+      # (e.g. Salesforce). Creates a pending credential, stores user credentials,
+      # and returns an authorize URL that goes through OauthController.
+      #
+      # For platform-managed OAuth (Slack, GitHub) where client_id/secret are in ENV,
+      # redirect directly to GET /oauth/authorize instead.
+      def oauth_authorize
+        return unless require_permission!("write")
+
+        connector = Connector.enabled.find(params[:connector_id])
+        cred_values = credential_values
+
+        unless connector.oauth2?
+          render json: { error: "Connector '#{connector.display_name}' does not support OAuth2" }, status: :unprocessable_entity
+          return
+        end
+
+        # Create or reuse a pending credential to store the user's OAuth app credentials
+        cred_name = params[:name] || "#{connector.display_name} OAuth"
+        existing = current_project.connector_credentials
+          .where(connector: connector, status: "pending")
+          .order(created_at: :desc)
+          .first
+
+        credential = if existing
+          existing.update_credentials(cred_values)
+          existing
+        else
+          cred = ConnectorCredential.create_encrypted(
+            project: current_project,
+            connector: connector,
+            name: "#{cred_name} #{Time.current.to_i}",
+            auth_type: "OAUTH2",
+            credentials: cred_values
+          )
+          cred.update_columns(status: "pending")
+          cred
+        end
+
+        # Build the Vault OAuth authorize URL — credential_id is stored in the state
+        # so the callback can retrieve the user's client_id/client_secret
+        oauth_params = {
+          project_id: current_project.id,
+          connector_id: connector.piece_name,
+          return_to: params[:return_url].to_s,
+          credential_id: credential.id
+        }.compact_blank
+
+        authorize_url = "#{vault_external_url}/oauth/authorize?" + URI.encode_www_form(oauth_params)
+
+        render json: {
+          authorize_url: authorize_url,
+          credential_id: credential.id
+        }
+      rescue ActiveRecord::RecordInvalid => e
+        render json: { error: e.message }, status: :unprocessable_entity
+      end
+
       # POST /api/v1/connector_credentials/:id/verify
       def verify
         connector = @credential.connector
@@ -97,6 +156,10 @@ module Api
 
       def set_credential
         @credential = current_project.connector_credentials.find(params[:id])
+      end
+
+      def vault_external_url
+        ENV.fetch("VAULT_EXTERNAL_URL") { ENV.fetch("VAULT_URL", "http://localhost:4006") }
       end
 
       def credential_values

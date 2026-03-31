@@ -149,6 +149,7 @@ module Connectors
       when "quickbooks" then Connectors::Native::Quickbooks
       when "linear" then Connectors::Native::Linear
       when "clickup" then Connectors::Native::Clickup
+      when "salesforce" then Connectors::Native::Salesforce
       else
         raise Connectors::Error, "Unknown native connector: #{piece_name}"
       end
@@ -168,7 +169,16 @@ module Connectors
         raise AuthenticationError, "Credentials expired for '#{credential.name}'"
       end
 
-      credential.decrypt_credentials
+      creds = credential.decrypt_credentials
+
+      # For OAUTH2 credentials, merge credential_id and refresh_token
+      if credential.auth_type == "OAUTH2"
+        creds[:_credential_id] = credential.id
+        refresh_token = credential.decrypt_refresh_token
+        creds[:_refresh_token] = refresh_token if refresh_token.present?
+      end
+
+      creds
     end
 
     def record_failure(connection, action_name, input, error, start_time)

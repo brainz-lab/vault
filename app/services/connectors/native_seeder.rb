@@ -49,6 +49,7 @@ module Connectors
       Connectors::Native::Quickbooks,
       Connectors::Native::Linear,
       Connectors::Native::Clickup
+      Connectors::Native::Salesforce
     ].freeze
 
     def seed!
