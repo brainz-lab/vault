@@ -48,7 +48,7 @@ module Connectors
       Connectors::Native::Sentry,
       Connectors::Native::Quickbooks,
       Connectors::Native::Linear,
-      Connectors::Native::Clickup
+      Connectors::Native::Clickup,
       Connectors::Native::Salesforce
     ].freeze
 
