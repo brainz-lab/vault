@@ -181,6 +181,7 @@ module Connectors
 
       def api_base
         base = credentials[:base_url].presence || "https://sentry.io"
+        validate_base_url!(base, label: "Sentry base_url")
         "#{base.chomp('/')}/api/0"
       end
 

@@ -159,24 +159,14 @@ class OauthController < ActionController::Base
   private
 
   # Authenticate OAuth authorize requests.
-  # The authorize endpoint is safe to be "open" because:
-  # 1. It only redirects to a known OAuth provider (no data exposure)
-  # 2. The callback is protected by the state token (Redis, 15-min TTL, single-use)
-  # 3. Credentials are only created/updated in the callback, not here
-  # 4. The project_id and connector_id are validated (must exist in Vault)
+  # Requires either a valid session or a service key — no unauthenticated access.
   def authenticate_oauth_request!
     return if session[:user_id].present?
 
-    # Service key via header (server-to-server calls)
+    # Service key via header (server-to-server calls from Axon, Platform, etc.)
     expected = ENV["SERVICE_KEY"] || "dev_service_key"
     service_key = request.headers["X-Service-Key"].presence
     if service_key.present? && ActiveSupport::SecurityUtils.secure_compare(service_key, expected)
-      return
-    end
-
-    # For popup requests: validate that project_id and connector_id are present.
-    # The actual protection is in the callback (state token).
-    if params[:project_id].present? && params[:connector_id].present?
       return
     end
 
@@ -345,13 +335,30 @@ class OauthController < ActionController::Base
     HTML
   end
 
+  ALLOWED_REDIRECT_HOSTS = [
+    /\.brainzlab\.(ai|local)\z/,
+    /\.brainzlab\.com\z/,
+    /\Alocalhost\z/
+  ].freeze
+
   def safe_redirect_uri(url)
     return nil if url.blank?
 
     uri = URI.parse(url)
+
+    # Allow relative paths
     return url if uri.relative? && url.start_with?("/")
 
-    url
+    # Require HTTPS for external redirects (allow HTTP only for localhost)
+    host = uri.host&.downcase
+    return nil if host.nil?
+    return nil if uri.scheme != "https" && host != "localhost"
+
+    # Validate host against allowlist
+    return url if ALLOWED_REDIRECT_HOSTS.any? { |pattern| pattern.match?(host) }
+
+    Rails.logger.warn "[OauthController] Blocked redirect to untrusted host: #{host}"
+    nil
   rescue URI::InvalidURIError
     nil
   end

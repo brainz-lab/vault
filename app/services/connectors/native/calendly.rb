@@ -157,6 +157,7 @@ module Connectors
       end
 
       def create_webhook(params)
+        validate_webhook_url!(params[:url], label: "webhook url")
         events = params[:events].split(",").map(&:strip)
         body = {
           url: params[:url],

@@ -64,7 +64,7 @@ module Dashboard
 
     def execute
       action_name = params[:action_name]
-      input = params[:input]&.permit!&.to_h || {}
+      input = sanitize_connector_input(params[:input])
 
       executor = Connectors::Executor.new(
         project: current_project,
@@ -109,6 +109,24 @@ module Dashboard
       JSON.parse(params[:config_json])
     rescue JSON::ParserError
       {}
+    end
+
+    # Build a flat hash from input params, allowing only scalar values (strings, numbers, booleans).
+    # This avoids permit! while still accepting dynamic connector action fields.
+    def sanitize_connector_input(input_params)
+      return {} if input_params.blank?
+
+      raw = input_params.to_unsafe_h
+      raw.each_with_object({}) do |(key, value), hash|
+        case value
+        when String, Integer, Float, TrueClass, FalseClass, NilClass
+          hash[key] = value
+        when ActionController::Parameters, Hash
+          hash[key] = value.to_unsafe_h.to_json
+        when Array
+          hash[key] = value.to_json
+        end
+      end
     end
   end
 end

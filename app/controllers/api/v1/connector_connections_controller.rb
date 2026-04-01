@@ -76,7 +76,7 @@ module Api
         attrs[:name] = params[:name] if params.key?(:name)
         attrs[:config] = params[:config] if params.key?(:config)
         attrs[:enabled] = params[:enabled] if params.key?(:enabled)
-        attrs[:status] = params[:status] if params.key?(:status)
+        # Status changes only through test/disconnect endpoints, not direct update
         attrs[:connector_credential_id] = params[:credential_id] if params.key?(:credential_id)
 
         @connection.update!(attrs)

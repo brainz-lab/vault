@@ -131,17 +131,15 @@ module Connectors
       private
 
       def list_tickets(params)
-        query = {}
-        query[:sort_by] = params[:sort_by] || "created_at"
-        query[:sort_order] = params[:sort_order] || "desc"
+        sort_by = params[:sort_by] || "created_at"
+        sort_order = params[:sort_order] || "desc"
 
-        path = if params[:status].present?
-                 "search.json?query=type:ticket status:#{params[:status]}&sort_by=#{query[:sort_by]}&sort_order=#{query[:sort_order]}"
+        if params[:status].present?
+          result = api_get("search.json", query: "type:ticket status:#{params[:status]}", sort_by: sort_by, sort_order: sort_order)
         else
-                 "tickets.json?sort_by=#{query[:sort_by]}&sort_order=#{query[:sort_order]}"
+          result = api_get("tickets.json", sort_by: sort_by, sort_order: sort_order)
         end
 
-        result = api_get(path)
         tickets = (result["tickets"] || result["results"] || []).first((params[:limit] || 25).to_i)
         tickets = tickets.map { |t| format_ticket(t) }
         { tickets: tickets, count: tickets.size }
@@ -194,13 +192,10 @@ module Connectors
       end
 
       def list_users(params)
-        path = if params[:role].present?
-                 "users.json?role=#{params[:role]}"
-        else
-                 "users.json"
-        end
+        query = {}
+        query[:role] = params[:role] if params[:role].present?
 
-        result = api_get(path)
+        result = api_get("users.json", query)
         users = (result["users"] || []).first((params[:limit] || 25).to_i)
         users = users.map do |u|
           { id: u["id"], name: u["name"], email: u["email"], role: u["role"], active: u["active"], created_at: u["created_at"] }

@@ -278,6 +278,7 @@ module Connectors
       end
 
       def api_base
+        validate_domain!(store_domain, allowed_pattern: /myshopify\.com\z|shopify\.com\z/, label: "store_domain")
         version = credentials[:api_version] || "2024-01"
         "https://#{store_domain}/admin/api/#{version}"
       end

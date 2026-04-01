@@ -163,12 +163,6 @@ module Api
       end
 
       def credential_values
-        # If credentials are passed as a nested hash, use them directly
-        if params[:credentials].is_a?(ActionController::Parameters) || params[:credentials].is_a?(Hash)
-          creds = params[:credentials]
-          return creds.respond_to?(:to_unsafe_h) ? creds.to_unsafe_h.compact_blank : creds.to_h.compact_blank
-        end
-
         # Static whitelist for known credential fields
         static_keys = %w[
           value api_key token username password secret
@@ -193,7 +187,15 @@ module Api
         end
 
         allowed_keys = (static_keys + dynamic_keys).uniq
-        params.permit(*allowed_keys).to_h.compact_blank
+
+        # Whether credentials arrive as nested hash or flat params, apply the same allowlist
+        source = if params[:credentials].is_a?(ActionController::Parameters)
+                   params[:credentials]
+                 else
+                   params
+                 end
+
+        source.permit(*allowed_keys).to_h.compact_blank
       end
     end
   end

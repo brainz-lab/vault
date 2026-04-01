@@ -201,6 +201,8 @@ module Connectors
         { success: true, id: result["id"], name: result["name"], list_id: result["idList"] }
       end
 
+      # NOTE: Trello's API requires key/token as query params (no Authorization header support).
+      # Ensure Rails.application.config.filter_parameters includes :token and :key to prevent log leakage.
       def api_get(path, params = {})
         resp = faraday.get("#{API_BASE}/#{path}") do |req|
           req.params = params.merge(key: api_key, token: token)

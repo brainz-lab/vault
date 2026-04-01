@@ -110,15 +110,21 @@ module Connectors
 
       def list_issues(params)
         limit = (params[:limit] || 25).to_i
-        filter_parts = []
-        filter_parts << "team: { key: { eq: \"#{params[:team_key]}\" } }" if params[:team_key].present?
-        filter_parts << "state: { name: { eq: \"#{params[:state]}\" } }" if params[:state].present?
-        filter_parts << "assignee: { displayName: { eq: \"#{params[:assignee]}\" } }" if params[:assignee].present?
+        filter = {}
+        filter[:team] = { key: { eq: params[:team_key] } } if params[:team_key].present?
+        filter[:state] = { name: { eq: params[:state] } } if params[:state].present?
+        filter[:assignee] = { displayName: { eq: params[:assignee] } } if params[:assignee].present?
 
-        filter = filter_parts.any? ? "(filter: { #{filter_parts.join(', ')} }, first: #{limit})" : "(first: #{limit})"
+        vars = { first: limit }
+        vars[:filter] = filter if filter.any?
 
-        query = "{ issues#{filter} { nodes { id identifier title state { name } priority assignee { displayName } createdAt updatedAt } } }"
-        result = graphql(query)
+        q = filter.any? ? "query($first: Int!, $filter: IssueFilter)" : "query($first: Int!)"
+        args = filter.any? ? "(first: $first, filter: $filter)" : "(first: $first)"
+
+        result = graphql(
+          "#{q} { issues#{args} { nodes { id identifier title state { name } priority assignee { displayName } createdAt updatedAt } } }",
+          variables: vars
+        )
         issues = (result.dig("data", "issues", "nodes") || []).map do |i|
           { id: i["id"], identifier: i["identifier"], title: i["title"],
             state: i.dig("state", "name"), priority: i["priority"],
@@ -136,8 +142,10 @@ module Connectors
         label_ids = parse_json(params[:label_ids])
         input[:labelIds] = label_ids if label_ids.is_a?(Array) && label_ids.any?
 
-        query = "mutation { issueCreate(input: #{to_gql_input(input)}) { success issue { id identifier title url } } }"
-        result = graphql(query)
+        result = graphql(
+          "mutation($input: IssueCreateInput!) { issueCreate(input: $input) { success issue { id identifier title url } } }",
+          variables: { input: input }
+        )
         issue = result.dig("data", "issueCreate", "issue")
         { success: true, id: issue["id"], identifier: issue["identifier"], title: issue["title"], url: issue["url"] }
       end
@@ -149,15 +157,16 @@ module Connectors
         input[:priority] = params[:priority].to_i if params[:priority].present?
         input[:assigneeId] = params[:assignee_id] if params[:assignee_id].present?
 
-        query = "mutation { issueUpdate(id: \"#{params[:issue_id]}\", input: #{to_gql_input(input)}) { success issue { id identifier title state { name } } } }"
-        result = graphql(query)
+        result = graphql(
+          "mutation($id: String!, $input: IssueUpdateInput!) { issueUpdate(id: $id, input: $input) { success issue { id identifier title state { name } } } }",
+          variables: { id: params[:issue_id].to_s, input: input }
+        )
         issue = result.dig("data", "issueUpdate", "issue")
         { success: true, id: issue["id"], identifier: issue["identifier"], state: issue.dig("state", "name") }
       end
 
       def list_teams(params)
-        query = "{ teams { nodes { id key name issueCount } } }"
-        result = graphql(query)
+        result = graphql("{ teams { nodes { id key name issueCount } } }")
         teams = (result.dig("data", "teams", "nodes") || []).map do |t|
           { id: t["id"], key: t["key"], name: t["name"], issue_count: t["issueCount"] }
         end
@@ -166,8 +175,10 @@ module Connectors
 
       def list_projects(params)
         limit = (params[:limit] || 25).to_i
-        query = "{ projects(first: #{limit}) { nodes { id name state startDate targetDate } } }"
-        result = graphql(query)
+        result = graphql(
+          "query($first: Int!) { projects(first: $first) { nodes { id name state startDate targetDate } } }",
+          variables: { first: limit }
+        )
         projects = (result.dig("data", "projects", "nodes") || []).map do |p|
           { id: p["id"], name: p["name"], state: p["state"],
             start_date: p["startDate"], target_date: p["targetDate"] }
@@ -176,16 +187,18 @@ module Connectors
       end
 
       def add_comment(params)
-        query = "mutation { commentCreate(input: { issueId: \"#{params[:issue_id]}\", body: \"#{escape_gql(params[:body])}\" }) { success comment { id } } }"
-        result = graphql(query)
+        result = graphql(
+          "mutation($input: CommentCreateInput!) { commentCreate(input: $input) { success comment { id } } }",
+          variables: { input: { issueId: params[:issue_id].to_s, body: params[:body].to_s } }
+        )
         { success: true, comment_id: result.dig("data", "commentCreate", "comment", "id") }
       end
 
-      def graphql(query)
+      def graphql(query, variables: {})
         resp = faraday.post(API_URL) do |req|
           req.headers["Authorization"] = api_key
           req.headers["Content-Type"] = "application/json"
-          req.body = { query: query }.to_json
+          req.body = { query: query, variables: variables }.to_json
         end
 
         data = JSON.parse(resp.body)

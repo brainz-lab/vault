@@ -107,8 +107,10 @@ module Connectors
 
       def list_boards(params)
         limit = (params[:limit] || 25).to_i
-        query = "{ boards(limit: #{limit}) { id name state board_kind columns { id title type } } }"
-        result = graphql(query)
+        result = graphql(
+          "query($limit: Int!) { boards(limit: $limit) { id name state board_kind columns { id title type } } }",
+          variables: { limit: limit }
+        )
         boards = (result.dig("data", "boards") || []).map do |b|
           { id: b["id"], name: b["name"], state: b["state"], kind: b["board_kind"],
             columns: b["columns"]&.map { |c| { id: c["id"], title: c["title"], type: c["type"] } } }
@@ -118,11 +120,14 @@ module Connectors
 
       def list_items(params)
         limit = (params[:limit] || 50).to_i
-        query = "{ boards(ids: [#{params[:board_id]}]) { items_page(limit: #{limit}) { items { id name group { id title } column_values { id text value } created_at updated_at } } } }"
-        result = graphql(query)
+        board_id = params[:board_id].to_i
+        result = graphql(
+          "query($boardId: [ID!]!, $limit: Int!) { boards(ids: $boardId) { items_page(limit: $limit) { items { id name group { id title } column_values { id text value } created_at updated_at } } } }",
+          variables: { boardId: [board_id], limit: limit }
+        )
         items = result.dig("data", "boards", 0, "items_page", "items") || []
         items = items.map do |i|
-          columns = (i["column_values"] || []).to_h { |c| [ c["id"], c["text"] ] }
+          columns = (i["column_values"] || []).to_h { |c| [c["id"], c["text"]] }
           { id: i["id"], name: i["name"], group: i.dig("group", "title"),
             columns: columns, created_at: i["created_at"] }
         end
@@ -134,10 +139,16 @@ module Connectors
         col_values = col_values.to_json if col_values.is_a?(Hash)
         col_values = col_values || "{}"
 
-        group_part = params[:group_id].present? ? ", group_id: \"#{params[:group_id]}\"" : ""
-        query = "mutation { create_item(board_id: #{params[:board_id]}, item_name: \"#{escape_gql(params[:item_name])}\"#{group_part}, column_values: \"#{escape_gql(col_values)}\") { id name } }"
+        vars = { boardId: params[:board_id].to_i, itemName: params[:item_name].to_s, columnValues: col_values }
+        vars[:groupId] = params[:group_id].to_s if params[:group_id].present?
 
-        result = graphql(query)
+        group_param = params[:group_id].present? ? ", $groupId: String" : ""
+        group_arg = params[:group_id].present? ? ", group_id: $groupId" : ""
+
+        result = graphql(
+          "mutation($boardId: ID!, $itemName: String!, $columnValues: JSON!#{group_param}) { create_item(board_id: $boardId, item_name: $itemName, column_values: $columnValues#{group_arg}) { id name } }",
+          variables: vars
+        )
         item = result.dig("data", "create_item")
         { success: true, id: item["id"], name: item["name"] }
       end
@@ -146,32 +157,39 @@ module Connectors
         col_values = params[:column_values]
         col_values = col_values.to_json if col_values.is_a?(Hash)
 
-        query = "mutation { change_multiple_column_values(board_id: #{params[:board_id]}, item_id: #{params[:item_id]}, column_values: \"#{escape_gql(col_values)}\") { id name } }"
-        result = graphql(query)
+        result = graphql(
+          "mutation($boardId: ID!, $itemId: ID!, $columnValues: JSON!) { change_multiple_column_values(board_id: $boardId, item_id: $itemId, column_values: $columnValues) { id name } }",
+          variables: { boardId: params[:board_id].to_i, itemId: params[:item_id].to_i, columnValues: col_values }
+        )
         item = result.dig("data", "change_multiple_column_values")
         { success: true, id: item["id"], name: item["name"] }
       end
 
       def add_update(params)
-        query = "mutation { create_update(item_id: #{params[:item_id]}, body: \"#{escape_gql(params[:body])}\") { id } }"
-        result = graphql(query)
+        result = graphql(
+          "mutation($itemId: ID!, $body: String!) { create_update(item_id: $itemId, body: $body) { id } }",
+          variables: { itemId: params[:item_id].to_i, body: params[:body].to_s }
+        )
         { success: true, update_id: result.dig("data", "create_update", "id") }
       end
 
       def list_groups(params)
-        query = "{ boards(ids: [#{params[:board_id]}]) { groups { id title color position } } }"
-        result = graphql(query)
+        board_id = params[:board_id].to_i
+        result = graphql(
+          "query($boardId: [ID!]!) { boards(ids: $boardId) { groups { id title color position } } }",
+          variables: { boardId: [board_id] }
+        )
         groups = result.dig("data", "boards", 0, "groups") || []
         groups = groups.map { |g| { id: g["id"], title: g["title"], color: g["color"] } }
         { groups: groups, count: groups.size }
       end
 
-      def graphql(query)
+      def graphql(query, variables: {})
         resp = faraday.post(API_URL) do |req|
           req.headers["Authorization"] = api_token
           req.headers["Content-Type"] = "application/json"
           req.headers["API-Version"] = "2024-01"
-          req.body = { query: query }.to_json
+          req.body = { query: query, variables: variables }.to_json
         end
 
         data = JSON.parse(resp.body)

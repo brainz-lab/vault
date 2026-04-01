@@ -163,6 +163,7 @@ module Connectors
       end
 
       def set_webhook(params)
+        validate_webhook_url!(params[:url], label: "webhook url")
         body = { url: params[:url] }
         body[:secret_token] = params[:secret_token] if params[:secret_token].present?
 

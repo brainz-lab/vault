@@ -218,6 +218,7 @@ module Connectors
 
       def api_base
         base = credentials[:base_url].presence || "https://gitlab.com"
+        validate_base_url!(base, label: "GitLab base_url")
         "#{base.chomp('/')}/api/v4"
       end
 

@@ -224,13 +224,15 @@ module Connectors
 
       def api_get(path, params = {})
         resp = faraday.get("#{api_base}/#{path}") do |req|
-          req.params = params.merge(api_token: api_token)
+          req.headers["Authorization"] = "Bearer #{api_token}"
+          req.params = params
         end
         handle_response(resp)
       end
 
       def api_post(path, body)
-        resp = faraday.post("#{api_base}/#{path}?api_token=#{api_token}") do |req|
+        resp = faraday.post("#{api_base}/#{path}") do |req|
+          req.headers["Authorization"] = "Bearer #{api_token}"
           req.headers["Content-Type"] = "application/json"
           req.body = body.to_json
         end
@@ -238,7 +240,8 @@ module Connectors
       end
 
       def api_put(path, body)
-        resp = faraday.put("#{api_base}/#{path}?api_token=#{api_token}") do |req|
+        resp = faraday.put("#{api_base}/#{path}") do |req|
+          req.headers["Authorization"] = "Bearer #{api_token}"
           req.headers["Content-Type"] = "application/json"
           req.body = body.to_json
         end
